@@ -592,18 +592,15 @@
       });
     }
 
-    // Helper to get active Slot Key (B1 vs P1) for Matrix Cell
     function getSlotKeyForCell(teacher, colIdx) {
       const isBlockFormat = (selectedDayType !== "Day C") && (teacher.type !== "primary");
       if (isBlockFormat) {
         return `B${colIdx}`;
       } else {
-        // Map Col 1 -> P1, Col 2 -> P3, Col 3 -> P5, Col 4 -> P7
         return `P${(colIdx * 2) - 1}`;
       }
     }
 
-    // Interactive Matrix Cell Click Action
     function onMatrixCellClick(teacherName, colIdx) {
       const teacher = TEACHERS.find(t => t.name === teacherName);
       if (!teacher) return;
@@ -628,7 +625,7 @@
         currentClassName
       );
 
-      if (choice === null) return; // User cancelled
+      if (choice === null) return;
 
       const trimmed = choice.trim();
       if (trimmed.toUpperCase() === "FREE") {
