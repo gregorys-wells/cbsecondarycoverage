@@ -6,7 +6,6 @@
     <title>Secondary Teacher Coverage Manager (2026-2027)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <script>
       // ==========================================================
@@ -22,26 +21,26 @@
         <header class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">Secondary Teacher Coverage Manager</h1>
-                <p class="text-slate-400 text-sm mt-1">2026-2027 Master Timetable: Date-Isolated Coverage Tracking</p>
+                <p class="text-slate-400 text-sm mt-1">2026-2027 Master Timetable & Daily Coverage Tracker</p>
             </div>
             <div class="flex flex-wrap gap-2">
                 <span id="syncStatus" class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5">
-                    <i class="fa-solid fa-cloud"></i> Synced
+                    <i class="fa-solid fa-database"></i> <span id="syncStatusText">Local & Drive Protected</span>
                 </span>
                 <button onclick="resetCoverageCountsOnly()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-calendar-plus"></i> Reset Coverages
+                    <i class="fa-solid fa-rotate"></i> Clear Coverages
                 </button>
-                <button onclick="resetToSchoolData()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-rotate-left"></i> Restore Master Timetable
+                <button onclick="openRosterImportModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Add / Edit Faculty
                 </button>
             </div>
         </header>
 
-        <!-- DAY C WARNING BANNER -->
+        <!-- DAY C BANNER -->
         <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between text-xs font-semibold text-amber-900">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base"></i>
-                <span><strong>Schedule Alert:</strong> Days A, B, D, E follow 5-period slots. <strong>Day C (Wednesday)</strong> follows an 8-period short slot schedule (Periods C1–C8).</span>
+                <span><strong>Schedule Alert:</strong> Days A, B, D, E follow standard 5-period slots. <strong>Day C (Wednesday)</strong> follows an 8-period short slot schedule (Periods C1–C8).</span>
             </div>
         </div>
 
@@ -214,6 +213,27 @@
         </div>
     </div>
 
+    <!-- MODAL: ADD/EDIT TEACHERS -->
+    <div id="rosterModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-indigo-600"></i> Add New Teacher to Roster
+            </h3>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Teacher Full Name</label>
+                <input type="text" id="newTeacherName" placeholder="e.g. Mr. Troy" class="w-full p-2.5 border rounded-xl text-sm font-semibold">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Department</label>
+                <input type="text" id="newTeacherDept" placeholder="e.g. Secondary Science" class="w-full p-2.5 border rounded-xl text-sm font-semibold">
+            </div>
+            <div class="flex justify-end gap-2 border-t pt-3">
+                <button onclick="closeRosterModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold">Cancel</button>
+                <button onclick="addNewTeacher()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold">Save Teacher</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     const SEC_SLOTS_STANDARD = {
         'Period 1': '8:00 - 9:15',
@@ -234,59 +254,68 @@
         'Period C8': '1:50 - 2:30'
     };
 
-    const RAW_ASSIGNMENTS_MASTER = [
-        {"name": "Mr. Adam", "dept": "English", "day": "A", "period": "Period 1", "details": "G10 English Literature"},
-        {"name": "Mr. Adam", "dept": "English", "day": "A", "period": "Period 3", "details": "G12 AP Language"},
-        {"name": "Mr. Adam", "dept": "English", "day": "B", "period": "Period 2", "details": "G10 English Literature"},
-        {"name": "Mr. Adam", "dept": "English", "day": "B", "period": "Period 4", "details": "G11 English Lang Arts"},
-        {"name": "Mr. Adam", "dept": "English", "day": "C", "period": "Period C1", "details": "G10 English"},
-        {"name": "Mr. Adam", "dept": "English", "day": "C", "period": "Period C3", "details": "G12 AP Lang"},
-        {"name": "Mr. Adam", "dept": "English", "day": "C", "period": "Period C5", "details": "G11 English"},
-        {"name": "Mr. Adam", "dept": "English", "day": "D", "period": "Period 1", "details": "G12 AP Language"},
-        {"name": "Mr. Adam", "dept": "English", "day": "D", "period": "Period 5", "details": "G11 English Lang Arts"},
-
-        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "A", "period": "Period 2", "details": "G9 Algebra I"},
-        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "A", "period": "Period 4", "details": "G11 AP Calculus AB"},
-        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "B", "period": "Period 1", "details": "G9 Algebra I"},
-        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "B", "period": "Period 3", "details": "G10 Geometry"},
-        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "C", "period": "Period C2", "details": "G9 Algebra"},
-        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "C", "period": "Period C4", "details": "G10 Geometry"},
-        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "C", "period": "Period C6", "details": "G11 AP Calc"},
-        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "E", "period": "Period 2", "details": "G10 Geometry"},
-        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "E", "period": "Period 5", "details": "G11 AP Calculus AB"},
-
-        {"name": "Dr. David", "dept": "Science", "day": "A", "period": "Period 1", "details": "G11 AP Chemistry"},
-        {"name": "Dr. David", "dept": "Science", "day": "A", "period": "Period 5", "details": "G9 Biology"},
-        {"name": "Dr. David", "dept": "Science", "day": "B", "period": "Period 2", "details": "G9 Biology"},
-        {"name": "Dr. David", "dept": "Science", "day": "B", "period": "Period 5", "details": "G12 Physics"},
-        {"name": "Dr. David", "dept": "Science", "day": "C", "period": "Period C1", "details": "G11 AP Chem"},
-        {"name": "Dr. David", "dept": "Science", "day": "C", "period": "Period C5", "details": "G9 Biology"},
-        {"name": "Dr. David", "dept": "Science", "day": "C", "period": "Period C7", "details": "G12 Physics"},
-        {"name": "Dr. David", "dept": "Science", "day": "D", "period": "Period 3", "details": "G11 AP Chemistry"},
-        {"name": "Dr. David", "dept": "Science", "day": "E", "period": "Period 4", "details": "G12 Physics"},
-
-        {"name": "Mr. Robert", "dept": "Social Studies", "day": "A", "period": "Period 3", "details": "G10 World History"},
-        {"name": "Mr. Robert", "dept": "Social Studies", "day": "A", "period": "Period 4", "details": "G12 AP US History"},
-        {"name": "Mr. Robert", "dept": "Social Studies", "day": "B", "period": "Period 1", "details": "G9 Economics"},
-        {"name": "Mr. Robert", "dept": "Social Studies", "day": "C", "period": "Period C3", "details": "G10 World History"},
-        {"name": "Mr. Robert", "dept": "Social Studies", "day": "C", "period": "Period C4", "details": "G12 APUSH"},
-        {"name": "Mr. Robert", "dept": "Social Studies", "day": "D", "period": "Period 2", "details": "G9 Economics"},
-        {"name": "Mr. Robert", "dept": "Social Studies", "day": "E", "period": "Period 1", "details": "G10 World History"},
-        {"name": "Mr. Robert", "dept": "Social Studies", "day": "E", "period": "Period 3", "details": "G12 AP US History"}
+    // INCLUDES YOUR REAL FACULTY (Mr. Troy included)
+    const DEFAULT_SECONDARY_FACULTY = [
+        "Mr. Troy", "Mr. Adam", "Ms. Sarah", "Dr. David", "Mr. Robert"
     ];
 
-    const HOLIDAYS = [
-        "2026-10-13", "2026-10-23", "2026-12-05", "2026-12-10", 
-        "2026-12-21", "2026-12-22", "2026-12-23", "2026-12-24", "2026-12-25"
-    ];
+    function generateBlankSchedule() {
+        let schedule = {'A': {}, 'B': {}, 'C': {}, 'D': {}, 'E': {}};
+        ['A', 'B', 'D', 'E'].forEach(d => {
+            Object.keys(SEC_SLOTS_STANDARD).forEach(p => {
+                schedule[d][p] = { status: "Free", time: SEC_SLOTS_STANDARD[p], details: "Prep / Planning" };
+            });
+        });
+        Object.keys(SEC_SLOTS_DAY_C).forEach(p => {
+            schedule['C'][p] = { status: "Free", time: SEC_SLOTS_DAY_C[p], details: "Prep / Planning" };
+        });
+        return schedule;
+    }
+
+    function createTeacherObject(name, dept = "Secondary Faculty", id = null) {
+        return {
+            id: id || 'sec_fac_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+            name: name,
+            department: dept,
+            totalCoverageCount: 0,
+            schedule: generateBlankSchedule(),
+            teachingCounts: {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0, 'total': 0}
+        };
+    }
+
+    let faculty = [];
+    let absenceRecords = [];
+
+    // SAFE LOCAL STORAGE FALLBACK & RECOVERY
+    function loadSavedState() {
+        const localFaculty = localStorage.getItem('sec_faculty_backup');
+        const localAbsences = localStorage.getItem('sec_absences_backup');
+
+        if (localFaculty) {
+            try { faculty = JSON.parse(localFaculty); } catch(e) {}
+        }
+        if (localAbsences) {
+            try { absenceRecords = JSON.parse(localAbsences); } catch(e) {}
+        }
+
+        if (!faculty || faculty.length === 0) {
+            faculty = DEFAULT_SECONDARY_FACULTY.map((name, idx) => createTeacherObject(name, "Secondary Faculty", 'sec_fac_' + (idx + 1)));
+            saveStateLocally();
+        }
+    }
+
+    function saveStateLocally() {
+        localStorage.setItem('sec_faculty_backup', JSON.stringify(faculty));
+        localStorage.setItem('sec_absences_backup', JSON.stringify(absenceRecords));
+    }
+
+    const HOLIDAYS = ["2026-10-13", "2026-10-23", "2026-12-05", "2026-12-10"];
 
     function getScheduleDayForDate(dateString) {
         if (!dateString) return "A";
         const dateObj = new Date(dateString + "T00:00:00");
         const dayOfWeek = dateObj.getDay();
-
-        if (dayOfWeek === 0 || dayOfWeek === 6) return null;
-        if (HOLIDAYS.includes(dateString)) return null;
+        if (dayOfWeek === 0 || dayOfWeek === 6 || HOLIDAYS.includes(dateString)) return null;
 
         const startDate = new Date("2026-08-17T00:00:00");
         if (dateObj < startDate) return "A";
@@ -301,69 +330,15 @@
             }
             cur.setDate(cur.getDate() + 1);
         }
-
         const rotationDays = ['A', 'B', 'C', 'D', 'E'];
-        const dayIndex = (count - 1) % 5;
-        return rotationDays[dayIndex >= 0 ? dayIndex : 0];
-    }
-
-    function buildMasterFaculty() {
-        const uniqueTeachers = Array.from(new Set(RAW_ASSIGNMENTS_MASTER.map(a => a.name)));
-        return uniqueTeachers.map((tName, idx) => {
-            const teacherAssignments = RAW_ASSIGNMENTS_MASTER.filter(a => a.name === tName);
-            const dept = teacherAssignments[0] ? teacherAssignments[0].dept : "Secondary Faculty";
-
-            let schedule = {'A': {}, 'B': {}, 'C': {}, 'D': {}, 'E': {}};
-            let teachingCounts = {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0, 'total': 0};
-
-            ['A', 'B', 'C', 'D', 'E'].forEach(day => {
-                const dayAssignments = teacherAssignments.filter(a => a.day === day);
-                const slotsObj = day === 'C' ? SEC_SLOTS_DAY_C : SEC_SLOTS_STANDARD;
-
-                Object.keys(slotsObj).forEach(pName => {
-                    schedule[day][pName] = { status: "Free", time: slotsObj[pName], details: "Prep / Planning" };
-                });
-                dayAssignments.forEach(asgn => {
-                    if (schedule[day][asgn.period]) {
-                        schedule[day][asgn.period] = { status: "Teaching", time: slotsObj[asgn.period], details: asgn.details };
-                    }
-                });
-
-                let tCount = 0;
-                Object.keys(schedule[day]).forEach(slotKey => {
-                    if (schedule[day][slotKey].status === 'Teaching') tCount++;
-                });
-                teachingCounts[day] = tCount;
-                teachingCounts.total += tCount;
-            });
-
-            return {
-                id: 'sec_fac_' + (idx + 1),
-                name: tName,
-                department: dept,
-                totalCoverageCount: 0,
-                schedule: schedule,
-                teachingCounts: teachingCounts
-            };
-        });
-    }
-
-    const MASTER_FACULTY = buildMasterFaculty();
-    let faculty = JSON.parse(JSON.stringify(MASTER_FACULTY));
-    let absenceRecords = [];
-
-    function ensureFacultyLoaded() {
-        if (!faculty || faculty.length === 0) {
-            faculty = JSON.parse(JSON.stringify(MASTER_FACULTY));
-        }
+        return rotationDays[(count - 1) % 5] || "A";
     }
 
     function loadFromGoogleDrive() {
-        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) {
-            ensureFacultyLoaded();
-            refreshUI();
-            return;
-        }
+        loadSavedState();
+        refreshUI();
+
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) return;
 
         fetch(GOOGLE_SCRIPT_URL)
             .then(res => res.json())
@@ -371,48 +346,29 @@
                 if (data && Array.isArray(data.faculty) && data.faculty.length > 0) {
                     faculty = data.faculty;
                     absenceRecords = data.absenceRecords || [];
-                } else {
-                    ensureFacultyLoaded();
-                    saveToGoogleDrive();
+                    saveStateLocally();
+                    recalculateCoverageCounts();
+                    refreshUI();
                 }
-                recalculateCoverageCounts();
-                refreshUI();
             })
-            .catch(err => {
-                console.error("Error loading data from Drive API:", err);
-                ensureFacultyLoaded();
-                refreshUI();
-            });
+            .catch(err => console.error("Sync error, using local backup:", err));
     }
 
     function saveToGoogleDrive() {
-        ensureFacultyLoaded();
+        saveStateLocally();
+        refreshUI();
 
-        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) {
-            refreshUI();
-            return;
-        }
-
-        const payload = {
-            faculty: faculty,
-            absenceRecords: absenceRecords
-        };
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) return;
 
         fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).then(() => {
-            refreshUI();
-        }).catch(err => {
-            console.error("Error saving data to Drive API:", err);
-            refreshUI();
-        });
+            body: JSON.stringify({ faculty: faculty, absenceRecords: absenceRecords })
+        }).catch(err => console.error("Error saving to Drive:", err));
     }
 
     function refreshUI() {
-        ensureFacultyLoaded();
         populateTeacherDropdowns();
         populateTable();
         updateCoverageOptions();
@@ -422,10 +378,8 @@
 
     function init() {
         document.getElementById('absenceDate').valueAsDate = new Date();
-        ensureFacultyLoaded();
-        handleDateChange();
-        refreshUI();
         loadFromGoogleDrive();
+        handleDateChange();
     }
 
     function handleDateChange() {
@@ -434,12 +388,11 @@
         const daySelect = document.getElementById('scheduleDaySelect');
 
         if (!detectedDay) {
-            alert("⚠️ Selected date is a weekend or scheduled holiday! Defaulting to Day A.");
+            alert("⚠️ Selected date is a weekend or holiday! Defaulting to Day A.");
             daySelect.value = "A";
         } else {
             daySelect.value = detectedDay;
         }
-
         updateCoverageOptions();
     }
 
@@ -466,69 +419,65 @@
     }
 
     function populateTeacherDropdowns() {
-        ensureFacultyLoaded();
         const selAssign = document.getElementById('absentTeacherSelect');
         const selEditor = document.getElementById('editorTeacherSelect');
         const selFilter = document.getElementById('logFilterTeacherSelect');
 
-        const currAssignVal = selAssign ? selAssign.value : '';
-        const currEditorVal = selEditor ? selEditor.value : '';
-        const currFilterVal = selFilter ? selFilter.value : 'ALL';
+        const v1 = selAssign.value, v2 = selEditor.value, v3 = selFilter.value;
 
         selAssign.innerHTML = '<option value="">-- Select Teacher --</option>';
         selEditor.innerHTML = '';
         selFilter.innerHTML = '<option value="ALL">All Teachers</option>';
 
         faculty.forEach(t => {
-            selAssign.innerHTML += `<option value="${t.id}">${t.name} (${t.teachingCounts.total} periods/wk)</option>`;
+            selAssign.innerHTML += `<option value="${t.id}">${t.name}</option>`;
             selEditor.innerHTML += `<option value="${t.id}">${t.name}</option>`;
             selFilter.innerHTML += `<option value="${t.id}">${t.name}</option>`;
         });
 
-        if (currAssignVal) selAssign.value = currAssignVal;
-        if (currEditorVal) selEditor.value = currEditorVal;
-        if (currFilterVal) selFilter.value = currFilterVal;
+        if (v1) selAssign.value = v1;
+        if (v2) selEditor.value = v2;
+        if (v3) selFilter.value = v3;
 
         document.getElementById('facultyCountSpan').innerText = faculty.length;
     }
 
-    // UNIQUE DATE-COMPOSITE KEY FUNCTIONALITY
+    function openRosterImportModal() { document.getElementById('rosterModal').classList.remove('hidden'); }
+    function closeRosterModal() { document.getElementById('rosterModal').classList.add('hidden'); }
+
+    function addNewTeacher() {
+        const name = document.getElementById('newTeacherName').value.trim();
+        const dept = document.getElementById('newTeacherDept').value.trim() || "Secondary Faculty";
+        if (!name) return alert("Please enter teacher name");
+
+        faculty.push(createTeacherObject(name, dept));
+        document.getElementById('newTeacherName').value = '';
+        closeRosterModal();
+        saveToGoogleDrive();
+    }
+
     function recordAbsence() {
         const absentId = document.getElementById('absentTeacherSelect').value;
         const dateVal = document.getElementById('absenceDate').value;
         const typeVal = document.getElementById('absenceTypeSelect').value;
         const dayVal = document.getElementById('scheduleDaySelect').value;
 
-        if (!absentId) {
-            alert("Please select a teacher to mark absent.");
-            return;
-        }
-
+        if (!absentId) return alert("Please select a teacher.");
         const teacher = faculty.find(t => t.id === absentId);
         if (!teacher) return;
 
-        // Composite Unique ID prevents overwriting across dates
         const compositeKey = `${dateVal}_${absentId}`;
-        let existingRec = absenceRecords.find(r => r.id === compositeKey || (r.teacherId === absentId && r.date === dateVal));
+        let rec = absenceRecords.find(r => r.id === compositeKey);
 
-        if (!existingRec) {
-            existingRec = {
-                id: compositeKey,
-                teacherId: absentId,
-                teacherName: teacher.name,
-                date: dateVal,
-                day: dayVal,
-                type: typeVal,
-                coverages: {}
-            };
-            absenceRecords.push(existingRec);
+        if (!rec) {
+            rec = { id: compositeKey, teacherId: absentId, teacherName: teacher.name, date: dateVal, day: dayVal, type: typeVal, coverages: {} };
+            absenceRecords.push(rec);
         } else {
-            existingRec.type = typeVal;
-            existingRec.day = dayVal;
+            rec.type = typeVal; rec.day = dayVal;
         }
 
         saveToGoogleDrive();
-        alert(`✅ Absence Recorded for ${dateVal} (Day ${dayVal})!\n\nTeacher: ${teacher.name}`);
+        alert(`✅ Absence Recorded for ${dateVal} (Day ${dayVal})\nTeacher: ${teacher.name}`);
     }
 
     function assignCoverage(subId, absentTeacherId, day, period) {
@@ -537,24 +486,14 @@
         if (!sub) return;
 
         const compositeKey = `${dateVal}_${absentTeacherId}`;
-        let rec = absenceRecords.find(r => r.id === compositeKey || (r.teacherId === absentTeacherId && r.date === dateVal));
-
+        let rec = absenceRecords.find(r => r.id === compositeKey);
         if (!rec) {
             const absentTeacher = faculty.find(t => t.id === absentTeacherId);
-            rec = {
-                id: compositeKey,
-                teacherId: absentTeacherId,
-                teacherName: absentTeacher ? absentTeacher.name : 'Teacher',
-                date: dateVal,
-                day: day,
-                type: document.getElementById('absenceTypeSelect').value || 'Absent',
-                coverages: {}
-            };
+            rec = { id: compositeKey, teacherId: absentTeacherId, teacherName: absentTeacher ? absentTeacher.name : 'Teacher', date: dateVal, day: day, type: 'Absent', coverages: {} };
             absenceRecords.push(rec);
         }
 
         rec.coverages[period] = sub.name;
-
         recalculateCoverageCounts();
         saveToGoogleDrive();
     }
@@ -562,7 +501,6 @@
     function unassignCoverage(absentTeacherId, period) {
         const dateVal = document.getElementById('absenceDate').value;
         const rec = absenceRecords.find(r => r.teacherId === absentTeacherId && r.date === dateVal);
-
         if (rec && rec.coverages && rec.coverages[period]) {
             delete rec.coverages[period];
             recalculateCoverageCounts();
@@ -571,23 +509,19 @@
     }
 
     function recalculateCoverageCounts() {
-        ensureFacultyLoaded();
         faculty.forEach(t => { t.totalCoverageCount = 0; });
-
         absenceRecords.forEach(rec => {
             if (rec.coverages) {
                 Object.values(rec.coverages).forEach(subName => {
                     const sub = faculty.find(t => t.name === subName);
-                    if (sub) {
-                        sub.totalCoverageCount += 1;
-                    }
+                    if (sub) sub.totalCoverageCount += 1;
                 });
             }
         });
     }
 
     function deleteAbsenceRecord(recId) {
-        if (confirm("Remove this absence entry from the log?")) {
+        if (confirm("Remove this log entry?")) {
             absenceRecords = absenceRecords.filter(r => r.id !== recId);
             recalculateCoverageCounts();
             saveToGoogleDrive();
@@ -595,7 +529,7 @@
     }
 
     function clearAllAbsences() {
-        if (confirm("Clear all recorded entries in the absence log?")) {
+        if (confirm("Clear all absence history?")) {
             absenceRecords = [];
             recalculateCoverageCounts();
             saveToGoogleDrive();
@@ -604,41 +538,29 @@
 
     function renderAbsenceLogTable() {
         const tbody = document.getElementById('absenceLogTableBody');
-        const filterTeacherId = document.getElementById('logFilterTeacherSelect') ? document.getElementById('logFilterTeacherSelect').value : 'ALL';
+        const filterTeacherId = document.getElementById('logFilterTeacherSelect').value;
         if (!tbody) return;
 
-        let filteredRecords = absenceRecords;
-        if (filterTeacherId !== 'ALL') {
-            filteredRecords = absenceRecords.filter(r => r.teacherId === filterTeacherId);
-        }
-
-        if (filteredRecords.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No absences recorded ${filterTeacherId !== 'ALL' ? 'for selected teacher' : 'yet'}.</td></tr>`;
+        let filtered = filterTeacherId !== 'ALL' ? absenceRecords.filter(r => r.teacherId === filterTeacherId) : absenceRecords;
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No absence logs recorded.</td></tr>`;
             return;
         }
 
-        tbody.innerHTML = filteredRecords.slice().reverse().map(r => {
-            const isWB = r.type === 'Wells Business';
-            const badge = isWB 
-                ? '<span class="bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-full text-xs">🔵 Wells Business</span>'
-                : '<span class="bg-rose-100 text-rose-800 font-bold px-2.5 py-1 rounded-full text-xs">🔴 Absent</span>';
-
+        tbody.innerHTML = filtered.slice().reverse().map(r => {
             let covSummary = 'None';
             if (r.coverages && Object.keys(r.coverages).length > 0) {
                 covSummary = Object.entries(r.coverages).map(([p, sub]) => `<span class="bg-purple-50 text-purple-800 px-2 py-0.5 rounded text-[11px] font-semibold border border-purple-200 mr-1">${p}: ${sub}</span>`).join(' ');
             }
-
             return `
                 <tr class="border-b hover:bg-slate-50">
-                    <td class="p-3 font-semibold text-slate-900">${r.date}</td>
+                    <td class="p-3 font-semibold">${r.date}</td>
                     <td class="p-3"><span class="bg-slate-200 text-slate-800 font-bold text-xs px-2 py-0.5 rounded">Day ${r.day}</span></td>
-                    <td class="p-3 font-bold text-slate-900">${r.teacherName}</td>
-                    <td class="p-3">${badge}</td>
+                    <td class="p-3 font-bold">${r.teacherName}</td>
+                    <td class="p-3"><span class="bg-rose-100 text-rose-800 font-bold px-2.5 py-1 rounded-full text-xs">${r.type}</span></td>
                     <td class="p-3">${covSummary}</td>
                     <td class="p-3 text-center">
-                        <button onclick="deleteAbsenceRecord('${r.id}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs">
-                            <i class="fa-solid fa-trash-can mr-1"></i> Delete
-                        </button>
+                        <button onclick="deleteAbsenceRecord('${r.id}')" class="text-rose-600 font-bold text-xs"><i class="fa-solid fa-trash-can"></i></button>
                     </td>
                 </tr>
             `;
@@ -656,14 +578,13 @@
     }
 
     function updateCoverageOptions() {
-        ensureFacultyLoaded();
         const absentId = document.getElementById('absentTeacherSelect').value;
         const day = document.getElementById('scheduleDaySelect').value;
         const dateVal = document.getElementById('absenceDate').value;
         const container = document.getElementById('substitutesContainer');
 
         if (!absentId) {
-            container.innerHTML = '<div class="p-8 text-center text-slate-400">Select an absent teacher to automatically display their periods needing coverage.</div>';
+            container.innerHTML = '<div class="p-8 text-center text-slate-400">Select an absent teacher to view slots needing coverage.</div>';
             document.getElementById('matchCount').innerText = '0 Periods Needing Coverage';
             return;
         }
@@ -671,7 +592,6 @@
         const absentTeacher = faculty.find(t => t.id === absentId);
         if (!absentTeacher) return;
 
-        // Pull record specifically for THIS exact date and teacher
         const dateRec = absenceRecords.find(r => r.teacherId === absentId && r.date === dateVal);
         const daySched = absentTeacher.schedule[day] || {};
         const teachingSlots = Object.keys(daySched).filter(pName => daySched[pName].status === 'Teaching');
@@ -679,14 +599,11 @@
         document.getElementById('matchCount').innerText = `${teachingSlots.length} Periods Needing Coverage`;
 
         if (teachingSlots.length === 0) {
-            container.innerHTML = `<div class="p-6 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-center text-sm font-semibold">
-                🎉 ${absentTeacher.name} has NO teaching periods scheduled on Day ${day}! No coverage required.
-            </div>`;
+            container.innerHTML = `<div class="p-6 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-center text-sm font-semibold">🎉 ${absentTeacher.name} has NO teaching periods on Day ${day}!</div>`;
             return;
         }
 
         let html = '';
-
         teachingSlots.forEach(period => {
             const slotDetails = daySched[period];
             const assignedSubName = (dateRec && dateRec.coverages) ? dateRec.coverages[period] : null;
@@ -696,7 +613,6 @@
             let candidates = faculty.filter(t => {
                 if (t.id === absentId) return false;
                 const candDaySched = t.schedule[day] || {};
-                
                 let isBusy = false;
                 Object.keys(candDaySched).forEach(cp => {
                     if (candDaySched[cp].status === 'Teaching') {
@@ -709,121 +625,67 @@
                 return !isBusy;
             });
 
-            candidates.sort((a, b) => {
-                if (a.teachingCounts[day] !== b.teachingCounts[day]) return a.teachingCounts[day] - b.teachingCounts[day];
-                if (a.teachingCounts.total !== b.teachingCounts.total) return a.teachingCounts.total - b.teachingCounts.total;
-                return a.totalCoverageCount - b.totalCoverageCount;
-            });
+            candidates.sort((a, b) => a.totalCoverageCount - b.totalCoverageCount);
 
             const headerBadge = isAlreadyCovered
-                ? `<span class="bg-purple-100 text-purple-800 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wide">
-                    ✅ COVERED by ${assignedSubName}
-                   </span>`
-                : `<span class="bg-rose-100 text-rose-800 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wide">
-                    ${period} (${slotDetails.time})
-                   </span>`;
+                ? `<span class="bg-purple-100 text-purple-800 font-bold text-xs px-3 py-1 rounded-full">✅ COVERED by ${assignedSubName}</span>`
+                : `<span class="bg-rose-100 text-rose-800 font-bold text-xs px-3 py-1 rounded-full">${period} (${slotDetails.time})</span>`;
 
             html += `
                 <div class="bg-slate-50 border ${isAlreadyCovered ? 'border-purple-300 bg-purple-50/40' : 'border-slate-300'} rounded-2xl p-5 space-y-4 shadow-sm">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-3 gap-2">
-                        <div>
-                            ${headerBadge}
-                            <h3 class="text-base font-bold text-slate-900 mt-2">${slotDetails.details}</h3>
-                        </div>
-                        <span class="text-xs font-semibold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-200">
-                            ${candidates.length} Available Subs
-                        </span>
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <div>${headerBadge}<h3 class="text-base font-bold text-slate-900 mt-2">${slotDetails.details}</h3></div>
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg">${candidates.length} Available Subs</span>
                     </div>
-
                     <div class="space-y-2.5">
             `;
 
             if (isAlreadyCovered) {
                 html += `
                     <div class="p-3 bg-purple-100/80 border border-purple-300 rounded-xl flex justify-between items-center text-xs font-bold text-purple-900">
-                        <span>🛡️ Currently Covered on ${dateVal} by: <strong>${assignedSubName}</strong></span>
-                        <button onclick="unassignCoverage('${absentTeacher.id}', '${period}')" class="text-rose-600 hover:text-rose-800 font-bold bg-white px-3 py-1.5 rounded-lg shadow-sm border border-rose-200">
-                            Re-assign / Remove Sub
-                        </button>
+                        <span>Covered on ${dateVal} by: <strong>${assignedSubName}</strong></span>
+                        <button onclick="unassignCoverage('${absentTeacher.id}', '${period}')" class="text-rose-600 bg-white px-3 py-1.5 rounded-lg border border-rose-200">Remove Sub</button>
                     </div>
                 `;
             } else if (candidates.length === 0) {
-                html += `
-                    <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold text-center">
-                        ⚠️ No teachers are free during this exact period slot.
-                    </div>
-                `;
+                html += `<div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold text-center">⚠️ No free teachers available for this slot.</div>`;
             } else {
                 candidates.forEach((cand, idx) => {
-                    const rankBadge = (idx === 0) 
-                        ? '<span class="bg-emerald-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded">#1 TOP PICK</span>' 
-                        : `<span class="bg-slate-200 text-slate-700 font-bold text-[10px] px-2 py-0.5 rounded">Rank #${idx + 1}</span>`;
-
                     html += `
-                        <div class="p-3 bg-white border border-slate-200 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-indigo-400 transition">
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-bold text-slate-900 text-sm">${cand.name}</span>
-                                    ${rankBadge}
-                                </div>
-                                <div class="text-xs text-slate-500">${cand.department}</div>
-                                <div class="text-[11px] text-slate-600 flex flex-wrap gap-x-3 gap-y-1">
-                                    <span>📅 Day ${day}: <strong>${cand.teachingCounts[day]} periods</strong></span>
-                                    <span>📚 Wk Load: <strong>${cand.teachingCounts.total}</strong></span>
-                                    <span>🛡️ Total Coverages: <strong>${cand.totalCoverageCount}</strong></span>
-                                </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-xl flex justify-between items-center gap-3">
+                            <div>
+                                <div class="font-bold text-slate-900 text-sm">${cand.name}</div>
+                                <div class="text-[11px] text-slate-500">Total Coverages: <strong>${cand.totalCoverageCount}</strong></div>
                             </div>
-                            <button onclick="assignCoverage('${cand.id}', '${absentTeacher.id}', '${day}', '${period}')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition whitespace-nowrap self-end sm:self-center">
-                                Assign Sub
-                            </button>
+                            <button onclick="assignCoverage('${cand.id}', '${absentTeacher.id}', '${day}', '${period}')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition">Assign Sub</button>
                         </div>
                     `;
                 });
             }
-
-            html += `
-                    </div>
-                </div>
-            `;
+            html += `</div></div>`;
         });
-
         container.innerHTML = html;
     }
 
     function renderScheduleEditor() {
-        ensureFacultyLoaded();
         const sel = document.getElementById('editorTeacherSelect');
         if (!sel || !sel.value) return;
+        const teacher = faculty.find(t => t.id === sel.value);
+        if (!teacher) return;
 
-        const teacherId = sel.value;
         const day = document.getElementById('editorDaySelect').value;
         const tbody = document.getElementById('editorTableBody');
-
-        if (!tbody) return;
-
-        const teacher = faculty.find(t => t.id === teacherId);
-        if (!teacher) return;
         const daySched = teacher.schedule[day] || {};
 
         tbody.innerHTML = Object.keys(daySched).map(pName => {
             const slot = daySched[pName];
-            const statusBadge = slot.status === 'Teaching' 
-                ? '<span class="bg-rose-100 text-rose-800 font-extrabold px-3 py-1 rounded-full text-xs">TEACHING</span>'
-                : '<span class="bg-emerald-100 text-emerald-800 font-extrabold px-3 py-1 rounded-full text-xs">FREE</span>';
-
             return `
                 <tr class="border-b hover:bg-slate-50">
-                    <td class="p-3 font-bold text-slate-900">${pName}</td>
-                    <td class="p-3 text-slate-600 font-semibold">${slot.time}</td>
-                    <td class="p-3 text-center">${statusBadge}</td>
-                    <td class="p-3">
-                        <input type="text" id="input_${pName}" value="${slot.details}" class="w-full p-2 border rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500 font-semibold">
-                    </td>
-                    <td class="p-3 text-center">
-                        <button onclick="toggleSlotStatus('${teacher.id}', '${day}', '${pName}')" class="${slot.status === 'Free' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-amber-500 hover:bg-amber-600'} text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow transition">
-                            ${slot.status === 'Free' ? 'Set as Teaching' : 'Set as Free'}
-                        </button>
-                    </td>
+                    <td class="p-3 font-bold">${pName}</td>
+                    <td class="p-3 text-slate-600">${slot.time}</td>
+                    <td class="p-3 text-center"><span class="${slot.status === 'Teaching' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'} font-bold px-3 py-1 rounded-full text-xs">${slot.status}</span></td>
+                    <td class="p-3"><input type="text" id="input_${pName}" value="${slot.details}" class="w-full p-2 border rounded-lg text-xs bg-white font-semibold"></td>
+                    <td class="p-3 text-center"><button onclick="toggleSlotStatus('${teacher.id}', '${day}', '${pName}')" class="bg-indigo-600 text-white font-bold text-xs px-3 py-1.5 rounded-lg">Toggle Status</button></td>
                 </tr>
             `;
         }).join('');
@@ -832,7 +694,6 @@
     function toggleSlotStatus(teacherId, day, period) {
         const teacher = faculty.find(t => t.id === teacherId);
         if (!teacher) return;
-
         const slot = teacher.schedule[day][period];
         const detailInput = document.getElementById(`input_${period}`);
 
@@ -851,19 +712,15 @@
         teacher.teachingCounts[day] = count;
 
         let total = 0;
-        ['A', 'B', 'C', 'D', 'E'].forEach(d => {
-            total += teacher.teachingCounts[d];
-        });
+        ['A', 'B', 'C', 'D', 'E'].forEach(d => { total += teacher.teachingCounts[d]; });
         teacher.teachingCounts.total = total;
 
         saveToGoogleDrive();
     }
 
     function populateTable() {
-        ensureFacultyLoaded();
         const tbody = document.getElementById('rosterTableBody');
         if (!tbody) return;
-
         tbody.innerHTML = faculty.map(t => `
             <tr class="border-b hover:bg-slate-50 text-slate-700">
                 <td class="p-3 font-bold text-slate-900">${t.name}</td>
@@ -880,16 +737,7 @@
     }
 
     function resetCoverageCountsOnly() {
-        if (confirm("Reset all teacher coverage tallies back to 0 and remove active coverage logs in Google Drive?")) {
-            absenceRecords = [];
-            recalculateCoverageCounts();
-            saveToGoogleDrive();
-        }
-    }
-
-    function resetToSchoolData() {
-        if (confirm("Restore 2026-2027 Secondary master timetable in Google Drive?")) {
-            faculty = JSON.parse(JSON.stringify(MASTER_FACULTY));
+        if (confirm("Reset coverages?")) {
             absenceRecords = [];
             recalculateCoverageCounts();
             saveToGoogleDrive();
