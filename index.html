@@ -352,30 +352,46 @@
     let faculty = JSON.parse(JSON.stringify(MASTER_FACULTY));
     let absenceRecords = [];
 
+    function ensureFacultyLoaded() {
+        if (!faculty || faculty.length === 0) {
+            faculty = JSON.parse(JSON.stringify(MASTER_FACULTY));
+        }
+    }
+
     function loadFromGoogleDrive() {
-        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) return;
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) {
+            ensureFacultyLoaded();
+            refreshUI();
+            return;
+        }
 
         fetch(GOOGLE_SCRIPT_URL)
             .then(res => res.json())
             .then(data => {
-                if (data && data.faculty) {
+                if (data && Array.isArray(data.faculty) && data.faculty.length > 0) {
                     faculty = data.faculty;
                     absenceRecords = data.absenceRecords || [];
-                    recalculateCoverageCounts();
-                    populateTeacherDropdowns();
-                    populateTable();
-                    updateCoverageOptions();
-                    renderScheduleEditor();
-                    renderAbsenceLogTable();
                 } else {
+                    ensureFacultyLoaded();
                     saveToGoogleDrive();
                 }
+                recalculateCoverageCounts();
+                refreshUI();
             })
-            .catch(err => console.error("Error loading data from Drive API:", err));
+            .catch(err => {
+                console.error("Error loading data from Drive API:", err);
+                ensureFacultyLoaded();
+                refreshUI();
+            });
     }
 
     function saveToGoogleDrive() {
-        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) return;
+        ensureFacultyLoaded();
+
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) {
+            refreshUI();
+            return;
+        }
 
         const payload = {
             faculty: faculty,
@@ -388,21 +404,27 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
-            populateTeacherDropdowns();
-            populateTable();
-            updateCoverageOptions();
-            renderScheduleEditor();
-            renderAbsenceLogTable();
-        }).catch(err => console.error("Error saving data to Drive API:", err));
+            refreshUI();
+        }).catch(err => {
+            console.error("Error saving data to Drive API:", err);
+            refreshUI();
+        });
+    }
+
+    function refreshUI() {
+        ensureFacultyLoaded();
+        populateTeacherDropdowns();
+        populateTable();
+        updateCoverageOptions();
+        renderScheduleEditor();
+        renderAbsenceLogTable();
     }
 
     function init() {
         document.getElementById('absenceDate').valueAsDate = new Date();
+        ensureFacultyLoaded();
         handleDateChange();
-        populateTeacherDropdowns();
-        populateTable();
-        renderAbsenceLogTable();
-        renderScheduleEditor();
+        refreshUI();
         loadFromGoogleDrive();
     }
 
@@ -444,9 +466,14 @@
     }
 
     function populateTeacherDropdowns() {
+        ensureFacultyLoaded();
         const selAssign = document.getElementById('absentTeacherSelect');
         const selEditor = document.getElementById('editorTeacherSelect');
         const selFilter = document.getElementById('logFilterTeacherSelect');
+
+        const currAssignVal = selAssign ? selAssign.value : '';
+        const currEditorVal = selEditor ? selEditor.value : '';
+        const currFilterVal = selFilter ? selFilter.value : 'ALL';
 
         selAssign.innerHTML = '<option value="">-- Select Teacher --</option>';
         selEditor.innerHTML = '';
@@ -457,6 +484,10 @@
             selEditor.innerHTML += `<option value="${t.id}">${t.name}</option>`;
             selFilter.innerHTML += `<option value="${t.id}">${t.name}</option>`;
         });
+
+        if (currAssignVal) selAssign.value = currAssignVal;
+        if (currEditorVal) selEditor.value = currEditorVal;
+        if (currFilterVal) selFilter.value = currFilterVal;
 
         document.getElementById('facultyCountSpan').innerText = faculty.length;
     }
@@ -493,7 +524,6 @@
         }
 
         saveToGoogleDrive();
-        updateCoverageOptions();
         alert(`✅ Absence Recorded for ${dateVal} (Day ${dayVal})!\n\nTeacher: ${teacher.name}`);
     }
 
@@ -521,7 +551,6 @@
 
         recalculateCoverageCounts();
         saveToGoogleDrive();
-        updateCoverageOptions();
     }
 
     function unassignCoverage(absentTeacherId, period) {
@@ -532,11 +561,11 @@
             delete rec.coverages[period];
             recalculateCoverageCounts();
             saveToGoogleDrive();
-            updateCoverageOptions();
         }
     }
 
     function recalculateCoverageCounts() {
+        ensureFacultyLoaded();
         faculty.forEach(t => { t.totalCoverageCount = 0; });
 
         absenceRecords.forEach(rec => {
@@ -621,6 +650,7 @@
     }
 
     function updateCoverageOptions() {
+        ensureFacultyLoaded();
         const absentId = document.getElementById('absentTeacherSelect').value;
         const day = document.getElementById('scheduleDaySelect').value;
         const dateVal = document.getElementById('absenceDate').value;
@@ -754,11 +784,15 @@
     }
 
     function renderScheduleEditor() {
-        const teacherId = document.getElementById('editorTeacherSelect').value;
+        ensureFacultyLoaded();
+        const sel = document.getElementById('editorTeacherSelect');
+        if (!sel || !sel.value) return;
+
+        const teacherId = sel.value;
         const day = document.getElementById('editorDaySelect').value;
         const tbody = document.getElementById('editorTableBody');
 
-        if (!teacherId || !tbody) return;
+        if (!tbody) return;
 
         const teacher = faculty.find(t => t.id === teacherId);
         if (!teacher) return;
@@ -819,8 +853,10 @@
     }
 
     function populateTable() {
+        ensureFacultyLoaded();
         const tbody = document.getElementById('rosterTableBody');
         if (!tbody) return;
+
         tbody.innerHTML = faculty.map(t => `
             <tr class="border-b hover:bg-slate-50 text-slate-700">
                 <td class="p-3 font-bold text-slate-900">${t.name}</td>
