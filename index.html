@@ -140,7 +140,7 @@
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
               <div>
                 <h2 id="teacherScheduleHeading" class="text-base font-bold text-slate-900">Teacher Daily Schedule</h2>
-                <p id="teacherScheduleSubheading" class="text-xs text-slate-500 mt-0.5">Use "+ Add Class" or "Remove Class" to dynamically edit schedule slots.</p>
+                <p id="teacherScheduleSubheading" class="text-xs text-slate-500 mt-0.5">Edit classes directly or click cells in the Full Matrix tab.</p>
               </div>
               <div id="dayFormatBadge" class="text-xs font-bold px-3 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200">
                 Blocks Format
@@ -202,7 +202,7 @@
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
           <div>
             <h2 class="text-base font-bold text-slate-900">Full School Master Schedule Matrix</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Click <strong>any class cell</strong> in the table below to toggle that slot between <strong>Free</strong> and <strong>Teaching</strong>. Toggling a slot free immediately updates the coverage finder!</p>
+            <p class="text-xs text-slate-500 mt-0.5">Click <strong>ANY cell</strong> in the table to edit the class, mark as FREE, or add a class. Live synced with Coverage Finder!</p>
           </div>
           <div class="w-full md:w-72">
             <input type="text" id="matrixFilterInput" onkeyup="filterMatrixTable()" placeholder="Search teacher or subject..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -395,10 +395,10 @@
     let selectedDayType = "Day A";
     let activeMainTab = "daily";
 
-    let absences = JSON.parse(localStorage.getItem('tsc_absences_v4') || '{}');
-    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v4') || '{}');
-    let customClasses = JSON.parse(localStorage.getItem('tsc_custom_classes_v4') || '{}');
-    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v4') || '[]');
+    let absences = JSON.parse(localStorage.getItem('tsc_absences_v5') || '{}');
+    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v5') || '{}');
+    let customClasses = JSON.parse(localStorage.getItem('tsc_custom_classes_v5') || '{}');
+    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v5') || '[]');
 
     document.addEventListener('DOMContentLoaded', () => {
       initDatePicker();
@@ -529,7 +529,7 @@
 
       if (!absences[selectedDate]) absences[selectedDate] = {};
       absences[selectedDate][teacherName] = { type: reason, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-      localStorage.setItem('tsc_absences_v4', JSON.stringify(absences));
+      localStorage.setItem('tsc_absences_v5', JSON.stringify(absences));
 
       addLogEntry({
         date: selectedDate,
@@ -546,7 +546,7 @@
       if (absences[selectedDate] && absences[selectedDate][teacherName]) {
         delete absences[selectedDate][teacherName];
         if (Object.keys(absences[selectedDate]).length === 0) delete absences[selectedDate];
-        localStorage.setItem('tsc_absences_v4', JSON.stringify(absences));
+        localStorage.setItem('tsc_absences_v5', JSON.stringify(absences));
 
         addLogEntry({
           date: selectedDate,
@@ -592,26 +592,69 @@
       });
     }
 
-    // Toggle Cell Directly From Matrix
-    function toggleMatrixSlot(teacherName, slotKey) {
+    // Helper to get active Slot Key (B1 vs P1) for Matrix Cell
+    function getSlotKeyForCell(teacher, colIdx) {
+      const isBlockFormat = (selectedDayType !== "Day C") && (teacher.type !== "primary");
+      if (isBlockFormat) {
+        return `B${colIdx}`;
+      } else {
+        // Map Col 1 -> P1, Col 2 -> P3, Col 3 -> P5, Col 4 -> P7
+        return `P${(colIdx * 2) - 1}`;
+      }
+    }
+
+    // Interactive Matrix Cell Click Action
+    function onMatrixCellClick(teacherName, colIdx) {
+      const teacher = TEACHERS.find(t => t.name === teacherName);
+      if (!teacher) return;
+
+      const slotKey = getSlotKeyForCell(teacher, colIdx);
       const editKey = `${selectedDate}_${teacherName}_${slotKey}`;
       const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName] ? SCHEDULES[selectedDayType][teacherName] : {};
-      const existingCustom = customClasses[editKey];
+      const currentEdit = customClasses[editKey];
 
-      if (existingCustom === "REMOVED") {
-        delete customClasses[editKey]; // Reset back
-      } else if (existingCustom) {
-        customClasses[editKey] = "REMOVED"; // Set Free
-      } else if (daySched[slotKey]) {
-        customClasses[editKey] = "REMOVED"; // Remove original class -> Set Free
-      } else {
-        const newClass = prompt(`Enter class name to assign to ${teacherName} (${slotKey}):`, "Coverage Class");
-        if (newClass && newClass.trim()) {
-          customClasses[editKey] = newClass.trim();
-        }
+      let currentClassName = null;
+      if (currentEdit === "REMOVED") currentClassName = "FREE";
+      else if (currentEdit) currentClassName = currentEdit;
+      else currentClassName = daySched[slotKey] || "FREE";
+
+      const choice = prompt(
+        `MANAGE MATRIX CELL for ${teacherName} (${slotKey}) on ${selectedDate}:\n` +
+        `Current Status: [${currentClassName}]\n\n` +
+        `Choose an action:\n` +
+        `1. Type a NEW CLASS name to assign class\n` +
+        `2. Type "FREE" to set teacher as free for coverage\n` +
+        `3. Type "RESET" to restore original schedule`,
+        currentClassName
+      );
+
+      if (choice === null) return; // User cancelled
+
+      const trimmed = choice.trim();
+      if (trimmed.toUpperCase() === "FREE") {
+        customClasses[editKey] = "REMOVED";
+        addLogEntry({
+          date: selectedDate,
+          type: 'EDIT',
+          text: `Matrix Edit: Set ${teacherName} (${slotKey}) to FREE on ${selectedDate}`
+        });
+      } else if (trimmed.toUpperCase() === "RESET") {
+        delete customClasses[editKey];
+        addLogEntry({
+          date: selectedDate,
+          type: 'EDIT',
+          text: `Matrix Edit: Reset ${teacherName} (${slotKey}) to default on ${selectedDate}`
+        });
+      } else if (trimmed.length > 0) {
+        customClasses[editKey] = trimmed;
+        addLogEntry({
+          date: selectedDate,
+          type: 'EDIT',
+          text: `Matrix Edit: Assigned "${trimmed}" to ${teacherName} (${slotKey}) on ${selectedDate}`
+        });
       }
 
-      localStorage.setItem('tsc_custom_classes_v4', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v5', JSON.stringify(customClasses));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -619,7 +662,7 @@
     function removeClassFromSchedule(teacherName, slotKey) {
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       customClasses[key] = "REMOVED";
-      localStorage.setItem('tsc_custom_classes_v4', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v5', JSON.stringify(customClasses));
 
       addLogEntry({
         date: selectedDate,
@@ -637,7 +680,7 @@
 
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       customClasses[key] = className.trim();
-      localStorage.setItem('tsc_custom_classes_v4', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v5', JSON.stringify(customClasses));
 
       addLogEntry({
         date: selectedDate,
@@ -652,7 +695,7 @@
     function resetSlotSchedule(teacherName, slotKey) {
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       delete customClasses[key];
-      localStorage.setItem('tsc_custom_classes_v4', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v5', JSON.stringify(customClasses));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -857,7 +900,7 @@
         delete coverages[selectedDate][key];
       }
 
-      localStorage.setItem('tsc_coverages_v4', JSON.stringify(coverages));
+      localStorage.setItem('tsc_coverages_v5', JSON.stringify(coverages));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -879,7 +922,8 @@
           statusBadge = `<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-bold text-[10px]">${absenceType}</span>`;
         }
 
-        const buildCellHtml = (slotKey) => {
+        const buildCellHtml = (colIdx) => {
+          const slotKey = getSlotKeyForCell(t, colIdx);
           const editKey = `${selectedDate}_${t.name}_${slotKey}`;
           const cEntry = customClasses[editKey];
           const coverKey = `${t.name}_${slotKey}`;
@@ -892,23 +936,23 @@
 
           if (isCovered) {
             return `
-              <div onclick="toggleMatrixSlot('${t.name}', '${slotKey}')" class="cursor-pointer p-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 font-bold text-xs flex items-center justify-between hover:bg-emerald-100">
+              <div onclick="onMatrixCellClick('${t.name}', ${colIdx})" class="cursor-pointer p-2 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-950 font-bold text-xs flex items-center justify-between hover:bg-emerald-100 transition-all shadow-sm">
                 <span>${val || 'Class'}</span>
-                <span class="text-[9px] bg-emerald-200 px-1 py-0.5 rounded">Covered by ${isCovered}</span>
+                <span class="text-[9px] bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded font-black">Covered: ${isCovered}</span>
               </div>
             `;
           } else if (val) {
             return `
-              <div onclick="toggleMatrixSlot('${t.name}', '${slotKey}')" class="cursor-pointer p-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-950 font-bold text-xs flex items-center justify-between hover:bg-rose-50 hover:border-rose-300 group">
-                <span class="group-hover:line-through">${val}</span>
-                <span class="text-[9px] text-indigo-500 group-hover:text-rose-600 font-semibold">(Click to Free)</span>
+              <div onclick="onMatrixCellClick('${t.name}', ${colIdx})" class="cursor-pointer p-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-950 font-bold text-xs flex items-center justify-between hover:bg-blue-100 hover:border-blue-400 transition-all shadow-sm group">
+                <span class="truncate pr-1">${val}</span>
+                <i class="fa-solid fa-pen text-[10px] text-indigo-400 group-hover:text-blue-600"></i>
               </div>
             `;
           } else {
             return `
-              <div onclick="toggleMatrixSlot('${t.name}', '${slotKey}')" class="cursor-pointer p-1.5 rounded-lg bg-emerald-50/60 border border-dashed border-emerald-300 text-emerald-800 font-bold text-xs flex items-center justify-between hover:bg-emerald-100">
+              <div onclick="onMatrixCellClick('${t.name}', ${colIdx})" class="cursor-pointer p-2 rounded-lg bg-slate-50 border border-dashed border-slate-300 text-slate-500 font-bold text-xs flex items-center justify-between hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-800 transition-all">
                 <span>FREE</span>
-                <span class="text-[9px] text-emerald-600">(Click to Add)</span>
+                <span class="text-[9px] text-slate-400">+ Add</span>
               </div>
             `;
           }
@@ -918,10 +962,10 @@
           <td class="p-3 font-bold text-slate-800">${t.name}</td>
           <td class="p-3 text-slate-500 capitalize font-medium">${t.type}</td>
           <td class="p-3">${statusBadge}</td>
-          <td class="p-2">${buildCellHtml('B1') || buildCellHtml('P1')}</td>
-          <td class="p-2">${buildCellHtml('B2') || buildCellHtml('P3')}</td>
-          <td class="p-2">${buildCellHtml('B3') || buildCellHtml('P5')}</td>
-          <td class="p-2">${buildCellHtml('B4') || buildCellHtml('P7')}</td>
+          <td class="p-2">${buildCellHtml(1)}</td>
+          <td class="p-2">${buildCellHtml(2)}</td>
+          <td class="p-2">${buildCellHtml(3)}</td>
+          <td class="p-2">${buildCellHtml(4)}</td>
         `;
 
         tbody.appendChild(tr);
@@ -941,7 +985,7 @@
       entry.time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       historyLogs.unshift(entry);
       if (historyLogs.length > 100) historyLogs.pop();
-      localStorage.setItem('tsc_logs_v4', JSON.stringify(historyLogs));
+      localStorage.setItem('tsc_logs_v5', JSON.stringify(historyLogs));
       renderLogHistory();
     }
 
@@ -982,7 +1026,7 @@
     function clearAllLogs() {
       if (confirm("Are you sure you want to clear all log records?")) {
         historyLogs = [];
-        localStorage.removeItem('tsc_logs_v4');
+        localStorage.removeItem('tsc_logs_v5');
         renderLogHistory();
       }
     }
