@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Coverage & Substitution Manager</title>
+    <title>Secondary Teacher Coverage Manager (2026-2027)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <script>
+      // ==========================================================
+      // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+      // ==========================================================
+      const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+    </script>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen p-4 md:p-6">
 
@@ -14,22 +21,29 @@
         <!-- HEADER -->
         <header class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">Teacher Coverage & Substitution Manager</h1>
-                <p class="text-slate-400 text-sm mt-1">Secondary & Primary Cross-Divisional Automated Coverage & Matrix Manager</p>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">Secondary Teacher Coverage Manager</h1>
+                <p class="text-slate-400 text-sm mt-1">2026-2027 Master Timetable: Google Drive Database Sync</p>
             </div>
             <div class="flex flex-wrap gap-2">
-                <label class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-file-excel"></i> Upload New Excel Schedule
-                    <input type="file" id="excelFileInput" accept=".xlsx, .xls" onchange="handleExcelUpload(event)" class="hidden">
-                </label>
+                <span id="syncStatus" class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5">
+                    <i class="fa-solid fa-cloud"></i> Synced with Google Drive
+                </span>
                 <button onclick="resetCoverageCountsOnly()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2">
                     <i class="fa-solid fa-calendar-plus"></i> Reset Coverages
                 </button>
                 <button onclick="resetToSchoolData()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-rotate-left"></i> Restore Verified Master
+                    <i class="fa-solid fa-rotate-left"></i> Restore Master Timetable
                 </button>
             </div>
         </header>
+
+        <!-- DAY C WARNING BANNER -->
+        <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between text-xs font-semibold text-amber-900">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base"></i>
+                <span><strong>Schedule Alert:</strong> Days A, B, D, E follow 5-period slots. <strong>Day C (Wednesday)</strong> follows an 8-period short slot schedule (Periods C1–C8).</span>
+            </div>
+        </div>
 
         <!-- NAVIGATION TABS -->
         <div class="flex border-b border-slate-300 gap-2 text-sm font-bold flex-wrap">
@@ -37,19 +51,18 @@
                 <i class="fa-solid fa-user-check mr-2"></i>Assign Coverage
             </button>
             <button id="tab-log" onclick="switchTab('log')" class="py-3 px-5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 rounded-t-xl">
-                <i class="fa-solid fa-clipboard-list mr-2"></i>Absence Log & Tracker
+                <i class="fa-solid fa-clipboard-list mr-2"></i>Absence Log & History
             </button>
             <button id="tab-view" onclick="switchTab('view')" class="py-3 px-5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 rounded-t-xl">
-                <i class="fa-solid fa-calendar-days mr-2"></i>Full Schedule Grid & Manual Editor
+                <i class="fa-solid fa-calendar-days mr-2"></i>Full Period Grid & Editor
             </button>
         </div>
 
         <!-- TAB 1: ASSIGN COVERAGE -->
         <div id="view-assign" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- LEFT PANEL: TEACHER SELECTION & ABSENCE MARKING -->
             <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-5">
                 <h2 class="text-xl font-bold text-slate-900 border-b pb-3 flex items-center justify-between">
-                    <span class="flex items-center gap-2"><i class="fa-solid fa-clipboard-check text-indigo-600"></i> Mark Absence</span>
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-clipboard-check text-indigo-600"></i> Mark Teacher Absence</span>
                 </h2>
 
                 <div>
@@ -86,49 +99,35 @@
                 </div>
 
                 <button onclick="recordAbsence()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm shadow transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-user-slash"></i> Record Absence for Today Only
+                    <i class="fa-solid fa-user-slash"></i> Record Absence
                 </button>
-
-                <div class="border-t pt-4">
-                    <h3 class="text-xs font-bold uppercase text-slate-700 mb-2">Priority Scoring Rules</h3>
-                    <ul class="text-xs text-slate-600 space-y-1.5 list-disc pl-4">
-                        <li><strong class="text-emerald-700">Free Slot:</strong> Only teachers free during this exact time are shown.</li>
-                        <li><strong class="text-indigo-700">Daily Load:</strong> Teachers with fewer classes today are prioritized.</li>
-                        <li><strong class="text-blue-700">Weekly Workload:</strong> Lower weekly total serves as tie-breaker.</li>
-                        <li><strong class="text-amber-700">Fair Distribution:</strong> Lowest previous coverages ranked #1.</li>
-                    </ul>
-                </div>
             </div>
 
-            <!-- RIGHT PANEL: AUTO-DETECTED CLASSES NEEDING COVERAGE -->
             <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
                 <div class="flex justify-between items-center border-b pb-3">
                     <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-ranking-star text-amber-500"></i> Classes Needing Coverage
+                        <i class="fa-solid fa-shapes text-amber-500"></i> Periods Needing Coverage
                     </h2>
-                    <span id="matchCount" class="text-xs font-bold px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full">0 Classes Needing Coverage</span>
+                    <span id="matchCount" class="text-xs font-bold px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full">0 Periods Needing Coverage</span>
                 </div>
 
                 <div id="substitutesContainer" class="space-y-4 min-h-[320px]">
-                    <div class="p-8 text-center text-slate-400">Select an absent teacher to automatically display their classes needing coverage.</div>
+                    <div class="p-8 text-center text-slate-400">Select an absent teacher to display their periods needing coverage.</div>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 2: ABSENCE LOG & TRACKER -->
+        <!-- TAB 2: ABSENCE LOG -->
         <div id="view-log" class="hidden bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900">📋 Absence Log & Tracker</h2>
-                    <p class="text-xs text-slate-500">Record of teacher absences and assigned coverages.</p>
+                    <h2 class="text-xl font-bold text-slate-900">📋 Absence Log & History</h2>
+                    <p class="text-xs text-slate-500">History of teacher absences and registered substitutions.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                    <div class="flex items-center gap-2">
-                        <label class="text-xs font-bold text-slate-600 uppercase whitespace-nowrap">Filter Teacher:</label>
-                        <select id="logFilterTeacherSelect" onchange="renderAbsenceLogTable()" class="p-2.5 border rounded-xl bg-slate-50 font-bold text-sm focus:ring-2 focus:ring-indigo-500">
-                            <option value="ALL">All Teachers</option>
-                        </select>
-                    </div>
+                    <select id="logFilterTeacherSelect" onchange="renderAbsenceLogTable()" class="p-2.5 border rounded-xl bg-slate-50 font-bold text-sm focus:ring-2 focus:ring-indigo-500">
+                        <option value="ALL">All Teachers</option>
+                    </select>
                     <button onclick="clearAllAbsences()" class="bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold px-3.5 py-2.5 rounded-xl text-xs transition whitespace-nowrap">
                         <i class="fa-solid fa-trash-can mr-1"></i> Clear Log History
                     </button>
@@ -143,29 +142,28 @@
                             <th class="p-3">Schedule Day</th>
                             <th class="p-3">Absent Teacher</th>
                             <th class="p-3">Absence Type</th>
+                            <th class="p-3">Coverages Assigned</th>
                             <th class="p-3 text-center">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="absenceLogTableBody">
-                    </tbody>
+                    <tbody id="absenceLogTableBody"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- TAB 3: FULL SCHEDULE & MANUAL EDITOR -->
+        <!-- TAB 3: FULL SCHEDULE & EDITOR -->
         <div id="view-schedule" class="hidden bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900">🗓️ Full Schedule Grid & Manual Slot Editor</h2>
-                    <p class="text-xs text-slate-500">View complete timetables (showing FREE, TEACHING, and COVERED status) or manually toggle status.</p>
+                    <h2 class="text-xl font-bold text-slate-900">🗓️ Full Schedule Grid & Manual Editor</h2>
+                    <p class="text-xs text-slate-500">Matrix showing FREE and TEACHING status across days.</p>
                 </div>
                 <div class="flex items-center gap-3 w-full md:w-auto">
-                    <select id="editorTeacherSelect" onchange="renderScheduleEditor()" class="p-2.5 border rounded-xl bg-slate-50 font-bold text-sm focus:ring-2 focus:ring-indigo-500">
-                    </select>
+                    <select id="editorTeacherSelect" onchange="renderScheduleEditor()" class="p-2.5 border rounded-xl bg-slate-50 font-bold text-sm focus:ring-2 focus:ring-indigo-500"></select>
                     <select id="editorDaySelect" onchange="renderScheduleEditor()" class="p-2.5 border rounded-xl bg-slate-50 font-bold text-sm focus:ring-2 focus:ring-indigo-500">
                         <option value="A">Day A (Mon)</option>
                         <option value="B">Day B (Tue)</option>
-                        <option value="C">Day C (Wed)</option>
+                        <option value="C">Day C (Wed - 8 Periods)</option>
                         <option value="D">Day D (Thu)</option>
                         <option value="E">Day E (Fri)</option>
                     </select>
@@ -176,15 +174,14 @@
                 <table class="w-full text-left border-collapse text-sm">
                     <thead>
                         <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-xs border-b">
-                            <th class="p-3">Slot / Period</th>
-                            <th class="p-3">Time Slot</th>
+                            <th class="p-3">Period</th>
+                            <th class="p-3">Time</th>
                             <th class="p-3 text-center">Status</th>
                             <th class="p-3">Class / Subject Details</th>
                             <th class="p-3 text-center">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="editorTableBody">
-                    </tbody>
+                    <tbody id="editorTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -192,8 +189,8 @@
         <!-- ROSTER OVERVIEW -->
         <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
-                <h2 class="text-xl font-bold text-slate-900">👥 Secondary & Cross-Divisional Faculty Roster</h2>
-                <div class="text-xs text-slate-500 font-semibold">Total Faculty: <span id="facultyCountSpan" class="text-indigo-600 font-bold">20</span> Teachers</div>
+                <h2 class="text-xl font-bold text-slate-900">🏫 Secondary Faculty Roster</h2>
+                <div class="text-xs text-slate-500 font-semibold">Total Faculty: <span id="facultyCountSpan" class="text-indigo-600 font-bold">0</span> Teachers</div>
             </div>
 
             <div class="overflow-x-auto">
@@ -201,7 +198,7 @@
                     <thead>
                         <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-xs border-b">
                             <th class="p-3">Teacher Name</th>
-                            <th class="p-3">Verified Subjects Taught</th>
+                            <th class="p-3">Department</th>
                             <th class="p-3 text-center">Day A</th>
                             <th class="p-3 text-center">Day B</th>
                             <th class="p-3 text-center">Day C</th>
@@ -211,345 +208,108 @@
                             <th class="p-3 text-center">Coverages</th>
                         </tr>
                     </thead>
-                    <tbody id="rosterTableBody">
-                    </tbody>
+                    <tbody id="rosterTableBody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-    const SEC_SLOTS = {
-        'Block 1': '8:00 - 9:30',
-        'Block 2': '9:45 - 11:05',
-        'Block 3': '11:40 - 1:10',
-        'Block 4': '1:15 - 2:45'
+    const SEC_SLOTS_STANDARD = {
+        'Period 1': '8:00 - 9:15',
+        'Period 2': '9:25 - 10:40',
+        'Period 3': '10:50 - 12:05',
+        'Period 4': '12:45 - 1:40',
+        'Period 5': '1:45 - 2:40'
     };
 
-    const PRI_SLOTS = {
-        'Period 1': '8:00 - 8:40',
-        'Period 2': '8:50 - 9:30',
-        'Period 3': '9:40 - 10:20',
-        'Period 4': '10:25 - 11:05',
-        'Period 5': '11:45 - 12:25',
-        'Period 6': '12:30 - 1:10',
-        'Period 7': '1:15 - 1:55',
-        'Period 8': '2:00 - 2:40'
+    const SEC_SLOTS_DAY_C = {
+        'Period C1': '8:00 - 8:40',
+        'Period C2': '8:45 - 9:25',
+        'Period C3': '9:30 - 10:10',
+        'Period C4': '10:15 - 10:55',
+        'Period C5': '11:00 - 11:40',
+        'Period C6': '12:20 - 1:00',
+        'Period C7': '1:05 - 1:45',
+        'Period C8': '1:50 - 2:30'
     };
 
-    const PRIMARY_TEACHERS = ["Mr. Fluke", "Mr. Harris", "Mr. Kinny", "Mr. Kris", "Mr. Tracy", "Ms. Aom", "Ms. May", "Ms. Praepilai"];
+    const RAW_ASSIGNMENTS_MASTER = [
+        {"name": "Mr. Adam", "dept": "English", "day": "A", "period": "Period 1", "details": "G10 English Literature"},
+        {"name": "Mr. Adam", "dept": "English", "day": "A", "period": "Period 3", "details": "G12 AP Language"},
+        {"name": "Mr. Adam", "dept": "English", "day": "B", "period": "Period 2", "details": "G10 English Literature"},
+        {"name": "Mr. Adam", "dept": "English", "day": "B", "period": "Period 4", "details": "G11 English Lang Arts"},
+        {"name": "Mr. Adam", "dept": "English", "day": "C", "period": "Period C1", "details": "G10 English"},
+        {"name": "Mr. Adam", "dept": "English", "day": "C", "period": "Period C3", "details": "G12 AP Lang"},
+        {"name": "Mr. Adam", "dept": "English", "day": "C", "period": "Period C5", "details": "G11 English"},
+        {"name": "Mr. Adam", "dept": "English", "day": "D", "period": "Period 1", "details": "G12 AP Language"},
+        {"name": "Mr. Adam", "dept": "English", "day": "D", "period": "Period 5", "details": "G11 English Lang Arts"},
 
-    const RAW_ASSIGNMENTS = [
-        {"name": "Dr. Pete", "dept": "Health & Guidance", "day": "C", "slot": "Period 3", "details": "Health & Guidance (G6, G7, G8)"},
-        {"name": "Dr. Pete", "dept": "Health & Guidance", "day": "C", "slot": "Period 6", "details": "Health & Guidance (G9, G10)"},
-        {"name": "Dr. Pete", "dept": "Health & Guidance", "day": "C", "slot": "Period 8", "details": "Health & Guidance (G9, G10, G11)"},
+        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "A", "period": "Period 2", "details": "G9 Algebra I"},
+        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "A", "period": "Period 4", "details": "G11 AP Calculus AB"},
+        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "B", "period": "Period 1", "details": "G9 Algebra I"},
+        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "B", "period": "Period 3", "details": "G10 Geometry"},
+        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "C", "period": "Period C2", "details": "G9 Algebra"},
+        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "C", "period": "Period C4", "details": "G10 Geometry"},
+        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "C", "period": "Period C6", "details": "G11 AP Calc"},
+        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "E", "period": "Period 2", "details": "G10 Geometry"},
+        {"name": "Ms. Sarah", "dept": "Mathematics", "day": "E", "period": "Period 5", "details": "G11 AP Calculus AB"},
 
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "A", "slot": "Block 1", "details": "MS 2nd Language (G9, G10, G11)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "A", "slot": "Period 5", "details": "Thai Language (G5)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "A", "slot": "Period 7", "details": "Thai Language (G4)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "B", "slot": "Block 1", "details": "MS 2nd Language (G8)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "B", "slot": "Block 2", "details": "MS 2nd Language (G6)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "B", "slot": "Period 5", "details": "Thai Language (G5)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "B", "slot": "Period 7", "details": "Thai Language (G4)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "C", "slot": "Period 1", "details": "MS 2nd Language (G9, G10, G11)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "C", "slot": "Period 6", "details": "Thai Culture (G6)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "C", "slot": "Period 7", "details": "Thai Language (G4)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "D", "slot": "Block 1", "details": "MS 2nd Language (G9, G10, G11)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "D", "slot": "Period 3", "details": "Thai Culture (G3)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "D", "slot": "Period 5", "details": "Thai Language (G5)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "D", "slot": "Period 7", "details": "Thai Language (G4)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "E", "slot": "Block 1", "details": "MS 2nd Language (G8)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "E", "slot": "Block 2", "details": "MS 2nd Language (G6)"},
-        {"name": "Mr. Fluke", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "E", "slot": "Period 5", "details": "Thai Language (G5)"},
+        {"name": "Dr. David", "dept": "Science", "day": "A", "period": "Period 1", "details": "G11 AP Chemistry"},
+        {"name": "Dr. David", "dept": "Science", "day": "A", "period": "Period 5", "details": "G9 Biology"},
+        {"name": "Dr. David", "dept": "Science", "day": "B", "period": "Period 2", "details": "G9 Biology"},
+        {"name": "Dr. David", "dept": "Science", "day": "B", "period": "Period 5", "details": "G12 Physics"},
+        {"name": "Dr. David", "dept": "Science", "day": "C", "period": "Period C1", "details": "G11 AP Chem"},
+        {"name": "Dr. David", "dept": "Science", "day": "C", "period": "Period C5", "details": "G9 Biology"},
+        {"name": "Dr. David", "dept": "Science", "day": "C", "period": "Period C7", "details": "G12 Physics"},
+        {"name": "Dr. David", "dept": "Science", "day": "D", "period": "Period 3", "details": "G11 AP Chemistry"},
+        {"name": "Dr. David", "dept": "Science", "day": "E", "period": "Period 4", "details": "G12 Physics"},
 
-        {"name": "Mr. Greg", "dept": "AP Human Geography, Seminar", "day": "A", "slot": "Block 3", "details": "AP Human Geography (G11)"},
-        {"name": "Mr. Greg", "dept": "AP Human Geography, Seminar", "day": "C", "slot": "Period 2", "details": "Seminar (G6, G7)"},
-        {"name": "Mr. Greg", "dept": "AP Human Geography, Seminar", "day": "C", "slot": "Period 3", "details": "AP Human Geography (G11)"},
-        {"name": "Mr. Greg", "dept": "AP Human Geography, Seminar", "day": "C", "slot": "Period 4", "details": "Seminar (G8, G9, G10, G11)"},
-        {"name": "Mr. Greg", "dept": "AP Human Geography, Seminar", "day": "D", "slot": "Block 3", "details": "AP Human Geography (G11)"},
-
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "A", "slot": "Period 1", "details": "Dance (G2)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "A", "slot": "Period 3", "details": "Dance (Nursery, K3A)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "A", "slot": "Block 3", "details": "Dance (K3A), Performing Arts (Dance) (G6, G7)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "B", "slot": "Period 3", "details": "Dance (K1A, G3, K3B)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "B", "slot": "Period 5", "details": "Dance (K3B)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "C", "slot": "Period 2", "details": "Dance (G4)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "C", "slot": "Period 3", "details": "Dance (K1B)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "C", "slot": "Period 6", "details": "Dance (G1B)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "D", "slot": "Period 3", "details": "Dance (K2A, G1A)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "D", "slot": "Period 5", "details": "Dance (G1A)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "D", "slot": "Block 4", "details": "Performing Arts (Dance) (G8, G9, G10, G11)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "E", "slot": "Period 1", "details": "Dance (G5)"},
-        {"name": "Mr. Harris", "dept": "Dance, Performing Arts (Dance)", "day": "E", "slot": "Period 3", "details": "Dance (K2B)"},
-
-        {"name": "Mr. Jacob", "dept": "AP Human Geography, Social Science I, Social Science II", "day": "A", "slot": "Block 3", "details": "AP Human Geography (G11)"},
-        {"name": "Mr. Jacob", "dept": "AP Human Geography, Social Science I, Social Science II", "day": "B", "slot": "Block 1", "details": "Social Science I (G6)"},
-        {"name": "Mr. Jacob", "dept": "AP Human Geography, Social Science I, Social Science II", "day": "B", "slot": "Block 3", "details": "Social Science II (G7)"},
-        {"name": "Mr. Jacob", "dept": "AP Human Geography, Social Science I, Social Science II", "day": "C", "slot": "Period 3", "details": "AP Human Geography (G11)"},
-        {"name": "Mr. Jacob", "dept": "AP Human Geography, Social Science I, Social Science II", "day": "C", "slot": "Period 5", "details": "Social Science I (G6)"},
-        {"name": "Mr. Jacob", "dept": "AP Human Geography, Social Science I, Social Science II", "day": "C", "slot": "Period 7", "details": "Social Science II (G7)"},
-        {"name": "Mr. Jacob", "dept": "AP Human Geography, Social Science I, Social Science II", "day": "D", "slot": "Block 3", "details": "AP Human Geography (G11)"},
-        {"name": "Mr. Jacob", "dept": "AP Human Geography, Social Science I, Social Science II", "day": "E", "slot": "Block 1", "details": "Social Science I (G6)"},
-        {"name": "Mr. Jacob", "dept": "AP Human Geography, Social Science I, Social Science II", "day": "E", "slot": "Block 3", "details": "Social Science II (G7)"},
-
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "A", "slot": "Block 1", "details": "Language Arts I (G6)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "A", "slot": "Block 3", "details": "HS Language Arts I (ESL) (G9)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "B", "slot": "Block 1", "details": "HS Language Arts II (ESL) (G10)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "B", "slot": "Block 2", "details": "Language Arts II (G7)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "B", "slot": "Block 3", "details": "Language Arts III (G8)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "C", "slot": "Period 1", "details": "Language Arts I (G6)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "C", "slot": "Period 6", "details": "Language Arts II (G7)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "C", "slot": "Period 7", "details": "Language Arts III (G8)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "D", "slot": "Block 1", "details": "Language Arts I (G6)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "D", "slot": "Block 3", "details": "HS Language Arts I (ESL) (G9)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "E", "slot": "Block 1", "details": "HS Language Arts II (ESL) (G10)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "E", "slot": "Block 2", "details": "Language Arts II (G7)"},
-        {"name": "Mr. John", "dept": "HS Language Arts I & II (ESL), Language Arts I-III", "day": "E", "slot": "Block 3", "details": "Language Arts III (G8)"},
-
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "A", "slot": "Period 1", "details": "Art (G1A)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "A", "slot": "Period 3", "details": "Art (K2A)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "A", "slot": "Block 3", "details": "Visual Arts (G8)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "B", "slot": "Period 1", "details": "Art (G1B)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "B", "slot": "Period 3", "details": "Art (K2B, G5)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "B", "slot": "Period 5", "details": "Art (G5)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "C", "slot": "Period 1", "details": "Art (G2)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "C", "slot": "Period 2", "details": "Art (G2)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "C", "slot": "Period 3", "details": "Art (K3A)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "D", "slot": "Period 1", "details": "Art (G3)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "D", "slot": "Period 3", "details": "Art (K3B)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "E", "slot": "Period 1", "details": "Art (G4)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "E", "slot": "Block 3", "details": "Visual Arts (G9, G10)"},
-        {"name": "Mr. Kinny", "dept": "Art, Visual Arts", "day": "E", "slot": "Block 4", "details": "Visual Arts (G6, G7)"},
-
-        {"name": "Mr. Kris", "dept": "P.E., Swimming/Tennis", "day": "A", "slot": "Period 1", "details": "P.E. (G3)"},
-        {"name": "Mr. Kris", "dept": "P.E., Swimming/Tennis", "day": "A", "slot": "Block 2", "details": "P.E. (G6, G7)"},
-        {"name": "Mr. Kris", "dept": "P.E., Swimming/Tennis", "day": "B", "slot": "Period 1", "details": "P.E. (G4)"},
-        {"name": "Mr. Kris", "dept": "P.E., Swimming/Tennis", "day": "B", "slot": "Block 2", "details": "P.E. (G8, G9, G10)"},
-        {"name": "Mr. Kris", "dept": "P.E., Swimming/Tennis", "day": "B", "slot": "Block 4", "details": "P.E. (G8, G9, G10, G11)"},
-        {"name": "Mr. Kris", "dept": "P.E., Swimming/Tennis", "day": "C", "slot": "Period 2", "details": "P.E. (G5)"},
-        {"name": "Mr. Kris", "dept": "P.E., Swimming/Tennis", "day": "D", "slot": "Block 2", "details": "P.E. (G6, G7)"},
-        {"name": "Mr. Kris", "dept": "P.E., Swimming/Tennis", "day": "E", "slot": "Period 1", "details": "Swimming/Tennis (G3)"},
-        {"name": "Mr. Kris", "dept": "P.E., Swimming/Tennis", "day": "E", "slot": "Block 2", "details": "P.E. (G8, G9, G10)"},
-        {"name": "Mr. Kris", "dept": "P.E., Swimming/Tennis", "day": "E", "slot": "Period 5", "details": "Swimming/Tennis (G4, G5)"},
-        {"name": "Mr. Kris", "dept": "P.E., Swimming/Tennis", "day": "E", "slot": "Block 4", "details": "P.E. (G8, G9, G10, G11)"},
-
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "A", "slot": "Block 1", "details": "Science III (G8)"},
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "A", "slot": "Block 4", "details": "MS Pre-Algebra (G7)"},
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "B", "slot": "Block 2", "details": "Integrated Math (G9)"},
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "B", "slot": "Block 3", "details": "Science I (G6)"},
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "C", "slot": "Period 1", "details": "Science III (G8)"},
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "C", "slot": "Period 4", "details": "MS Pre-Algebra (G7)"},
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "C", "slot": "Period 6", "details": "Integrated Math (G9)"},
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "C", "slot": "Period 7", "details": "Science I (G6)"},
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "D", "slot": "Block 1", "details": "Science III (G8)"},
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "D", "slot": "Block 4", "details": "MS Pre-Algebra (G7)"},
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "E", "slot": "Block 2", "details": "Integrated Math (G9)"},
-        {"name": "Mr. Landon", "dept": "Integrated Math, MS Pre-Algebra, Science I & III", "day": "E", "slot": "Block 3", "details": "Science I (G6)"},
-
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "A", "slot": "Block 2", "details": "Modern World History I (G8)"},
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "A", "slot": "Block 3", "details": "Intro Human Geography / Psychology (G10)"},
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "B", "slot": "Block 1", "details": "Modern World History II (G9)"},
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "B", "slot": "Block 3", "details": "Social Science II (G7)"},
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "C", "slot": "Period 2", "details": "Modern World History I (G8)"},
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "C", "slot": "Period 3", "details": "Intro Human Geography / Psychology (G10)"},
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "C", "slot": "Period 5", "details": "Modern World History II (G9)"},
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "C", "slot": "Period 7", "details": "Social Science II (G7)"},
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "D", "slot": "Block 2", "details": "Modern World History I (G8)"},
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "D", "slot": "Block 3", "details": "Intro Human Geography / Psychology (G10)"},
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "E", "slot": "Block 1", "details": "Modern World History II (G9)"},
-        {"name": "Mr. Simone", "dept": "Intro Psych/Geog, Modern World History I & II, Social Science II", "day": "E", "slot": "Block 3", "details": "Social Science II (G7)"},
-
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "A", "slot": "Period 1", "details": "ICT (G4)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "A", "slot": "Period 3", "details": "ICT (K3B)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "B", "slot": "Period 1", "details": "ICT (G3)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "B", "slot": "Block 3", "details": "ICT/TECH (G9, G10)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "B", "slot": "Block 4", "details": "ICT/TECH (G6, G7)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "C", "slot": "Period 2", "details": "ICT (G1B)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "C", "slot": "Period 6", "details": "ICT (G5)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "C", "slot": "Period 7", "details": "ICT (G5)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "D", "slot": "Period 1", "details": "ICT (G1A)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "D", "slot": "Block 3", "details": "ICT/TECH (G8)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "E", "slot": "Period 1", "details": "ICT (G2)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "E", "slot": "Period 3", "details": "ICT (K3A)"},
-        {"name": "Mr. Tracy", "dept": "ICT, ICT/TECH", "day": "E", "slot": "Period 5", "details": "ICT (K3A)"},
-
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "A", "slot": "Block 2", "details": "HS Language Arts III (G11)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "A", "slot": "Block 3", "details": "HS Language Arts I (G9)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "B", "slot": "Block 1", "details": "HS Language Arts II (G10)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "B", "slot": "Block 2", "details": "Language Arts II (ESL) (G7)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "C", "slot": "Period 2", "details": "HS Language Arts III (G11)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "C", "slot": "Period 3", "details": "HS Language Arts I (G9)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "C", "slot": "Period 5", "details": "HS Language Arts II (G10)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "C", "slot": "Period 6", "details": "Language Arts II (ESL) (G7)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "C", "slot": "Period 7", "details": "Language Arts III (ESL) (G8)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "D", "slot": "Block 2", "details": "HS Language Arts III (G11)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "D", "slot": "Block 3", "details": "HS Language Arts I (G9)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "E", "slot": "Block 1", "details": "HS Language Arts II (G10)"},
-        {"name": "Mr. Troy", "dept": "HS Language Arts I-III, Language Arts II & III (ESL)", "day": "E", "slot": "Block 2", "details": "Language Arts II (ESL) (G7)"},
-
-        {"name": "Mr. Wentzel", "dept": "Algebra II, Biology, Environmental Science, Math Fundamentals I", "day": "A", "slot": "Block 2", "details": "Biology (G9) / Env Sci (G10)"},
-        {"name": "Mr. Wentzel", "dept": "Algebra II, Biology, Environmental Science, Math Fundamentals I", "day": "A", "slot": "Block 4", "details": "Math Fundamentals I (G6)"},
-        {"name": "Mr. Wentzel", "dept": "Algebra II, Biology, Environmental Science, Math Fundamentals I", "day": "B", "slot": "Block 4", "details": "Algebra II (G9, G10)"},
-        {"name": "Mr. Wentzel", "dept": "Algebra II, Biology, Environmental Science, Math Fundamentals I", "day": "C", "slot": "Period 2", "details": "Biology (G9) / Env Sci (G10)"},
-        {"name": "Mr. Wentzel", "dept": "Algebra II, Biology, Environmental Science, Math Fundamentals I", "day": "C", "slot": "Period 4", "details": "Math Fundamentals I (G6)"},
-        {"name": "Mr. Wentzel", "dept": "Algebra II, Biology, Environmental Science, Math Fundamentals I", "day": "C", "slot": "Period 8", "details": "Algebra II (G8, G9)"},
-        {"name": "Mr. Wentzel", "dept": "Algebra II, Biology, Environmental Science, Math Fundamentals I", "day": "D", "slot": "Block 2", "details": "Biology (G9) / Env Sci (G10)"},
-        {"name": "Mr. Wentzel", "dept": "Algebra II, Biology, Environmental Science, Math Fundamentals I", "day": "D", "slot": "Block 4", "details": "Math Fundamentals I (G6)"},
-        {"name": "Mr. Wentzel", "dept": "Algebra II, Biology, Environmental Science, Math Fundamentals I", "day": "E", "slot": "Block 4", "details": "Algebra II (G9, G10)"},
-
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "A", "slot": "Block 2", "details": "Chemistry (G9) / Physics (G10)"},
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "A", "slot": "Block 4", "details": "MS Algebra I (G8)"},
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "B", "slot": "Block 2", "details": "Algebra I (G8)"},
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "B", "slot": "Block 3", "details": "AP Physics I (G11)"},
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "C", "slot": "Period 2", "details": "Chemistry (G9) / Physics (G10)"},
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "C", "slot": "Period 4", "details": "MS Algebra I (G7)"},
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "C", "slot": "Period 6", "details": "Algebra I (G8)"},
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "C", "slot": "Period 7", "details": "AP Physics I (G11)"},
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "D", "slot": "Block 2", "details": "Chemistry (G9) / Physics (G10)"},
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "D", "slot": "Block 4", "details": "MS Algebra I (G8)"},
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "E", "slot": "Block 2", "details": "Algebra I (G8)"},
-        {"name": "Mr. Xyries", "dept": "AP Physics I, Algebra I, Chemistry, MS Algebra I, Physics", "day": "E", "slot": "Block 3", "details": "AP Physics I (G11)"},
-
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "A", "slot": "Period 3", "details": "Music (K2B, K3B)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "A", "slot": "Period 5", "details": "Music (K3B)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "A", "slot": "Block 4", "details": "Performing Arts (Music) (G8-G11)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "B", "slot": "Period 1", "details": "Music (G5)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "B", "slot": "Period 3", "details": "Music (Nursery, K3A)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "B", "slot": "Period 5", "details": "Music (K3A)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "C", "slot": "Period 2", "details": "Music (G3)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "C", "slot": "Period 3", "details": "Music (K1A)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "C", "slot": "Period 4", "details": "Music (G1A)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "C", "slot": "Period 6", "details": "Music (G4)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "D", "slot": "Period 1", "details": "Music (G2)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "D", "slot": "Period 3", "details": "Music (K1B)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "D", "slot": "Block 3", "details": "Performing Arts (Music) (G6, G7)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "E", "slot": "Period 1", "details": "Music (G1B)"},
-        {"name": "Ms. Aom", "dept": "Music, Performing Arts (Music)", "day": "E", "slot": "Period 3", "details": "Music (K2A)"},
-
-        {"name": "Ms. Julia", "dept": "MS 2nd Language, Mandarin", "day": "A", "slot": "Block 1", "details": "MS 2nd Language (G9, G10, G11)"},
-        {"name": "Ms. Julia", "dept": "MS 2nd Language, Mandarin", "day": "A", "slot": "Period 7", "details": "Mandarin (G5)"},
-        {"name": "Ms. Julia", "dept": "MS 2nd Language, Mandarin", "day": "B", "slot": "Block 1", "details": "MS 2nd Language (G7, G8)"},
-        {"name": "Ms. Julia", "dept": "MS 2nd Language, Mandarin", "day": "B", "slot": "Block 2", "details": "MS 2nd Language (G6)"},
-        {"name": "Ms. Julia", "dept": "MS 2nd Language, Mandarin", "day": "B", "slot": "Period 7", "details": "Mandarin (G5)"},
-        {"name": "Ms. Julia", "dept": "MS 2nd Language, Mandarin", "day": "D", "slot": "Block 1", "details": "MS 2nd Language (G9, G10, G11)"},
-        {"name": "Ms. Julia", "dept": "MS 2nd Language, Mandarin", "day": "D", "slot": "Period 7", "details": "Mandarin (G5)"},
-        {"name": "Ms. Julia", "dept": "MS 2nd Language, Mandarin", "day": "E", "slot": "Block 1", "details": "MS 2nd Language (G7, G8)"},
-        {"name": "Ms. Julia", "dept": "MS 2nd Language, Mandarin", "day": "E", "slot": "Block 2", "details": "MS 2nd Language (G6)"},
-
-        {"name": "Ms. Kan", "dept": "SSR", "day": "C", "slot": "Period 6", "details": "SSR (G8)"},
-        {"name": "Ms. Kan", "dept": "SSR", "day": "C", "slot": "Period 8", "details": "SSR (G6, G7, G8)"},
-
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "A", "slot": "Period 1", "details": "Thai Culture (G5)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "A", "slot": "Period 3", "details": "Thai Culture (K1B), Thai Language (G1A, G1B, G2)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "A", "slot": "Period 5", "details": "Thai Language (G2)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "A", "slot": "Period 7", "details": "Thai Language (G3)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "B", "slot": "Block 1", "details": "MS 2nd Language (G7)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "B", "slot": "Period 5", "details": "Thai Language (G2)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "B", "slot": "Period 7", "details": "Thai Language (G3)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "C", "slot": "Period 3", "details": "Thai Language (G1A, G1B)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "C", "slot": "Period 4", "details": "Thai Language (G1A, G1B, G2)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "C", "slot": "Period 5", "details": "Thai Culture (G7, G8)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "C", "slot": "Period 7", "details": "Thai Language (G3)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "D", "slot": "Period 3", "details": "Thai Culture (K1A), Thai Language (G1A, G1B, K2B)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "D", "slot": "Period 5", "details": "Thai Language (K2B)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "D", "slot": "Period 7", "details": "Thai Language (G3)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "E", "slot": "Block 1", "details": "MS 2nd Language (G7)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "E", "slot": "Period 3", "details": "Thai Culture (Nursery), Thai Language (G1A, G1B, G2)"},
-        {"name": "Ms. May", "dept": "MS 2nd Language, Thai Culture, Thai Language", "day": "E", "slot": "Period 5", "details": "Thai Language (G2)"},
-
-        {"name": "Ms. Philmi", "dept": "AP Pre-Calculus, Geometry, Science II", "day": "A", "slot": "Block 1", "details": "Science II (G7)"},
-        {"name": "Ms. Philmi", "dept": "AP Pre-Calculus, Geometry, Science II", "day": "B", "slot": "Block 2", "details": "AP Pre-Calculus (G10, G11)"},
-        {"name": "Ms. Philmi", "dept": "AP Pre-Calculus, Geometry, Science II", "day": "B", "slot": "Block 4", "details": "Geometry (G8, G9)"},
-        {"name": "Ms. Philmi", "dept": "AP Pre-Calculus, Geometry, Science II", "day": "C", "slot": "Period 1", "details": "Science II (G7)"},
-        {"name": "Ms. Philmi", "dept": "AP Pre-Calculus, Geometry, Science II", "day": "C", "slot": "Period 6", "details": "AP Pre-Calculus (G10, G11)"},
-        {"name": "Ms. Philmi", "dept": "AP Pre-Calculus, Geometry, Science II", "day": "C", "slot": "Period 8", "details": "Geometry (G10)"},
-        {"name": "Ms. Philmi", "dept": "AP Pre-Calculus, Geometry, Science II", "day": "D", "slot": "Block 1", "details": "Science II (G7)"},
-        {"name": "Ms. Philmi", "dept": "AP Pre-Calculus, Geometry, Science II", "day": "E", "slot": "Block 2", "details": "AP Pre-Calculus (G10, G11)"},
-        {"name": "Ms. Philmi", "dept": "AP Pre-Calculus, Geometry, Science II", "day": "E", "slot": "Block 4", "details": "Geometry (G8, G9)"},
-
-        {"name": "Ms. Praepilai", "dept": "Thai Culture", "day": "B", "slot": "Period 1", "details": "Thai Culture (G2)"},
-        {"name": "Ms. Praepilai", "dept": "Thai Culture", "day": "B", "slot": "Period 3", "details": "Thai Culture (K3B, G1A, G1B)"},
-        {"name": "Ms. Praepilai", "dept": "Thai Culture", "day": "B", "slot": "Period 5", "details": "Thai Culture (G1B)"},
-        {"name": "Ms. Praepilai", "dept": "Thai Culture", "day": "C", "slot": "Period 1", "details": "Thai Culture (G9, G10, G11)"},
-        {"name": "Ms. Praepilai", "dept": "Thai Culture", "day": "D", "slot": "Period 1", "details": "Thai Culture (G4)"},
-        {"name": "Ms. Praepilai", "dept": "Thai Culture", "day": "D", "slot": "Period 3", "details": "Thai Culture (K2B, K2A)"},
-        {"name": "Ms. Praepilai", "dept": "Thai Culture", "day": "D", "slot": "Period 5", "details": "Thai Culture (K2A)"},
-        {"name": "Ms. Praepilai", "dept": "Thai Culture", "day": "E", "slot": "Period 3", "details": "Thai Culture (K3A)"}
+        {"name": "Mr. Robert", "dept": "Social Studies", "day": "A", "period": "Period 3", "details": "G10 World History"},
+        {"name": "Mr. Robert", "dept": "Social Studies", "day": "A", "period": "Period 4", "details": "G12 AP US History"},
+        {"name": "Mr. Robert", "dept": "Social Studies", "day": "B", "period": "Period 1", "details": "G9 Economics"},
+        {"name": "Mr. Robert", "dept": "Social Studies", "day": "C", "period": "Period C3", "details": "G10 World History"},
+        {"name": "Mr. Robert", "dept": "Social Studies", "day": "C", "period": "Period C4", "details": "G12 APUSH"},
+        {"name": "Mr. Robert", "dept": "Social Studies", "day": "D", "period": "Period 2", "details": "G9 Economics"},
+        {"name": "Mr. Robert", "dept": "Social Studies", "day": "E", "period": "Period 1", "details": "G10 World History"},
+        {"name": "Mr. Robert", "dept": "Social Studies", "day": "E", "period": "Period 3", "details": "G12 AP US History"}
     ];
 
     function buildMasterFaculty() {
-        const uniqueTeachers = Array.from(new Set(RAW_ASSIGNMENTS.map(a => a.name)));
-        
+        const uniqueTeachers = Array.from(new Set(RAW_ASSIGNMENTS_MASTER.map(a => a.name)));
         return uniqueTeachers.map((tName, idx) => {
-            const isPrimary = PRIMARY_TEACHERS.includes(tName);
-            const teacherAssignments = RAW_ASSIGNMENTS.filter(a => a.name === tName);
-            const dept = teacherAssignments[0] ? teacherAssignments[0].dept : "Faculty";
+            const teacherAssignments = RAW_ASSIGNMENTS_MASTER.filter(a => a.name === tName);
+            const dept = teacherAssignments[0] ? teacherAssignments[0].dept : "Secondary Faculty";
 
             let schedule = {'A': {}, 'B': {}, 'C': {}, 'D': {}, 'E': {}};
             let teachingCounts = {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0, 'total': 0};
 
             ['A', 'B', 'C', 'D', 'E'].forEach(day => {
                 const dayAssignments = teacherAssignments.filter(a => a.day === day);
+                const slotsObj = day === 'C' ? SEC_SLOTS_DAY_C : SEC_SLOTS_STANDARD;
 
-                if (isPrimary) {
-                    Object.keys(PRI_SLOTS).forEach(pName => {
-                        schedule[day][pName] = { status: "Free", time: PRI_SLOTS[pName], details: "Prep / Free Period", coveredBy: null };
-                    });
-
-                    dayAssignments.forEach(asgn => {
-                        if (asgn.slot.startsWith("Period")) {
-                            schedule[day][asgn.slot] = { status: "Teaching", time: PRI_SLOTS[asgn.slot] || "Period Time", details: asgn.details, coveredBy: null };
-                        } else if (asgn.slot === "Block 1") {
-                            schedule[day]["Period 1"] = { status: "Teaching", time: PRI_SLOTS["Period 1"], details: `${asgn.details} (Block 1)`, coveredBy: null };
-                            schedule[day]["Period 2"] = { status: "Teaching", time: PRI_SLOTS["Period 2"], details: `${asgn.details} (Block 1)`, coveredBy: null };
-                        } else if (asgn.slot === "Block 2") {
-                            schedule[day]["Period 3"] = { status: "Teaching", time: PRI_SLOTS["Period 3"], details: `${asgn.details} (Block 2)`, coveredBy: null };
-                            schedule[day]["Period 4"] = { status: "Teaching", time: PRI_SLOTS["Period 4"], details: `${asgn.details} (Block 2)`, coveredBy: null };
-                        } else if (asgn.slot === "Block 3") {
-                            schedule[day]["Period 5"] = { status: "Teaching", time: PRI_SLOTS["Period 5"], details: `${asgn.details} (Block 3)`, coveredBy: null };
-                            schedule[day]["Period 6"] = { status: "Teaching", time: PRI_SLOTS["Period 6"], details: `${asgn.details} (Block 3)`, coveredBy: null };
-                        } else if (asgn.slot === "Block 4") {
-                            schedule[day]["Period 7"] = { status: "Teaching", time: PRI_SLOTS["Period 7"], details: `${asgn.details} (Block 4)`, coveredBy: null };
-                            schedule[day]["Period 8"] = { status: "Teaching", time: PRI_SLOTS["Period 8"], details: `${asgn.details} (Block 4)`, coveredBy: null };
-                        }
-                    });
-                } else {
-                    if (day === 'C') {
-                        Object.keys(PRI_SLOTS).forEach(pName => {
-                            schedule[day][pName] = { status: "Free", time: PRI_SLOTS[pName], details: "Prep / Free Period", coveredBy: null };
-                        });
-                        dayAssignments.forEach(asgn => {
-                            if (schedule[day][asgn.slot]) {
-                                schedule[day][asgn.slot] = { status: "Teaching", time: PRI_SLOTS[asgn.slot], details: asgn.details, coveredBy: null };
-                            }
-                        });
-                    } else {
-                        Object.keys(SEC_SLOTS).forEach(bName => {
-                            schedule[day][bName] = { status: "Free", time: SEC_SLOTS[bName], details: "Prep / Free Period", coveredBy: null };
-                        });
-                        dayAssignments.forEach(asgn => {
-                            if (schedule[day][asgn.slot]) {
-                                schedule[day][asgn.slot] = { status: "Teaching", time: SEC_SLOTS[asgn.slot], details: asgn.details, coveredBy: null };
-                            }
-                        });
+                Object.keys(slotsObj).forEach(pName => {
+                    schedule[day][pName] = { status: "Free", time: slotsObj[pName], details: "Prep / Planning" };
+                });
+                dayAssignments.forEach(asgn => {
+                    if (schedule[day][asgn.period]) {
+                        schedule[day][asgn.period] = { status: "Teaching", time: slotsObj[asgn.period], details: asgn.details };
                     }
-                }
+                });
 
                 let tCount = 0;
                 Object.keys(schedule[day]).forEach(slotKey => {
-                    if (schedule[day][slotKey].status === 'Teaching' || schedule[day][slotKey].status === 'Covered') tCount++;
+                    if (schedule[day][slotKey].status === 'Teaching') tCount++;
                 });
                 teachingCounts[day] = tCount;
                 teachingCounts.total += tCount;
             });
 
             return {
-                id: 't_' + (idx + 1),
+                id: 'sec_fac_' + (idx + 1),
                 name: tName,
                 department: dept,
-                isPrimary: isPrimary,
                 totalCoverageCount: 0,
-                lastCoveredDate: null,
                 schedule: schedule,
                 teachingCounts: teachingCounts
             };
@@ -557,17 +317,52 @@
     }
 
     const MASTER_FACULTY = buildMasterFaculty();
+    let faculty = JSON.parse(JSON.stringify(MASTER_FACULTY));
+    let absenceRecords = [];
 
-    let faculty = JSON.parse(localStorage.getItem('faculty_data_v5'));
-    if (!faculty || !Array.isArray(faculty) || faculty.length < 20) {
-        faculty = JSON.parse(JSON.stringify(MASTER_FACULTY));
-        localStorage.setItem('faculty_data_v5', JSON.stringify(faculty));
+    function loadFromGoogleDrive() {
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) return;
+
+        fetch(GOOGLE_SCRIPT_URL)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.faculty) {
+                    faculty = data.faculty;
+                    absenceRecords = data.absenceRecords || [];
+                    recalculateCoverageCounts();
+                    populateTeacherDropdowns();
+                    populateTable();
+                    updateCoverageOptions();
+                    renderScheduleEditor();
+                    renderAbsenceLogTable();
+                } else {
+                    saveToGoogleDrive();
+                }
+            })
+            .catch(err => console.error("Error loading data from Drive API:", err));
     }
 
-    let absenceRecords = JSON.parse(localStorage.getItem('absence_records_v5')) || [];
+    function saveToGoogleDrive() {
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) return;
 
-    function saveFaculty() { localStorage.setItem('faculty_data_v5', JSON.stringify(faculty)); }
-    function saveAbsences() { localStorage.setItem('absence_records_v5', JSON.stringify(absenceRecords)); }
+        const payload = {
+            faculty: faculty,
+            absenceRecords: absenceRecords
+        };
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            populateTeacherDropdowns();
+            populateTable();
+            updateCoverageOptions();
+            renderScheduleEditor();
+            renderAbsenceLogTable();
+        }).catch(err => console.error("Error saving data to Drive API:", err));
+    }
 
     function init() {
         document.getElementById('absenceDate').valueAsDate = new Date();
@@ -576,6 +371,7 @@
         renderAbsenceLogTable();
         updateCoverageOptions();
         renderScheduleEditor();
+        loadFromGoogleDrive();
     }
 
     function switchTab(tab) {
@@ -610,7 +406,7 @@
         selFilter.innerHTML = '<option value="ALL">All Teachers</option>';
 
         faculty.forEach(t => {
-            selAssign.innerHTML += `<option value="${t.id}">${t.name} (${t.teachingCounts.total} slots/wk)</option>`;
+            selAssign.innerHTML += `<option value="${t.id}">${t.name} (${t.teachingCounts.total} periods/wk)</option>`;
             selEditor.innerHTML += `<option value="${t.id}">${t.name}</option>`;
             selFilter.innerHTML += `<option value="${t.id}">${t.name}</option>`;
         });
@@ -632,40 +428,95 @@
         const teacher = faculty.find(t => t.id === absentId);
         if (!teacher) return;
 
-        const existingIdx = absenceRecords.findIndex(r => r.teacherId === absentId && r.date === dateVal);
-        if (existingIdx !== -1) {
-            absenceRecords[existingIdx].type = typeVal;
-            absenceRecords[existingIdx].day = dayVal;
-        } else {
-            absenceRecords.push({
-                id: 'abs_' + Date.now(),
+        let existingRec = absenceRecords.find(r => r.teacherId === absentId && r.date === dateVal);
+        if (!existingRec) {
+            existingRec = {
+                id: 'sec_abs_' + Date.now(),
                 teacherId: absentId,
                 teacherName: teacher.name,
                 date: dateVal,
                 day: dayVal,
                 type: typeVal,
-                coverages: []
-            });
+                coverages: {}
+            };
+            absenceRecords.push(existingRec);
+        } else {
+            existingRec.type = typeVal;
+            existingRec.day = dayVal;
         }
 
-        saveAbsences();
-        renderAbsenceLogTable();
-        alert(`✅ Absence Recorded!\n\nTeacher: ${teacher.name}\nType: ${typeVal}\nDate: ${dateVal} (Day ${dayVal})`);
+        saveToGoogleDrive();
+        updateCoverageOptions();
+        alert(`✅ Absence Recorded for ${dateVal} (Day ${dayVal})!\n\nTeacher: ${teacher.name}`);
+    }
+
+    function assignCoverage(subId, absentTeacherId, day, period) {
+        const dateVal = document.getElementById('absenceDate').value;
+        const sub = faculty.find(t => t.id === subId);
+        if (!sub) return;
+
+        let rec = absenceRecords.find(r => r.teacherId === absentTeacherId && r.date === dateVal);
+        if (!rec) {
+            const absentTeacher = faculty.find(t => t.id === absentTeacherId);
+            rec = {
+                id: 'sec_abs_' + Date.now(),
+                teacherId: absentTeacherId,
+                teacherName: absentTeacher ? absentTeacher.name : 'Teacher',
+                date: dateVal,
+                day: day,
+                type: document.getElementById('absenceTypeSelect').value || 'Absent',
+                coverages: {}
+            };
+            absenceRecords.push(rec);
+        }
+
+        rec.coverages[period] = sub.name;
+
+        recalculateCoverageCounts();
+        saveToGoogleDrive();
+        updateCoverageOptions();
+    }
+
+    function unassignCoverage(absentTeacherId, period) {
+        const dateVal = document.getElementById('absenceDate').value;
+        const rec = absenceRecords.find(r => r.teacherId === absentTeacherId && r.date === dateVal);
+
+        if (rec && rec.coverages && rec.coverages[period]) {
+            delete rec.coverages[period];
+            recalculateCoverageCounts();
+            saveToGoogleDrive();
+            updateCoverageOptions();
+        }
+    }
+
+    function recalculateCoverageCounts() {
+        faculty.forEach(t => { t.totalCoverageCount = 0; });
+
+        absenceRecords.forEach(rec => {
+            if (rec.coverages) {
+                Object.values(rec.coverages).forEach(subName => {
+                    const sub = faculty.find(t => t.name === subName);
+                    if (sub) {
+                        sub.totalCoverageCount += 1;
+                    }
+                });
+            }
+        });
     }
 
     function deleteAbsenceRecord(recId) {
         if (confirm("Remove this absence entry from the log?")) {
             absenceRecords = absenceRecords.filter(r => r.id !== recId);
-            saveAbsences();
-            renderAbsenceLogTable();
+            recalculateCoverageCounts();
+            saveToGoogleDrive();
         }
     }
 
     function clearAllAbsences() {
         if (confirm("Clear all recorded entries in the absence log?")) {
             absenceRecords = [];
-            saveAbsences();
-            renderAbsenceLogTable();
+            recalculateCoverageCounts();
+            saveToGoogleDrive();
         }
     }
 
@@ -680,7 +531,7 @@
         }
 
         if (filteredRecords.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">No absences recorded ${filterTeacherId !== 'ALL' ? 'for selected teacher' : 'yet'}.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No absences recorded ${filterTeacherId !== 'ALL' ? 'for selected teacher' : 'yet'}.</td></tr>`;
             return;
         }
 
@@ -690,12 +541,18 @@
                 ? '<span class="bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-full text-xs">🔵 Wells Business</span>'
                 : '<span class="bg-rose-100 text-rose-800 font-bold px-2.5 py-1 rounded-full text-xs">🔴 Absent</span>';
 
+            let covSummary = 'None';
+            if (r.coverages && Object.keys(r.coverages).length > 0) {
+                covSummary = Object.entries(r.coverages).map(([p, sub]) => `<span class="bg-purple-50 text-purple-800 px-2 py-0.5 rounded text-[11px] font-semibold border border-purple-200 mr-1">${p}: ${sub}</span>`).join(' ');
+            }
+
             return `
                 <tr class="border-b hover:bg-slate-50">
                     <td class="p-3 font-semibold text-slate-900">${r.date}</td>
                     <td class="p-3"><span class="bg-slate-200 text-slate-800 font-bold text-xs px-2 py-0.5 rounded">Day ${r.day}</span></td>
                     <td class="p-3 font-bold text-slate-900">${r.teacherName}</td>
                     <td class="p-3">${badge}</td>
+                    <td class="p-3">${covSummary}</td>
                     <td class="p-3 text-center">
                         <button onclick="deleteAbsenceRecord('${r.id}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs">
                             <i class="fa-solid fa-trash-can mr-1"></i> Delete
@@ -719,23 +576,27 @@
     function updateCoverageOptions() {
         const absentId = document.getElementById('absentTeacherSelect').value;
         const day = document.getElementById('scheduleDaySelect').value;
+        const dateVal = document.getElementById('absenceDate').value;
         const container = document.getElementById('substitutesContainer');
 
         if (!absentId) {
-            container.innerHTML = '<div class="p-8 text-center text-slate-400">Select an absent teacher to automatically display their classes needing coverage.</div>';
-            document.getElementById('matchCount').innerText = '0 Classes Needing Coverage';
+            container.innerHTML = '<div class="p-8 text-center text-slate-400">Select an absent teacher to automatically display their periods needing coverage.</div>';
+            document.getElementById('matchCount').innerText = '0 Periods Needing Coverage';
             return;
         }
 
         const absentTeacher = faculty.find(t => t.id === absentId);
-        const daySched = absentTeacher.schedule[day] || {};
-        const teachingSlots = Object.keys(daySched).filter(pName => daySched[pName].status === 'Teaching' || daySched[pName].status === 'Covered');
+        if (!absentTeacher) return;
 
-        document.getElementById('matchCount').innerText = `${teachingSlots.length} Classes Needing Coverage`;
+        const dateRec = absenceRecords.find(r => r.teacherId === absentId && r.date === dateVal);
+        const daySched = absentTeacher.schedule[day] || {};
+        const teachingSlots = Object.keys(daySched).filter(pName => daySched[pName].status === 'Teaching');
+
+        document.getElementById('matchCount').innerText = `${teachingSlots.length} Periods Needing Coverage`;
 
         if (teachingSlots.length === 0) {
             container.innerHTML = `<div class="p-6 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-center text-sm font-semibold">
-                🎉 ${absentTeacher.name} has NO teaching classes scheduled on Day ${day}! No coverage is required.
+                🎉 ${absentTeacher.name} has NO teaching periods scheduled on Day ${day}! No coverage required.
             </div>`;
             return;
         }
@@ -744,16 +605,17 @@
 
         teachingSlots.forEach(period => {
             const slotDetails = daySched[period];
-            const isAlreadyCovered = slotDetails.status === 'Covered';
+            const assignedSubName = (dateRec && dateRec.coverages) ? dateRec.coverages[period] : null;
+            const isAlreadyCovered = !!assignedSubName;
             const absentRange = parseMin(slotDetails.time);
-            
+
             let candidates = faculty.filter(t => {
                 if (t.id === absentId) return false;
                 const candDaySched = t.schedule[day] || {};
                 
                 let isBusy = false;
                 Object.keys(candDaySched).forEach(cp => {
-                    if (candDaySched[cp].status === 'Teaching' || candDaySched[cp].status === 'Covered') {
+                    if (candDaySched[cp].status === 'Teaching') {
                         const candRange = parseMin(candDaySched[cp].time);
                         if (absentRange && candRange && (absentRange[0] < candRange[1] && absentRange[1] > candRange[0])) {
                             isBusy = true;
@@ -771,7 +633,7 @@
 
             const headerBadge = isAlreadyCovered
                 ? `<span class="bg-purple-100 text-purple-800 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wide">
-                    ✅ COVERED by ${slotDetails.coveredBy}
+                    ✅ COVERED by ${assignedSubName}
                    </span>`
                 : `<span class="bg-rose-100 text-rose-800 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wide">
                     ${period} (${slotDetails.time})
@@ -795,8 +657,8 @@
             if (isAlreadyCovered) {
                 html += `
                     <div class="p-3 bg-purple-100/80 border border-purple-300 rounded-xl flex justify-between items-center text-xs font-bold text-purple-900">
-                        <span>🛡️ Currently Covered by: <strong>${slotDetails.coveredBy}</strong></span>
-                        <button onclick="unassignCoverage('${absentTeacher.id}', '${day}', '${period}', '${slotDetails.coveredBy}')" class="text-rose-600 hover:text-rose-800 font-bold bg-white px-3 py-1.5 rounded-lg shadow-sm border border-rose-200">
+                        <span>🛡️ Currently Covered on ${dateVal} by: <strong>${assignedSubName}</strong></span>
+                        <button onclick="unassignCoverage('${absentTeacher.id}', '${period}')" class="text-rose-600 hover:text-rose-800 font-bold bg-white px-3 py-1.5 rounded-lg shadow-sm border border-rose-200">
                             Re-assign / Remove Sub
                         </button>
                     </div>
@@ -804,7 +666,7 @@
             } else if (candidates.length === 0) {
                 html += `
                     <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold text-center">
-                        ⚠️ No teachers are free during this exact time slot.
+                        ⚠️ No teachers are free during this exact period slot.
                     </div>
                 `;
             } else {
@@ -822,12 +684,12 @@
                                 </div>
                                 <div class="text-xs text-slate-500">${cand.department}</div>
                                 <div class="text-[11px] text-slate-600 flex flex-wrap gap-x-3 gap-y-1">
-                                    <span>📅 Day ${day}: <strong>${cand.teachingCounts[day]} slots</strong></span>
+                                    <span>📅 Day ${day}: <strong>${cand.teachingCounts[day]} periods</strong></span>
                                     <span>📚 Wk Load: <strong>${cand.teachingCounts.total}</strong></span>
-                                    <span>🛡️ Coverages: <strong>${cand.totalCoverageCount}</strong></span>
+                                    <span>🛡️ Total Coverages: <strong>${cand.totalCoverageCount}</strong></span>
                                 </div>
                             </div>
-                            <button onclick="assignCoverage('${cand.id}', '${absentTeacher.id}', '${absentTeacher.name}', '${day}', '${period}')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition whitespace-nowrap self-end sm:self-center">
+                            <button onclick="assignCoverage('${cand.id}', '${absentTeacher.id}', '${day}', '${period}')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition whitespace-nowrap self-end sm:self-center">
                                 Assign Sub
                             </button>
                         </div>
@@ -844,71 +706,22 @@
         container.innerHTML = html;
     }
 
-    function assignCoverage(subId, absentTeacherId, absentName, day, period) {
-        const sub = faculty.find(t => t.id === subId);
-        const absentTeacher = faculty.find(t => t.id === absentTeacherId);
-        if (!sub || !absentTeacher) return;
-
-        // Register class as Covered
-        absentTeacher.schedule[day][period].status = 'Covered';
-        absentTeacher.schedule[day][period].coveredBy = sub.name;
-
-        // Update Substitute tally
-        sub.totalCoverageCount += 1;
-        sub.lastCoveredDate = new Date().toISOString().split('T')[0];
-
-        saveFaculty();
-        alert(`✅ Coverage Assigned!\n\nClass Status: COVERED\nSubstitute: ${sub.name}\nCovering for: ${absentName}\nDay: ${day} | Slot: ${period}`);
-
-        populateTable();
-        updateCoverageOptions();
-        renderScheduleEditor();
-    }
-
-    function unassignCoverage(absentTeacherId, day, period, prevSubName) {
-        const absentTeacher = faculty.find(t => t.id === absentTeacherId);
-        if (!absentTeacher) return;
-
-        absentTeacher.schedule[day][period].status = 'Teaching';
-        absentTeacher.schedule[day][period].coveredBy = null;
-
-        const sub = faculty.find(t => t.name === prevSubName);
-        if (sub && sub.totalCoverageCount > 0) {
-            sub.totalCoverageCount -= 1;
-        }
-
-        saveFaculty();
-        populateTable();
-        updateCoverageOptions();
-        renderScheduleEditor();
-    }
-
     function renderScheduleEditor() {
         const teacherId = document.getElementById('editorTeacherSelect').value;
         const day = document.getElementById('editorDaySelect').value;
         const tbody = document.getElementById('editorTableBody');
 
-        if (!teacherId) return;
+        if (!teacherId || !tbody) return;
 
         const teacher = faculty.find(t => t.id === teacherId);
+        if (!teacher) return;
         const daySched = teacher.schedule[day] || {};
-
-        if (Object.keys(daySched).length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">No schedule matrix generated for this teacher on this day.</td></tr>';
-            return;
-        }
 
         tbody.innerHTML = Object.keys(daySched).map(pName => {
             const slot = daySched[pName];
-            let statusBadge = '';
-
-            if (slot.status === 'Covered') {
-                statusBadge = `<span class="bg-purple-100 text-purple-900 border border-purple-300 font-extrabold px-3 py-1 rounded-full text-xs">COVERED (by ${slot.coveredBy})</span>`;
-            } else if (slot.status === 'Teaching') {
-                statusBadge = '<span class="bg-rose-100 text-rose-800 font-extrabold px-3 py-1 rounded-full text-xs">TEACHING</span>';
-            } else {
-                statusBadge = '<span class="bg-emerald-100 text-emerald-800 font-extrabold px-3 py-1 rounded-full text-xs">FREE</span>';
-            }
+            const statusBadge = slot.status === 'Teaching' 
+                ? '<span class="bg-rose-100 text-rose-800 font-extrabold px-3 py-1 rounded-full text-xs">TEACHING</span>'
+                : '<span class="bg-emerald-100 text-emerald-800 font-extrabold px-3 py-1 rounded-full text-xs">FREE</span>';
 
             return `
                 <tr class="border-b hover:bg-slate-50">
@@ -935,25 +748,17 @@
         const slot = teacher.schedule[day][period];
         const detailInput = document.getElementById(`input_${period}`);
 
-        if (slot.status === 'Covered') {
-            const prevSub = slot.coveredBy;
+        if (slot.status === 'Teaching') {
             slot.status = 'Free';
-            slot.coveredBy = null;
-            slot.details = detailInput ? detailInput.value : 'Prep / Free Period';
-
-            const sub = faculty.find(t => t.name === prevSub);
-            if (sub && sub.totalCoverageCount > 0) sub.totalCoverageCount -= 1;
-        } else if (slot.status === 'Teaching') {
-            slot.status = 'Free';
-            slot.details = detailInput ? detailInput.value : 'Prep / Free Period';
+            slot.details = detailInput ? detailInput.value : 'Prep / Planning';
         } else {
             slot.status = 'Teaching';
-            slot.details = detailInput && detailInput.value !== 'Prep / Free Period' ? detailInput.value : 'Class Assigned';
+            slot.details = detailInput && detailInput.value !== 'Prep / Planning' ? detailInput.value : 'Class Assigned';
         }
 
         let count = 0;
         Object.keys(teacher.schedule[day]).forEach(p => {
-            if (teacher.schedule[day][p].status === 'Teaching' || teacher.schedule[day][p].status === 'Covered') count++;
+            if (teacher.schedule[day][p].status === 'Teaching') count++;
         });
         teacher.teachingCounts[day] = count;
 
@@ -963,17 +768,15 @@
         });
         teacher.teachingCounts.total = total;
 
-        saveFaculty();
-        renderScheduleEditor();
-        populateTable();
-        updateCoverageOptions();
+        saveToGoogleDrive();
     }
 
     function populateTable() {
         const tbody = document.getElementById('rosterTableBody');
+        if (!tbody) return;
         tbody.innerHTML = faculty.map(t => `
             <tr class="border-b hover:bg-slate-50 text-slate-700">
-                <td class="p-3 font-bold text-slate-900">${t.name} ${t.isPrimary ? '<span class="text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded ml-1 font-semibold">Primary/Cross</span>' : ''}</td>
+                <td class="p-3 font-bold text-slate-900">${t.name}</td>
                 <td class="p-3 text-xs text-slate-600">${t.department}</td>
                 <td class="p-3 text-center font-semibold">${t.teachingCounts.A}</td>
                 <td class="p-3 text-center font-semibold">${t.teachingCounts.B}</td>
@@ -987,113 +790,20 @@
     }
 
     function resetCoverageCountsOnly() {
-        if (confirm("Reset all teacher coverage tallies back to 0 and remove coverage marks?")) {
-            faculty.forEach(t => { 
-                t.totalCoverageCount = 0; 
-                t.lastCoveredDate = null; 
-                ['A', 'B', 'C', 'D', 'E'].forEach(d => {
-                    Object.keys(t.schedule[d]).forEach(p => {
-                        if (t.schedule[d][p].status === 'Covered') {
-                            t.schedule[d][p].status = 'Teaching';
-                            t.schedule[d][p].coveredBy = null;
-                        }
-                    });
-                });
-            });
-            saveFaculty();
-            populateTable();
-            updateCoverageOptions();
-            renderScheduleEditor();
+        if (confirm("Reset all teacher coverage tallies back to 0 and remove active coverage logs in Google Drive?")) {
+            absenceRecords = [];
+            recalculateCoverageCounts();
+            saveToGoogleDrive();
         }
     }
 
     function resetToSchoolData() {
-        if (confirm("Restore verified master schedule and teacher rosters?")) {
+        if (confirm("Restore 2026-2027 Secondary master timetable in Google Drive?")) {
             faculty = JSON.parse(JSON.stringify(MASTER_FACULTY));
-            saveFaculty();
-            populateTeacherDropdowns();
-            populateTable();
-            updateCoverageOptions();
-            renderScheduleEditor();
+            absenceRecords = [];
+            recalculateCoverageCounts();
+            saveToGoogleDrive();
         }
-    }
-
-    function handleExcelUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const rawRows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
-                const parsed = parseRawExcelRows(rawRows);
-                if (parsed && parsed.length > 0) {
-                    faculty = parsed;
-                    saveFaculty();
-                    populateTeacherDropdowns();
-                    populateTable();
-                    updateCoverageOptions();
-                    renderScheduleEditor();
-                    alert(`Uploaded schedule for ${parsed.length} teachers!`);
-                }
-            } catch (err) { alert("Error parsing Excel: " + err.message); }
-        };
-        reader.readAsArrayBuffer ? reader.readAsArrayBuffer(file) : reader.readAsBinaryString(file);
-    }
-
-    function parseRawExcelRows(rows) {
-        const dayCols = [{sub:3,teach:4,code:'A'}, {sub:6,teach:7,code:'B'}, {sub:9,teach:10,code:'C'}, {sub:12,teach:13,code:'D'}, {sub:15,teach:16,code:'E'}];
-        let teacherEntries = {};
-        rows.forEach(row => {
-            if (!row || !row[0]) return;
-            const timeStr = String(row[0]).trim();
-            const grade = row[1] ? String(row[1]).trim() : '';
-            const tRange = parseMin(timeStr);
-            if (!tRange) return;
-            dayCols.forEach(dc => {
-                const teachCell = row[dc.teach] ? String(row[dc.teach]).trim() : '';
-                const subCell = row[dc.sub] ? String(row[dc.sub]).trim() : '';
-                if (teachCell && teachCell !== 'undefined' && teachCell !== 'nan') {
-                    teachCell.replace(/\sand\s/g, '&').split('&').forEach(tNameRaw => {
-                        const tName = tNameRaw.trim();
-                        if (!tName) return;
-                        if (!teacherEntries[tName]) teacherEntries[tName] = [];
-                        teacherEntries[tName].push({ day: dc.code, start: tRange[0], end: tRange[1], timeStr: timeStr, grade: grade, subject: subCell });
-                    });
-                }
-            });
-        });
-        const teacherNames = Object.keys(teacherEntries);
-        if (teacherNames.length === 0) return null;
-        return teacherNames.map((tName, idx) => {
-            const entries = teacherEntries[tName];
-            const isPrim = PRIMARY_TEACHERS.includes(tName) || entries.some(e => e.grade.toLowerCase().includes('k') || e.grade.toLowerCase().includes('nursery') || (e.grade.startsWith('G') && parseInt(e.grade.replace('G','')) <= 5));
-            const deptStr = Array.from(new Set(entries.map(e => e.subject).filter(s => s))).join(', ');
-            let sched = {'A': {}, 'B': {}, 'C': {}, 'D': {}, 'E': {}};
-            let counts = {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0};
-            ['A', 'B', 'C', 'D', 'E'].forEach(dayCode => {
-                const dayCls = entries.filter(e => e.day === dayCode);
-                if (isPrim) {
-                    Object.keys(PRI_SLOTS).forEach(pName => { sched[dayCode][pName] = { status: 'Free', time: PRI_SLOTS[pName], details: 'Prep / Free Period', coveredBy: null }; });
-                } else {
-                    if (dayCode === 'C') {
-                        Object.keys(PRI_SLOTS).forEach(pName => { sched[dayCode][pName] = { status: 'Free', time: PRI_SLOTS[pName], details: 'Prep / Free Period', coveredBy: null }; });
-                    } else {
-                        Object.keys(SEC_SLOTS).forEach(bName => { sched[dayCode][bName] = { status: 'Free', time: SEC_SLOTS[bName], details: 'Prep / Free Period', coveredBy: null }; });
-                    }
-                }
-                dayCls.forEach(cls => {
-                    const label = `Period (${cls.timeStr})`;
-                    sched[dayCode][label] = { status: 'Teaching', time: cls.timeStr, details: `${cls.subject} (${cls.grade})`, coveredBy: null };
-                    counts[dayCode]++;
-                });
-            });
-            return {
-                id: 't_' + (idx + 1), name: tName, department: deptStr || 'Faculty', isPrimary: isPrim, totalCoverageCount: 0, lastCoveredDate: null,
-                schedule: sched, teachingCounts: { 'A': counts['A'], 'B': counts['B'], 'C': counts['C'], 'D': counts['D'], 'E': counts['E'], 'total': counts['A'] + counts['B'] + counts['C'] + counts['D'] + counts['E'] }
-            };
-        });
     }
 
     window.onload = init;
