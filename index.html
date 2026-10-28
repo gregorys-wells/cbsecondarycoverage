@@ -72,6 +72,27 @@
               <label for="teacherSelect" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Select Teacher</label>
               <select id="teacherSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="">-- Select Teacher --</option>
+                <option value="Dr. Pete">Dr. Pete (Secondary)</option>
+                <option value="Mr. Fluke">Mr. Fluke (Hybrid)</option>
+                <option value="Mr. Greg">Mr. Greg (Secondary)</option>
+                <option value="Mr. Harris">Mr. Harris (Primary)</option>
+                <option value="Mr. Jacob">Mr. Jacob (Secondary)</option>
+                <option value="Mr. John">Mr. John (Secondary)</option>
+                <option value="Mr. Kinny">Mr. Kinny (Primary)</option>
+                <option value="Mr. Kris">Mr. Kris (Secondary)</option>
+                <option value="Mr. Landon">Mr. Landon (Secondary)</option>
+                <option value="Mr. Simone">Mr. Simone (Secondary)</option>
+                <option value="Mr. Tracy">Mr. Tracy (Primary)</option>
+                <option value="Mr. Troy">Mr. Troy (Secondary)</option>
+                <option value="Mr. Wentzel">Mr. Wentzel (Secondary)</option>
+                <option value="Mr. Xyries">Mr. Xyries (Secondary)</option>
+                <option value="Ms. Aom">Ms. Aom (Primary)</option>
+                <option value="Ms. Julia">Ms. Julia (Secondary)</option>
+                <option value="Ms. Kan">Ms. Kan (Secondary)</option>
+                <option value="Ms. May">Ms. May (Hybrid)</option>
+                <option value="Ms. Philmi">Ms. Philmi (Secondary)</option>
+                <option value="Ms. Praepilai">Ms. Praepilai (Primary)</option>
+                <option value="Ms. Toey">Ms. Toey (Primary)</option>
               </select>
             </div>
 
@@ -358,14 +379,13 @@
     let selectedDayType = "Day A";
     let activeMainTab = "daily";
 
-    let absences = JSON.parse(localStorage.getItem('tsc_absences_v6') || '{}');
-    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v6') || '{}');
-    let customClasses = JSON.parse(localStorage.getItem('tsc_custom_classes_v6') || '{}');
-    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v6') || '[]');
+    let absences = JSON.parse(localStorage.getItem('tsc_absences_v7') || '{}');
+    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v7') || '{}');
+    let customClasses = JSON.parse(localStorage.getItem('tsc_custom_classes_v7') || '{}');
+    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v7') || '[]');
 
     function initPortal() {
       initDatePicker();
-      populateTeachersDropdown();
       setupEventListeners();
       renderDateAbsencesBanner();
       renderTeacherScheduleView();
@@ -423,8 +443,6 @@
       selectedDayType = info.code;
       const badge = document.getElementById('dayTypeBadge');
       if (badge) badge.textContent = `${info.code} (${info.name.substring(0,3)})`;
-      const mHeading = document.getElementById('matrixDateHeading');
-      if (mHeading) mHeading.textContent = `${selectedDate} (${info.code})`;
       const bText = document.getElementById('bannerDateText');
       if (bText) bText.textContent = selectedDate;
     }
@@ -451,18 +469,6 @@
         document.getElementById('tabBtnLogs').classList.add('active');
         renderLogHistory();
       }
-    }
-
-    function populateTeachersDropdown() {
-      const select = document.getElementById('teacherSelect');
-      if (!select) return;
-      select.innerHTML = '<option value="">-- Select Teacher --</option>';
-      TEACHERS.slice().sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t.name;
-        opt.textContent = `${t.name} (${t.type === 'primary' ? 'Primary' : t.type === 'hybrid' ? 'Hybrid' : 'Secondary'})`;
-        select.appendChild(opt);
-      });
     }
 
     function setupEventListeners() {
@@ -512,7 +518,7 @@
 
       if (!absences[selectedDate]) absences[selectedDate] = {};
       absences[selectedDate][teacherName] = { type: reason, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-      localStorage.setItem('tsc_absences_v6', JSON.stringify(absences));
+      localStorage.setItem('tsc_absences_v7', JSON.stringify(absences));
 
       addLogEntry({
         date: selectedDate,
@@ -529,7 +535,7 @@
       if (absences[selectedDate] && absences[selectedDate][teacherName]) {
         delete absences[selectedDate][teacherName];
         if (Object.keys(absences[selectedDate]).length === 0) delete absences[selectedDate];
-        localStorage.setItem('tsc_absences_v6', JSON.stringify(absences));
+        localStorage.setItem('tsc_absences_v7', JSON.stringify(absences));
 
         addLogEntry({
           date: selectedDate,
@@ -636,7 +642,7 @@
         });
       }
 
-      localStorage.setItem('tsc_custom_classes_v6', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v7', JSON.stringify(customClasses));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -644,7 +650,7 @@
     function removeClassFromSchedule(teacherName, slotKey) {
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       customClasses[key] = "REMOVED";
-      localStorage.setItem('tsc_custom_classes_v6', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v7', JSON.stringify(customClasses));
 
       addLogEntry({
         date: selectedDate,
@@ -662,7 +668,7 @@
 
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       customClasses[key] = className.trim();
-      localStorage.setItem('tsc_custom_classes_v6', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v7', JSON.stringify(customClasses));
 
       addLogEntry({
         date: selectedDate,
@@ -677,7 +683,7 @@
     function resetSlotSchedule(teacherName, slotKey) {
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       delete customClasses[key];
-      localStorage.setItem('tsc_custom_classes_v6', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v7', JSON.stringify(customClasses));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -770,7 +776,7 @@
         ? `Status: Marked ${absenceInfo.type} for ${selectedDate}` 
         : `Status: Present on ${selectedDate} (${selectedDayType})`;
 
-      const isBlockFormat = (selectedDayType !== "Day C") && (teacher.type !== "primary");
+      const isBlockFormat = (selectedDayType !== "Day C") && (teacher ? teacher.type !== "primary" : true);
       if (formatBadge) formatBadge.textContent = isBlockFormat ? "Blocks Format" : "Periods Format";
 
       const grid = isBlockFormat ? BLOCK_SCHEDULE : PERIOD_SCHEDULE;
@@ -885,7 +891,7 @@
         delete coverages[selectedDate][key];
       }
 
-      localStorage.setItem('tsc_coverages_v6', JSON.stringify(coverages));
+      localStorage.setItem('tsc_coverages_v7', JSON.stringify(coverages));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -972,7 +978,7 @@
       entry.time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       historyLogs.unshift(entry);
       if (historyLogs.length > 100) historyLogs.pop();
-      localStorage.setItem('tsc_logs_v6', JSON.stringify(historyLogs));
+      localStorage.setItem('tsc_logs_v7', JSON.stringify(historyLogs));
       renderLogHistory();
     }
 
@@ -1015,7 +1021,7 @@
     function clearAllLogs() {
       if (confirm("Are you sure you want to clear all log records?")) {
         historyLogs = [];
-        localStorage.removeItem('tsc_logs_v6');
+        localStorage.removeItem('tsc_logs_v7');
         renderLogHistory();
       }
     }
