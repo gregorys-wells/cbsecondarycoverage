@@ -25,8 +25,8 @@
           <i class="fa-solid fa-school text-indigo-200 text-xl"></i>
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-tight">Principal's Teacher Coverage System</h1>
-          <p class="text-xs text-indigo-200 font-medium">Secondary School Operations & Management</p>
+          <h1 class="text-xl font-bold tracking-tight">Teacher Coverage System</h1>
+          <p class="text-xs text-indigo-200 font-medium">Secondary & Hybrid Staff Schedule Management</p>
         </div>
       </div>
 
@@ -133,7 +133,7 @@
               <p class="text-xs text-slate-500 mt-0.5" id="scheduleSubtitle">Select a teacher above to view schedule and free cover options.</p>
             </div>
             <div id="dayStructurePill" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
-              4 Blocks
+              Blocks
             </div>
           </div>
 
@@ -162,13 +162,13 @@
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-start gap-2.5">
               <i class="fa-solid fa-circle-info text-indigo-500 mt-0.5 text-sm"></i>
               <p>
-                <strong>Recommendation Logic:</strong> Free teachers are ranked for each slot based on:
+                <strong>Recommendation Criteria:</strong> Free available teachers are ranked for each block/period based on:
               </p>
             </div>
             <ul class="space-y-2 pl-2">
               <li class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                <span><strong>Fewest Prior Coverages:</strong> Equalized duty load</span>
+                <span><strong>Fewest Prior Coverages:</strong> Equalized duty distribution</span>
               </li>
               <li class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -176,7 +176,7 @@
               </li>
               <li class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                <span><strong>Absence Recency:</strong> Recency of own last absence</span>
+                <span><strong>Absence Recency:</strong> Most distant/recent personal absence</span>
               </li>
             </ul>
           </div>
@@ -205,12 +205,10 @@
 
   <!-- Footer -->
   <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
-    <p>Secondary School Teacher Coverage System &bull; Principal Portal &bull; Date-Specific Operations</p>
+    <p>Secondary School Teacher Coverage System &bull; Principal Portal</p>
   </footer>
 
-  <!-- Inline Script with Full Schedule Data & System Logic -->
   <script>
-    // System Data Structures
     const TEACHERS = [
       { name: "Mr. John", type: "secondary" },
       { name: "Ms. Philmi", type: "secondary" },
@@ -222,16 +220,16 @@
       { name: "Mr. Kris", type: "secondary" },
       { name: "Mr. Wentzel", type: "secondary" },
       { name: "Mr. Xyries", type: "secondary" },
-      { name: "Mr. Harris", type: "hybrid" },
-      { name: "Mr. Kinny", type: "hybrid" },
+      { name: "Mr. Harris", type: "primary" },
+      { name: "Mr. Kinny", type: "primary" },
       { name: "Mr. Greg", type: "secondary" },
       { name: "Mr. Jacob", type: "secondary" },
-      { name: "Ms. Aom", type: "hybrid" },
+      { name: "Ms. Aom", type: "primary" },
       { name: "Ms. May", type: "hybrid" },
-      { name: "Mr. Tracy", type: "hybrid" },
+      { name: "Mr. Tracy", type: "primary" },
       { name: "Dr. Pete", type: "secondary" },
-      { name: "Ms. Praepilai", type: "hybrid" },
-      { name: "Ms. Toey", type: "hybrid" },
+      { name: "Ms. Praepilai", type: "primary" },
+      { name: "Ms. Toey", type: "primary" },
       { name: "Ms. Kan", type: "secondary" }
     ];
 
@@ -254,43 +252,42 @@
       { slot: 8, name: "Period 8", time: "02:00 - 02:40" }
     ];
 
-    // Schedules Database (Day -> Teacher -> Slot -> Class Name)
     const SCHEDULES = {
       "Day A": {
-        "Mr. John": { B1: "Language Arts I (G6)", B3: "HS Language Arts I ESL (G9)", P1: "Language Arts I (G6)", P2: "Language Arts I (G6)", P5: "HS Language Arts I ESL (G9)", P6: "HS Language Arts I ESL (G9)" },
-        "Ms. Philmi": { B1: "Science II (G7)", P1: "Science II (G7)", P2: "Science II (G7)" },
-        "Mr. Landon": { B1: "Science III (G8)", B4: "MS Pre-Algebra (G7)", P1: "Science III (G8)", P2: "Science III (G8)", P7: "MS Pre-Algebra (G7)", P8: "MS Pre-Algebra (G7)" },
-        "Mr. Fluke": { B1: "MS 2nd Language (G9-11)", P1: "MS 2nd Language (G9-11)", P2: "MS 2nd Language (G9-11)", P6: "Thai Language (G5)", P7: "Thai Language (G4)" },
-        "Ms. Julia": { B1: "MS 2nd Language (G9-11)", P1: "MS 2nd Language (G9-11)", P2: "MS 2nd Language (G9-11)", P7: "Mandarin (G5)", P8: "Mandarin (G5)" },
-        "Mr. Simone": { B2: "Modern World History I (G8)", B3: "Intro Human Geo / Psych (G10)", P3: "Modern World History I (G8)", P4: "Modern World History I (G8)", P5: "Intro Human Geo (G10)", P6: "Intro Psychology (G10)" },
-        "Mr. Troy": { B3: "HS Language Arts I (G9)", P5: "HS Language Arts I (G9)", P6: "HS Language Arts I (G9)" },
-        "Mr. Kris": { B2: "P.E. (G6/7)", P1: "P.E. (G3)", P3: "P.E. (G6/7)", P4: "P.E. (G6/7)" },
-        "Mr. Wentzel": { B2: "Biology / Env Sci (G9/10)", B4: "Math Fundamentals I (G6)", P3: "Biology (G9)", P4: "Environmental Science (G10)", P7: "Math Fundamentals I (G6)", P8: "Math Fundamentals I (G6)" },
-        "Mr. Xyries": { B2: "Chemistry / Physics (G9/10)", B4: "MS Algebra I (G8)", P3: "Chemistry (G9)", P4: "Physics (G10)", P7: "MS Algebra I (G8)", P8: "MS Algebra I (G8)" },
-        "Mr. Harris": { B3: "Performing Arts Dance (G6/7)", P2: "Dance (G2)", P3: "Dance (Nursery)", P5: "Dance (K3A)", P5_B: "Performing Arts Dance (G6/7)", P6_B: "Performing Arts Dance (G6/7)" },
-        "Mr. Kinny": { B3: "Visual Arts (G8)", P1: "Art (G1A)", P2: "Art (G1A)", P3: "Art (K2A)", P5: "Visual Arts (G8)", P6: "Visual Arts (G8)" },
-        "Mr. Greg": { B3: "AP Human Geography (G11)", P5: "AP Human Geography (G11)", P6: "AP Human Geography (G11)" },
-        "Mr. Jacob": { B3: "AP Human Geography (G11)", P5: "AP Human Geography (G11)", P6: "AP Human Geography (G11)" },
-        "Ms. Aom": { B4: "Performing Arts Music (G8-11)", P3: "Music (K2B)", P5: "Music (K3B)", P7: "Performing Arts Music (G8-11)", P8: "Performing Arts Music (G8-11)" },
+        "Mr. John": { B1: "Language Arts I (G6)", B3: "HS Language Arts I ESL (G9)" },
+        "Ms. Philmi": { B1: "Science II (G7)" },
+        "Mr. Landon": { B1: "Science III (G8)", B4: "MS Pre-Algebra (G7)" },
+        "Mr. Fluke": { B1: "MS 2nd Language (G9-11)", P6: "Thai Language (G5)", P7: "Thai Language (G4)" },
+        "Ms. Julia": { B1: "MS 2nd Language (G9-11)", P7: "Mandarin (G5)", P8: "Mandarin (G5)" },
+        "Mr. Simone": { B2: "Modern World History I (G8)", B3: "Intro Human Geo / Psych (G10)" },
+        "Mr. Troy": { B3: "HS Language Arts I (G9)" },
+        "Mr. Kris": { B2: "P.E. (G6/7)" },
+        "Mr. Wentzel": { B2: "Biology / Env Sci (G9/10)", B4: "Math Fundamentals I (G6)" },
+        "Mr. Xyries": { B2: "Chemistry / Physics (G9/10)", B4: "MS Algebra I (G8)" },
+        "Mr. Harris": { P2: "Dance (G2)", P3: "Dance (Nursery)", P5: "Dance (K3A)", B3: "Performing Arts Dance (G6/7)" },
+        "Mr. Kinny": { P1: "Art (G1A)", P2: "Art (G1A)", P3: "Art (K2A)", B3: "Visual Arts (G8)" },
+        "Mr. Greg": { B3: "AP Human Geography (G11)" },
+        "Mr. Jacob": { B3: "AP Human Geography (G11)" },
+        "Ms. Aom": { P3: "Music (K2B)", P5: "Music (K3B)", B4: "Performing Arts Music (G8-11)" },
         "Ms. May": { P2: "Thai Culture (G5)", P3: "Thai Culture (K1B)", P4: "Thai Language (G1A/B)", P5: "Thai Language (G2)", P7: "Thai Language (G3)" },
         "Mr. Tracy": { P1: "ICT (G4)", P2: "ICT (G4)", P3: "ICT (K3B)" }
       },
       "Day B": {
-        "Mr. John": { B2: "Language Arts II (G7)", B5: "HS Language Arts II ESL (G10)", P3: "Language Arts II (G7)", P4: "Language Arts II (G7)", P1: "HS Language Arts II ESL (G10)", P2: "HS Language Arts II ESL (G10)" },
-        "Mr. Jacob": { B1: "Social Science I (G6)", B3: "Social Science II (G7)", P1: "Social Science I (G6)", P2: "Social Science I (G6)", P5: "Social Science II (G7)", P6: "Social Science II (G7)" },
-        "Ms. Philmi": { B2: "AP Pre-Calculus (G10/11)", B4: "Geometry (G8/9)", P3: "AP Pre-Calculus (G10/11)", P4: "AP Pre-Calculus (G10/11)", P7: "Geometry (G8/9)", P8: "Geometry (G8/9)" },
-        "Mr. Fluke": { B2: "MS 2nd Language (G6)", P3: "MS 2nd Language (G6)", P4: "MS 2nd Language (G6)", P6: "Thai Language (G5)", P7: "Thai Language (G4)" },
-        "Mr. Simone": { B1: "Modern World History II (G9)", B3: "Social Science II (G7)", P1: "Modern World History II (G9)", P2: "Modern World History II (G9)", P5: "Social Science II (G7)", P6: "Social Science II (G7)" },
-        "Mr. Troy": { B1: "HS Language Arts II (G10)", B2: "Language Arts II ESL (G7)", P1: "HS Language Arts II (G10)", P2: "HS Language Arts II (G10)", P3: "Language Arts II ESL (G7)", P4: "Language Arts II ESL (G7)" },
-        "Mr. Kris": { B2: "P.E. (G8-10)", B4: "P.E. (G8-11)", P2: "P.E. (G4)", P3: "P.E. (G8-10)", P4: "P.E. (G8-10)", P7: "P.E. (G8-11)", P8: "P.E. (G8-11)" },
-        "Mr. Landon": { B2: "Integrated Math (G9)", B3: "Science I (G6)", P3: "Integrated Math (G9)", P4: "Integrated Math (G9)", P5: "Science I (G6)", P6: "Science I (G6)" },
-        "Mr. Wentzel": { B4: "Algebra II (G9/10)", P7: "Algebra II (G9/10)", P8: "Algebra II (G9/10)" },
-        "Mr. Xyries": { B2: "Algebra I (G8)", B3: "AP Physics I (G11)", P3: "Algebra I (G8)", P4: "Algebra I (G8)", P5: "AP Physics I (G11)", P6: "AP Physics I (G11)" },
-        "Mr. Tracy": { B3: "ICT / TECH (G9/10)", B4: "ICT / TECH (G6/7)", P1: "ICT (G3)", P2: "ICT (G3)", P5: "ICT / TECH (G9/10)", P6: "ICT / TECH (G9/10)", P7: "ICT / TECH (G6/7)", P8: "ICT / TECH (G6/7)" },
+        "Mr. John": { B2: "Language Arts II (G7)" },
+        "Mr. Jacob": { B1: "Social Science I (G6)", B3: "Social Science II (G7)" },
+        "Ms. Philmi": { B2: "AP Pre-Calculus (G10/11)", B4: "Geometry (G8/9)" },
+        "Mr. Fluke": { B2: "MS 2nd Language (G6)", P6: "Thai Language (G5)", P7: "Thai Language (G4)" },
+        "Mr. Simone": { B1: "Modern World History II (G9)", B3: "Social Science II (G7)" },
+        "Mr. Troy": { B1: "HS Language Arts II (G10)", B2: "Language Arts II ESL (G7)" },
+        "Mr. Kris": { B2: "P.E. (G8-10)", B4: "P.E. (G8-11)" },
+        "Mr. Landon": { B2: "Integrated Math (G9)", B3: "Science I (G6)" },
+        "Mr. Wentzel": { B4: "Algebra II (G9/10)" },
+        "Mr. Xyries": { B2: "Algebra I (G8)", B3: "AP Physics I (G11)" },
+        "Mr. Tracy": { B3: "ICT / TECH (G9/10)", B4: "ICT / TECH (G6/7)" },
         "Mr. Harris": { P3: "Dance (K1A)", P4: "Dance (G3)", P5: "Dance (K3B)" },
         "Mr. Kinny": { P1: "Art (G1B)", P2: "Art (G1B)", P3: "Art (K2B)", P4: "Art (G5)", P5: "Art (G5)" },
         "Ms. Aom": { P2: "Music (G5)", P3: "Music (Nursery)", P5: "Music (K3A)" },
-        "Ms. May": { B1: "MS 2nd Language (G7)", P1: "MS 2nd Language (G7)", P2: "MS 2nd Language (G7)", P6: "Thai Language (G2)", P7: "Thai Language (G3)" },
+        "Ms. May": { B1: "MS 2nd Language (G7)", P6: "Thai Language (G2)", P7: "Thai Language (G3)" },
         "Ms. Praepilai": { P2: "Thai Culture (G2)", P3: "Thai Culture (K3B)", P4: "Thai Culture (G1A)", P5: "Thai Culture (G1B)" }
       },
       "Day C": {
@@ -314,49 +311,47 @@
         "Mr. Tracy": { P2: "ICT (G1B)", P6: "ICT (G5)", P7: "ICT (G5)" }
       },
       "Day D": {
-        "Mr. John": { B1: "Language Arts I (G6)", B3: "HS Language Arts I ESL (G9)", P1: "Language Arts I (G6)", P2: "Language Arts I (G6)", P5: "HS Language Arts I ESL (G9)", P6: "HS Language Arts I ESL (G9)" },
-        "Ms. Philmi": { B1: "Science II (G7)", P1: "Science II (G7)", P2: "Science II (G7)" },
-        "Mr. Landon": { B1: "Science III (G8)", B4: "MS Pre-Algebra (G7)", P1: "Science III (G8)", P2: "Science III (G8)", P7: "MS Pre-Algebra (G7)", P8: "MS Pre-Algebra (G7)" },
-        "Mr. Fluke": { B1: "MS 2nd Language (G9-11)", P1: "MS 2nd Language (G9-11)", P2: "MS 2nd Language (G9-11)", P4: "Thai Culture (G3)", P6: "Thai Language (G5)", P7: "Thai Language (G4)" },
-        "Ms. Julia": { B1: "MS 2nd Language (G9-11)", P1: "MS 2nd Language (G9-11)", P2: "MS 2nd Language (G9-11)", P7: "Mandarin (G5)", P8: "Mandarin (G5)" },
-        "Mr. Kris": { B2: "P.E. (G6/7)", P3: "P.E. (G6/7)", P4: "P.E. (G6/7)" },
-        "Mr. Simone": { B2: "Modern World History I (G8)", B3: "Intro Human Geo / Psych (G10)", P3: "Modern World History I (G8)", P4: "Modern World History I (G8)", P5: "Intro Human Geo (G10)", P6: "Intro Psychology (G10)" },
-        "Mr. Wentzel": { B2: "Biology / Env Sci (G9/10)", B4: "Math Fundamentals I (G6)", P3: "Biology (G9)", P4: "Environmental Science (G10)", P7: "Math Fundamentals I (G6)", P8: "Math Fundamentals I (G6)" },
-        "Mr. Xyries": { B2: "Chemistry / Physics (G9/10)", B4: "MS Algebra I (G8)", P3: "Chemistry (G9)", P4: "Physics (G10)", P7: "MS Algebra I (G8)", P8: "MS Algebra I (G8)" },
-        "Mr. Troy": { B2: "HS Language Arts III (G11)", B3: "HS Language Arts I (G9)", P3: "HS Language Arts III (G11)", P4: "HS Language Arts III (G11)", P5: "HS Language Arts I (G9)", P6: "HS Language Arts I (G9)" },
-        "Ms. Aom": { B3: "Performing Arts Music (G6/7)", P2: "Music (G2)", P3: "Music (K1B)", P5: "Performing Arts Music (G6/7)", P6: "Performing Arts Music (G6/7)" },
-        "Mr. Tracy": { B3: "ICT / TECH (G8)", P2: "ICT (G1A)", P5: "ICT / TECH (G8)", P6: "ICT / TECH (G8)" },
-        "Mr. Greg": { B3: "AP Human Geography (G11)", P5: "AP Human Geography (G11)", P6: "AP Human Geography (G11)" },
-        "Mr. Jacob": { B3: "AP Human Geography (G11)", P5: "AP Human Geography (G11)", P6: "AP Human Geography (G11)" },
-        "Mr. Harris": { B4: "Performing Arts Dance (G8-11)", P3: "Dance (K2A)", P5: "Dance (G1A)", P7: "Performing Arts Dance (G8-11)", P8: "Performing Arts Dance (G8-11)" },
+        "Mr. John": { B1: "Language Arts I (G6)", B3: "HS Language Arts I ESL (G9)" },
+        "Ms. Philmi": { B1: "Science II (G7)" },
+        "Mr. Landon": { B1: "Science III (G8)", B4: "MS Pre-Algebra (G7)" },
+        "Mr. Fluke": { B1: "MS 2nd Language (G9-11)", P4: "Thai Culture (G3)", P6: "Thai Language (G5)", P7: "Thai Language (G4)" },
+        "Ms. Julia": { B1: "MS 2nd Language (G9-11)", P7: "Mandarin (G5)", P8: "Mandarin (G5)" },
+        "Mr. Kris": { B2: "P.E. (G6/7)" },
+        "Mr. Simone": { B2: "Modern World History I (G8)", B3: "Intro Human Geo / Psych (G10)" },
+        "Mr. Wentzel": { B2: "Biology / Env Sci (G9/10)", B4: "Math Fundamentals I (G6)" },
+        "Mr. Xyries": { B2: "Chemistry / Physics (G9/10)", B4: "MS Algebra I (G8)" },
+        "Mr. Troy": { B2: "HS Language Arts III (G11)", B3: "HS Language Arts I (G9)" },
+        "Ms. Aom": { B3: "Performing Arts Music (G6/7)", P2: "Music (G2)", P3: "Music (K1B)" },
+        "Mr. Tracy": { B3: "ICT / TECH (G8)", P2: "ICT (G1A)" },
+        "Mr. Greg": { B3: "AP Human Geography (G11)" },
+        "Mr. Jacob": { B3: "AP Human Geography (G11)" },
+        "Mr. Harris": { B4: "Performing Arts Dance (G8-11)", P3: "Dance (K2A)", P5: "Dance (G1A)" },
         "Mr. Kinny": { P1: "Art (G3)", P2: "Art (G3)", P3: "Art (K3B)", P4: "Art (G5)", P5: "Art (G5)" },
         "Ms. May": { P3: "Thai Culture (K1A)", P4: "Thai Language (G1A/B)", P5: "Thai Language (K2B)", P7: "Thai Language (G3)" },
         "Ms. Praepilai": { P2: "Thai Culture (G4)", P3: "Thai Culture (K2B)", P5: "Thai Culture (K2A)" },
         "Ms. Toey": { P3: "Thai Language (K3A)" }
       },
       "Day E": {
-        "Mr. John": { B1: "HS Language Arts II ESL (G10)", B2: "Language Arts II (G7)", P1: "HS Language Arts II ESL (G10)", P2: "HS Language Arts II ESL (G10)", P3: "Language Arts II (G7)", P4: "Language Arts II (G7)" },
-        "Mr. Jacob": { B1: "Social Science I (G6)", P1: "Social Science I (G6)", P2: "Social Science I (G6)" },
-        "Ms. Philmi": { B1: "Science II (G7)", P1: "Science II (G7)", P2: "Science II (G7)" },
-        "Ms. Julia": { B1: "MS 2nd Language (G6)", P1: "MS 2nd Language (G6)", P2: "MS 2nd Language (G6)" },
-        "Mr. Fluke": { B1: "MS 2nd Language (G8)", B2: "MS 2nd Language (G6)", P1: "MS 2nd Language (G8)", P2: "MS 2nd Language (G8)", P3: "MS 2nd Language (G6)", P4: "MS 2nd Language (G6)" },
-        "Mr. Simone": { B1: "Modern World History II (G9)", B2: "P.E. (G8)", P1: "Modern World History II (G9)", P2: "Modern World History II (G9)", P3: "P.E. (G8)", P4: "P.E. (G8)" },
-        "Mr. Troy": { B1: "HS Language Arts II (G10)", P1: "HS Language Arts II (G10)", P2: "HS Language Arts II (G10)" },
-        "Mr. Kris": { B2: "P.E. (G8)", P3: "P.E. (G8)", P4: "P.E. (G8)" },
-        "Mr. Landon": { B1: "Science III (G8)", P1: "Science III (G8)", P2: "Science III (G8)" },
-        "Mr. Wentzel": { B2: "Environmental Science (G10)", P3: "Environmental Science (G10)", P4: "Environmental Science (G10)" },
-        "Mr. Xyries": { B2: "Physics (G10)", P3: "Physics (G10)", P4: "Physics (G10)" }
+        "Mr. John": { B1: "HS Language Arts II ESL (G10)", B2: "Language Arts II (G7)" },
+        "Mr. Jacob": { B1: "Social Science I (G6)" },
+        "Ms. Philmi": { B1: "Science II (G7)" },
+        "Ms. Julia": { B1: "MS 2nd Language (G6)" },
+        "Mr. Fluke": { B1: "MS 2nd Language (G8)", B2: "MS 2nd Language (G6)" },
+        "Mr. Simone": { B1: "Modern World History II (G9)", B2: "P.E. (G8)" },
+        "Mr. Troy": { B1: "HS Language Arts II (G10)" },
+        "Mr. Kris": { B2: "P.E. (G8)" },
+        "Mr. Landon": { B1: "Science III (G8)" },
+        "Mr. Wentzel": { B2: "Environmental Science (G10)" },
+        "Mr. Xyries": { B2: "Physics (G10)" }
       }
     };
 
-    // State
     let selectedDate = new Date().toISOString().split('T')[0];
-    let selectedDayType = "Day A"; // A, B, C, D, E
+    let selectedDayType = "Day A";
     let absences = JSON.parse(localStorage.getItem('tsc_absences') || '{}');
     let coverAssignments = JSON.parse(localStorage.getItem('tsc_coverages') || '{}');
     let historyLogs = JSON.parse(localStorage.getItem('tsc_history') || '[]');
 
-    // Initialization
     document.addEventListener('DOMContentLoaded', () => {
       initDatePicker();
       populateTeacherDropdown();
@@ -366,10 +361,9 @@
       updateSelectedTeacherSchedule();
     });
 
-    // Determine Day Type from Date
     function getDayTypeFromDate(dateStr) {
       const d = new Date(dateStr);
-      const day = d.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+      const day = d.getDay();
       if (day === 1) return { code: "Day A", name: "Monday" };
       if (day === 2) return { code: "Day B", name: "Tuesday" };
       if (day === 3) return { code: "Day C", name: "Wednesday" };
@@ -398,7 +392,7 @@
       TEACHERS.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
         const opt = document.createElement('option');
         opt.value = t.name;
-        opt.textContent = `${t.name} (${t.type === 'hybrid' ? 'Hybrid Sec/Prim' : 'Secondary'})`;
+        opt.textContent = `${t.name} (${t.type === 'primary' ? 'Primary' : t.type === 'hybrid' ? 'Hybrid' : 'Secondary'})`;
         select.appendChild(opt);
       });
     }
@@ -419,9 +413,7 @@
 
         if (teacher) {
           pill.classList.remove('hidden');
-          label.textContent = teacher.type === 'hybrid' 
-            ? 'Hybrid Teacher (Teaches Sec & Primary)' 
-            : 'Secondary Only Teacher';
+          label.textContent = teacher.type === 'primary' ? 'Primary Teacher (8 Periods)' : teacher.type === 'hybrid' ? 'Hybrid Teacher (Blocks & Periods)' : 'Secondary Teacher (Blocks on A,B,D,E)';
         } else {
           pill.classList.add('hidden');
         }
@@ -433,10 +425,8 @@
       document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
     }
 
-    // Record Absence Action
     function recordTeacherAbsence() {
-      const teacherSelect = document.getElementById('teacherSelect');
-      const teacherName = teacherSelect.value;
+      const teacherName = document.getElementById('teacherSelect').value;
       const absenceType = document.getElementById('absenceTypeSelect').value;
 
       if (!teacherName) {
@@ -451,10 +441,8 @@
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
-      // Save LocalStorage
       localStorage.setItem('tsc_absences', JSON.stringify(absences));
 
-      // Add to History
       addHistoryLog({
         date: selectedDate,
         type: 'ABSENCE',
@@ -479,7 +467,6 @@
       }
     }
 
-    // Render Absences Banner
     function renderAbsencesBanner() {
       const banner = document.getElementById('absentTeachersBanner');
       const list = document.getElementById('absentList');
@@ -512,12 +499,10 @@
       });
     }
 
-    // Calculate Teacher Free Time & Prior Covers
     function getTeacherStats(teacherName) {
       let totalCovers = 0;
       let lastAbsenceDate = null;
 
-      // Count total cover assignments
       Object.keys(coverAssignments).forEach(d => {
         Object.keys(coverAssignments[d]).forEach(key => {
           if (coverAssignments[d][key] === teacherName) {
@@ -526,48 +511,28 @@
         });
       });
 
-      // Find recency of own last absence
       Object.keys(absences).sort().reverse().forEach(d => {
         if (absences[d][teacherName] && !lastAbsenceDate) {
           lastAbsenceDate = d;
         }
       });
 
-      // Calculate free slots on selected day
       const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName] ? SCHEDULES[selectedDayType][teacherName] : {};
       const busySlotsCount = Object.keys(daySched).length;
       
       return { totalCovers, lastAbsenceDate, busySlotsCount };
     }
 
-    // Recommendation Engine Ranking
     function getRecommendedCovers(slotKey) {
       const candidates = [];
 
       TEACHERS.forEach(t => {
-        // Exclude if absent today
         if (absences[selectedDate] && absences[selectedDate][t.name]) return;
 
-        // Exclude if busy in this slot
         const teacherSched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][t.name] ? SCHEDULES[selectedDayType][t.name] : {};
-        if (teacherSched[slotKey]) return; // Busy!
-
-        // Exclude if already assigned to cover another class in this slot today
-        const assignedKey = `${selectedDate}_${slotKey}`;
-        let alreadyCovering = false;
-        if (coverAssignments[selectedDate]) {
-          Object.keys(coverAssignments[selectedDate]).forEach(sk => {
-            if (sk === slotKey && coverAssignments[selectedDate][sk]) {
-              alreadyCovering = true;
-            }
-          });
-        }
+        if (teacherSched[slotKey]) return;
 
         const stats = getTeacherStats(t.name);
-
-        // Scoring algorithm (lower score = higher recommendation)
-        // Weight 1: Total prior coverages (primary tiebreaker)
-        // Weight 2: Busy slots today (prefer lighter schedule)
         let score = (stats.totalCovers * 10) + stats.busySlotsCount;
 
         candidates.push({
@@ -580,12 +545,10 @@
         });
       });
 
-      // Sort by recommendation score ascending
       candidates.sort((a,b) => a.score - b.score);
       return candidates;
     }
 
-    // Render Daily Schedule & Cover Recommendation Matrix
     function updateSelectedTeacherSchedule() {
       const teacherName = document.getElementById('teacherSelect').value;
       const container = document.getElementById('slotsContainer');
@@ -614,22 +577,19 @@
         ? `Status: Marked ${absenceInfo.type} for ${selectedDate}`
         : `Status: Present (Fresh schedule for ${selectedDate})`;
 
-      // Determine schedule format
-      const isBlockDay = (selectedDayType !== "Day C") && (teacher.type === "secondary");
-      dayPill.textContent = isBlockDay ? "4 Blocks Format" : "8 Periods Format";
+      const isBlockFormat = (selectedDayType !== "Day C") && (teacher.type !== "primary");
+      dayPill.textContent = isBlockFormat ? "Blocks Format" : "Periods Format";
 
-      const scheduleGrid = isBlockDay ? BLOCK_SCHEDULE : PERIOD_SCHEDULE;
+      const scheduleGrid = isBlockFormat ? BLOCK_SCHEDULE : PERIOD_SCHEDULE;
       const teacherDaySchedule = (SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName]) ? SCHEDULES[selectedDayType][teacherName] : {};
 
       container.innerHTML = '';
 
       scheduleGrid.forEach(slotItem => {
-        // Slot Key mapping
-        let slotKey = isBlockDay ? `B${slotItem.slot}` : `P${slotItem.slot}`;
+        let slotKey = isBlockFormat ? `B${slotItem.slot}` : `P${slotItem.slot}`;
         let className = teacherDaySchedule[slotKey] || null;
 
-        // If hybrid teacher in Secondary Block day, map B1 -> P1/P2, B2 -> P3/P4, B3 -> P5/P6, B4 -> P7/P8
-        if (!isBlockDay && selectedDayType !== "Day C" && !className) {
+        if (!isBlockFormat && selectedDayType !== "Day C" && !className) {
           if (slotItem.slot === 1 || slotItem.slot === 2) className = teacherDaySchedule['B1'];
           else if (slotItem.slot === 3 || slotItem.slot === 4) className = teacherDaySchedule['B2'];
           else if (slotItem.slot === 5 || slotItem.slot === 6) className = teacherDaySchedule['B3'];
@@ -639,7 +599,6 @@
         const slotCard = document.createElement('div');
         slotCard.className = `p-4 rounded-xl border transition-all ${className ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-50 border-slate-200/60 opacity-80'}`;
 
-        // Check if coverage is assigned for this slot
         const coverageKey = `${teacherName}_${slotKey}`;
         const currentCoverTeacher = (coverAssignments[selectedDate] && coverAssignments[selectedDate][coverageKey]) || null;
 
@@ -695,7 +654,7 @@
                 Needs Coverage
               </span>
             ` : `
-              <span class="text-xs text-slate-400 font-medium">Free Period</span>
+              <span class="text-xs text-slate-400 font-medium">Free Slot</span>
             `)}
           </div>
 
@@ -714,7 +673,6 @@
       });
     }
 
-    // Assign Coverage Action
     function assignCoverage(absentTeacher, slotKey, coverTeacher) {
       if (!coverAssignments[selectedDate]) coverAssignments[selectedDate] = {};
       
@@ -739,12 +697,11 @@
       renderHistoryLog();
     }
 
-    // History Log Management
     function addHistoryLog(entry) {
       entry.id = Date.now();
       entry.time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       historyLogs.unshift(entry);
-      if (historyLogs.length > 50) historyLogs.pop(); // Keep last 50
+      if (historyLogs.length > 50) historyLogs.pop();
       localStorage.setItem('tsc_history', JSON.stringify(historyLogs));
       renderHistoryLog();
     }
