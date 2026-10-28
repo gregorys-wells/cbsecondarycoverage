@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secondary School Teacher Coverage System</title>
+  <title>Teacher Coverage & Master Schedule System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -17,195 +17,263 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- Header / Top Bar -->
+  <!-- Top Header Navigation -->
   <header class="bg-indigo-900 text-white shadow-md border-b border-indigo-800 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center space-x-3">
-        <div class="bg-indigo-700 p-2.5 rounded-lg shadow-inner">
-          <i class="fa-solid fa-school text-indigo-200 text-xl"></i>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- System Title & Tab Switcher -->
+      <div class="flex items-center space-x-6">
+        <div class="flex items-center space-x-3">
+          <div class="bg-indigo-700 p-2 rounded-lg shadow-inner">
+            <i class="fa-solid fa-school text-indigo-200 text-xl"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold tracking-tight">Teacher Coverage System</h1>
+            <p class="text-xs text-indigo-200">Secondary & Primary Operations Portal</p>
+          </div>
         </div>
-        <div>
-          <h1 class="text-xl font-bold tracking-tight">Teacher Coverage System</h1>
-          <p class="text-xs text-indigo-200 font-medium">Secondary & Hybrid Staff Schedule Management</p>
-        </div>
+
+        <!-- View Tabs -->
+        <nav class="hidden md:flex space-x-1 bg-indigo-950/60 p-1 rounded-xl border border-indigo-700/50">
+          <button id="tabCoverageBtn" onclick="switchTab('coverage')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-user-check"></i>
+            <span>Daily Coverage Workstation</span>
+          </button>
+          <button id="tabMatrixBtn" onclick="switchTab('matrix')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-indigo-200 hover:text-white hover:bg-indigo-800/50 flex items-center gap-1.5">
+            <i class="fa-solid fa-table-cells"></i>
+            <span>Master Schedule Matrix</span>
+          </button>
+          <button id="tabLogBtn" onclick="switchTab('log')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-indigo-200 hover:text-white hover:bg-indigo-800/50 flex items-center gap-1.5">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Absence Audit Log</span>
+          </button>
+        </nav>
       </div>
 
-      <!-- Date & Day Picker Controls -->
-      <div class="flex items-center bg-indigo-950/60 rounded-xl p-1.5 border border-indigo-700/50 shadow-inner">
-        <div class="flex items-center px-3 py-1.5 space-x-2">
+      <!-- Date Stepper Controls (Back & Forth Switcher) -->
+      <div class="flex items-center bg-indigo-950/60 rounded-xl p-1 border border-indigo-700/50 shadow-inner">
+        <button onclick="changeDate(-1)" class="p-2 text-indigo-200 hover:text-white hover:bg-indigo-800/60 rounded-lg transition-colors" title="Previous Day">
+          <i class="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+
+        <div class="flex items-center px-2 py-1 space-x-2">
           <i class="fa-regular fa-calendar-days text-indigo-300"></i>
-          <input type="date" id="datePicker" class="bg-transparent text-white font-semibold text-sm focus:outline-none cursor-pointer">
+          <input type="date" id="datePicker" class="bg-transparent text-white font-semibold text-xs focus:outline-none cursor-pointer">
         </div>
-        <div class="h-6 w-px bg-indigo-700/60 my-auto"></div>
-        <div id="dayBadge" class="ml-2 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-indigo-600 text-white shadow-sm flex items-center gap-1.5">
+
+        <button onclick="changeDate(1)" class="p-2 text-indigo-200 hover:text-white hover:bg-indigo-800/60 rounded-lg transition-colors" title="Next Day">
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+
+        <div class="h-5 w-px bg-indigo-700/60 mx-1"></div>
+
+        <div id="dayBadge" class="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-indigo-600 text-white shadow-sm flex items-center gap-1">
           <span>Day A</span>
           <span class="text-[10px] opacity-75 font-normal">(Mon)</span>
         </div>
       </div>
+
     </div>
   </header>
 
-  <!-- Main Container -->
+  <!-- Mobile Tab Bar -->
+  <div class="md:hidden bg-indigo-950 px-4 py-2 flex justify-around border-b border-indigo-800">
+    <button onclick="switchTab('coverage')" class="text-xs font-bold text-white flex items-center gap-1">
+      <i class="fa-solid fa-user-check"></i> Workstation
+    </button>
+    <button onclick="switchTab('matrix')" class="text-xs font-bold text-indigo-300 flex items-center gap-1">
+      <i class="fa-solid fa-table-cells"></i> Master Schedule
+    </button>
+    <button onclick="switchTab('log')" class="text-xs font-bold text-indigo-300 flex items-center gap-1">
+      <i class="fa-solid fa-clock-rotate-left"></i> Absence Log
+    </button>
+  </div>
+
+  <!-- Main Workstation View -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-6">
 
-    <!-- Top Controls: Select Teacher, Absence Type, Action Button -->
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 transition-all">
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        
-        <!-- Left: Form Controls -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full md:w-auto flex-grow">
+    <!-- TAB 1: COVERAGE WORKSTATION -->
+    <div id="viewCoverage" class="space-y-6">
+      
+      <!-- Action Banner: Mark Teacher Absent -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           
-          <!-- Teacher Dropdown -->
-          <div>
-            <label for="teacherSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Select Teacher</label>
-            <div class="relative">
-              <select id="teacherSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-2.5 pr-8 appearance-none font-medium cursor-pointer">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full md:w-auto flex-grow">
+            <!-- Select Teacher -->
+            <div>
+              <label for="teacherSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Select Teacher</label>
+              <select id="teacherSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 p-2.5 font-medium cursor-pointer">
                 <option value="">-- Choose Teacher --</option>
               </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500">
-                <i class="fa-solid fa-chevron-down text-xs"></i>
-              </div>
             </div>
-          </div>
 
-          <!-- Absence Type Dropdown -->
-          <div>
-            <label for="absenceTypeSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Absence Type</label>
-            <div class="relative">
-              <select id="absenceTypeSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-2.5 pr-8 appearance-none font-medium cursor-pointer">
+            <!-- Absence Type -->
+            <div>
+              <label for="absenceTypeSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Type of Absence</label>
+              <select id="absenceTypeSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 p-2.5 font-medium cursor-pointer">
                 <option value="Absent">Absent</option>
                 <option value="Wells Business">Wells Business</option>
               </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500">
-                <i class="fa-solid fa-chevron-down text-xs"></i>
+            </div>
+
+            <!-- Role Badge -->
+            <div class="flex flex-col justify-end">
+              <div id="teacherTypePill" class="hidden text-xs font-medium px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 flex items-center gap-2">
+                <i class="fa-solid fa-user-tag text-slate-400"></i>
+                <span id="teacherTypeLabel">Secondary Teacher</span>
               </div>
             </div>
           </div>
 
-          <!-- Teacher Role Indicator Pill -->
-          <div class="flex flex-col justify-end">
-            <div id="teacherTypePill" class="hidden text-xs font-medium px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 flex items-center gap-2">
-              <i class="fa-solid fa-user-tag text-slate-400"></i>
-              <span id="teacherTypeLabel">Secondary Teacher</span>
-            </div>
+          <!-- Mark Absent Button -->
+          <div class="w-full md:w-auto flex items-end justify-end pt-2 md:pt-0">
+            <button id="markAbsentBtn" class="w-full md:w-auto bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm px-6 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-user-xmark"></i>
+              <span>Mark Teacher Absent</span>
+            </button>
           </div>
 
         </div>
+      </section>
 
-        <!-- Right: Record Absence Button -->
-        <div class="w-full md:w-auto flex items-end justify-end pt-2 md:pt-0">
-          <button id="markAbsentBtn" class="w-full md:w-auto bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm px-6 py-2.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-            <i class="fa-solid fa-user-xmark"></i>
-            <span>Mark Teacher Absent</span>
-          </button>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- Absences Recorded Banner (if any for current date) -->
-    <section id="absentTeachersBanner" class="hidden bg-rose-50 border border-rose-200 rounded-2xl p-4 shadow-sm">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm font-bold text-rose-900 uppercase tracking-wide flex items-center gap-2">
-          <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
-          <span>Absences Recorded For Selected Date</span>
-        </h2>
-        <span id="absentCountBadge" class="bg-rose-200 text-rose-800 text-xs font-bold px-2.5 py-0.5 rounded-full">0 Teachers</span>
-      </div>
-      <div id="absentList" class="flex flex-wrap gap-2">
-        <!-- Badges populated by JS -->
-      </div>
-    </section>
-
-    <!-- Workstation Grid: Left = Schedule & Cover Finder, Right = Summary & Recommendations -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-      <!-- Left Column (7 cols): Impacted Schedule & Recommended Covers -->
-      <div class="lg:col-span-7 space-y-6">
-
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-          <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-            <div>
-              <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                <i class="fa-regular fa-clock text-indigo-600"></i>
-                <span id="scheduleTitle">Teacher Daily Schedule</span>
-              </h2>
-              <p class="text-xs text-slate-500 mt-0.5" id="scheduleSubtitle">Select a teacher above to view schedule and free cover options.</p>
-            </div>
-            <div id="dayStructurePill" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
-              Blocks
-            </div>
-          </div>
-
-          <!-- Slots Container -->
-          <div id="slotsContainer" class="space-y-4">
-            <div class="text-center py-12 text-slate-400">
-              <i class="fa-solid fa-calendar-day text-4xl mb-3 text-slate-300"></i>
-              <p class="text-sm">Please select a teacher to display their class schedule.</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Right Column (5 cols): Teacher Stats & Coverage Recommendation Engine -->
-      <div class="lg:col-span-5 space-y-6">
-
-        <!-- Selected Cover Candidate Score Breakdown / Stats -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-          <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
-            <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
-            <span>Smart Coverage Engine</span>
+      <!-- Active Absences Banner for Selected Date -->
+      <section id="absentTeachersBanner" class="hidden bg-rose-50 border border-rose-200 rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-bold text-rose-900 uppercase tracking-wide flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+            <span>Recorded Absences for Selected Date</span>
           </h2>
+          <span id="absentCountBadge" class="bg-rose-200 text-rose-800 text-xs font-bold px-2.5 py-0.5 rounded-full">0 Teachers</span>
+        </div>
+        <div id="absentList" class="flex flex-wrap gap-2"></div>
+      </section>
 
-          <div class="space-y-3 text-xs text-slate-600">
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-start gap-2.5">
-              <i class="fa-solid fa-circle-info text-indigo-500 mt-0.5 text-sm"></i>
-              <p>
-                <strong>Recommendation Criteria:</strong> Free available teachers are ranked for each block/period based on:
-              </p>
+      <!-- Workstation Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Schedule Column -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <i class="fa-regular fa-clock text-indigo-600"></i>
+                  <span id="scheduleTitle">Teacher Daily Schedule</span>
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5" id="scheduleSubtitle">Select a teacher above to view schedule and free cover options.</p>
+              </div>
+              <div id="dayStructurePill" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
+                Blocks
+              </div>
             </div>
-            <ul class="space-y-2 pl-2">
-              <li class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                <span><strong>Fewest Prior Coverages:</strong> Equalized duty distribution</span>
-              </li>
-              <li class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span><strong>Most Free Time Today:</strong> Lightest schedule that day</span>
-              </li>
-              <li class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                <span><strong>Absence Recency:</strong> Most distant/recent personal absence</span>
-              </li>
-            </ul>
+
+            <div id="slotsContainer" class="space-y-4">
+              <div class="text-center py-12 text-slate-400">
+                <i class="fa-solid fa-calendar-day text-4xl mb-3 text-slate-300"></i>
+                <p class="text-sm">Please select a teacher to display their class schedule.</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Master Absence & Coverage History Log -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <!-- Recommendation Rules & History Summary -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+              <span>Smart Recommendation Engine</span>
+            </h2>
+            <div class="space-y-3 text-xs text-slate-600">
+              <p>Cover recommendations are ranked dynamically using three core parameters:</p>
+              <ul class="space-y-2 pl-2">
+                <li class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                  <span><strong>Fewest Coverages:</strong> Prioritizes staff with least assigned cover duty</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span><strong>Lightest Day Schedule:</strong> Prefers teachers with most free periods today</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                  <span><strong>Absence Recency:</strong> Factor in recency of staff's own absence</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+              <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
+                <span>Recent History</span>
+              </h2>
+              <button onclick="switchTab('log')" class="text-xs text-indigo-600 hover:underline font-semibold">View Full Log →</button>
+            </div>
+            <div id="quickHistoryContainer" class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB 2: MASTER SCHEDULE MATRIX -->
+    <div id="viewMatrix" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-table-cells text-indigo-600"></i>
+              <span>Full School Master Schedule Matrix</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Live view of all teachers across all blocks and periods for <strong id="matrixDateLabel">Selected Date</strong>.</p>
+          </div>
+          <input type="text" id="matrixSearch" onkeyup="filterMatrix()" placeholder="Filter teacher or subject..." class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 w-full sm:w-64">
+        </div>
+
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-indigo-900 text-white font-semibold">
+                <th class="p-3 rounded-tl-xl">Teacher Name</th>
+                <th class="p-3">Type</th>
+                <th class="p-3">Status Today</th>
+                <th class="p-3">Block / Period 1</th>
+                <th class="p-3">Block / Period 2</th>
+                <th class="p-3">Block / Period 3</th>
+                <th class="p-3 rounded-tr-xl">Block / Period 4</th>
+              </tr>
+            </thead>
+            <tbody id="matrixTableBody" class="divide-y divide-slate-200">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ABSENCE AUDIT LOG -->
+    <div id="viewLog" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
+          <div>
             <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
               <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
-              <span>Coverage & Absence History Log</span>
+              <span>Absence & Coverage Audit Log</span>
             </h2>
-            <button id="clearHistoryBtn" class="text-xs text-slate-400 hover:text-rose-600 font-medium transition-colors">Clear All</button>
+            <p class="text-xs text-slate-500 mt-0.5">Historical archive of all recorded teacher absences and cover assignments.</p>
           </div>
-
-          <div id="historyLog" class="max-h-80 overflow-y-auto custom-scrollbar space-y-2.5 pr-1">
-            <p class="text-xs text-slate-400 text-center py-6">No coverage or absence logs recorded yet.</p>
-          </div>
+          <button id="clearHistoryBtn" onclick="clearHistory()" class="text-xs bg-rose-50 text-rose-600 border border-rose-200 px-3 py-1.5 rounded-lg hover:bg-rose-100 font-semibold transition-colors">Clear Entire Log</button>
         </div>
 
+        <div id="fullHistoryLog" class="space-y-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1"></div>
       </div>
-
     </div>
 
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
-    <p>Secondary School Teacher Coverage System &bull; Principal Portal</p>
+  <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500 mt-auto">
+    <p>Secondary & Primary Teacher Coverage System &bull; Principal Portal</p>
   </footer>
 
   <script>
@@ -233,7 +301,6 @@
       { name: "Ms. Kan", type: "secondary" }
     ];
 
-    // Bell Schedules
     const BLOCK_SCHEDULE = [
       { slot: 1, name: "Block 1", time: "08:00 - 09:30" },
       { slot: 2, name: "Block 2", time: "09:45 - 11:10" },
@@ -348,6 +415,8 @@
 
     let selectedDate = new Date().toISOString().split('T')[0];
     let selectedDayType = "Day A";
+    let activeTab = "coverage";
+
     let absences = JSON.parse(localStorage.getItem('tsc_absences') || '{}');
     let coverAssignments = JSON.parse(localStorage.getItem('tsc_coverages') || '{}');
     let historyLogs = JSON.parse(localStorage.getItem('tsc_history') || '[]');
@@ -359,6 +428,7 @@
       renderAbsencesBanner();
       renderHistoryLog();
       updateSelectedTeacherSchedule();
+      renderMasterMatrix();
     });
 
     function getDayTypeFromDate(dateStr) {
@@ -378,12 +448,47 @@
       updateDayBadge();
     }
 
+    function changeDate(daysOffset) {
+      const current = new Date(selectedDate);
+      current.setDate(current.getDate() + daysOffset);
+      selectedDate = current.toISOString().split('T')[0];
+      document.getElementById('datePicker').value = selectedDate;
+      updateDayBadge();
+      renderAbsencesBanner();
+      updateSelectedTeacherSchedule();
+      renderMasterMatrix();
+    }
+
     function updateDayBadge() {
       const info = getDayTypeFromDate(selectedDate);
       selectedDayType = info.code;
       const badge = document.getElementById('dayBadge');
       badge.querySelector('span:first-child').textContent = info.code;
       badge.querySelector('span:last-child').textContent = `(${info.name.substring(0,3)})`;
+      document.getElementById('matrixDateLabel').textContent = `${selectedDate} (${info.code})`;
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      document.getElementById('viewCoverage').classList.add('hidden');
+      document.getElementById('viewMatrix').classList.add('hidden');
+      document.getElementById('viewLog').classList.add('hidden');
+
+      document.getElementById('tabCoverageBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-indigo-200 hover:text-white flex items-center gap-1.5";
+      document.getElementById('tabMatrixBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-indigo-200 hover:text-white flex items-center gap-1.5";
+      document.getElementById('tabLogBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-indigo-200 hover:text-white flex items-center gap-1.5";
+
+      if (tab === 'coverage') {
+        document.getElementById('viewCoverage').classList.remove('hidden');
+        document.getElementById('tabCoverageBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5";
+      } else if (tab === 'matrix') {
+        document.getElementById('viewMatrix').classList.remove('hidden');
+        document.getElementById('tabMatrixBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5";
+        renderMasterMatrix();
+      } else if (tab === 'log') {
+        document.getElementById('viewLog').classList.remove('hidden');
+        document.getElementById('tabLogBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5";
+      }
     }
 
     function populateTeacherDropdown() {
@@ -403,6 +508,7 @@
         updateDayBadge();
         renderAbsencesBanner();
         updateSelectedTeacherSchedule();
+        renderMasterMatrix();
       });
 
       document.getElementById('teacherSelect').addEventListener('change', (e) => {
@@ -422,7 +528,6 @@
       });
 
       document.getElementById('markAbsentBtn').addEventListener('click', recordTeacherAbsence);
-      document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
     }
 
     function recordTeacherAbsence() {
@@ -453,6 +558,7 @@
 
       renderAbsencesBanner();
       updateSelectedTeacherSchedule();
+      renderMasterMatrix();
     }
 
     function removeAbsence(teacherName) {
@@ -464,6 +570,7 @@
         localStorage.setItem('tsc_absences', JSON.stringify(absences));
         renderAbsencesBanner();
         updateSelectedTeacherSchedule();
+        renderMasterMatrix();
       }
     }
 
@@ -695,42 +802,88 @@
       localStorage.setItem('tsc_coverages', JSON.stringify(coverAssignments));
       updateSelectedTeacherSchedule();
       renderHistoryLog();
+      renderMasterMatrix();
+    }
+
+    function renderMasterMatrix() {
+      const tbody = document.getElementById('matrixTableBody');
+      tbody.innerHTML = '';
+
+      TEACHERS.forEach(t => {
+        const isAbsent = absences[selectedDate] && absences[selectedDate][t.name];
+        const absenceType = isAbsent ? absences[selectedDate][t.name].type : null;
+        const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][t.name] ? SCHEDULES[selectedDayType][t.name] : {};
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors";
+
+        let statusBadge = `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-semibold text-[10px]">Present</span>`;
+        if (isAbsent) {
+          statusBadge = `<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded-md font-semibold text-[10px]">${absenceType}</span>`;
+        }
+
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-slate-800">${t.name}</td>
+          <td class="p-3 text-slate-500 capitalize">${t.type}</td>
+          <td class="p-3">${statusBadge}</td>
+          <td class="p-3">${daySched.B1 || daySched.P1 || '<span class="text-slate-300 italic">Free</span>'}</td>
+          <td class="p-3">${daySched.B2 || daySched.P3 || '<span class="text-slate-300 italic">Free</span>'}</td>
+          <td class="p-3">${daySched.B3 || daySched.P5 || '<span class="text-slate-300 italic">Free</span>'}</td>
+          <td class="p-3">${daySched.B4 || daySched.P7 || '<span class="text-slate-300 italic">Free</span>'}</td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterMatrix() {
+      const query = document.getElementById('matrixSearch').value.toLowerCase();
+      const rows = document.querySelectorAll('#matrixTableBody tr');
+      rows.forEach(r => {
+        r.style.display = r.textContent.toLowerCase().includes(query) ? '' : 'none';
+      });
     }
 
     function addHistoryLog(entry) {
       entry.id = Date.now();
       entry.time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       historyLogs.unshift(entry);
-      if (historyLogs.length > 50) historyLogs.pop();
+      if (historyLogs.length > 100) historyLogs.pop();
       localStorage.setItem('tsc_history', JSON.stringify(historyLogs));
       renderHistoryLog();
     }
 
     function renderHistoryLog() {
-      const container = document.getElementById('historyLog');
+      const fullContainer = document.getElementById('fullHistoryLog');
+      const quickContainer = document.getElementById('quickHistoryContainer');
+
       if (historyLogs.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No coverage or absence logs recorded yet.</p>`;
+        fullContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No historical records saved.</p>`;
+        quickContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No recent history.</p>`;
         return;
       }
 
-      container.innerHTML = '';
-      historyLogs.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs flex items-start justify-between gap-2';
-        
+      fullContainer.innerHTML = '';
+      quickContainer.innerHTML = '';
+
+      historyLogs.forEach((item, idx) => {
         const isAbsence = item.type === 'ABSENCE';
         const iconClass = isAbsence ? 'fa-user-xmark text-rose-500' : 'fa-user-check text-emerald-500';
 
-        div.innerHTML = `
-          <div class="flex items-start gap-2">
-            <i class="fa-solid ${iconClass} mt-0.5"></i>
-            <div>
-              <p class="font-medium text-slate-800">${item.text}</p>
-              <p class="text-[10px] text-slate-400 mt-0.5">${item.date} at ${item.time}</p>
+        const rowHtml = `
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs flex items-start justify-between gap-2">
+            <div class="flex items-start gap-2">
+              <i class="fa-solid ${iconClass} mt-0.5"></i>
+              <div>
+                <p class="font-medium text-slate-800">${item.text}</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">${item.date} at ${item.time}</p>
+              </div>
             </div>
           </div>
         `;
-        container.appendChild(div);
+
+        fullContainer.innerHTML += rowHtml;
+        if (idx < 5) quickContainer.innerHTML += rowHtml;
       });
     }
 
