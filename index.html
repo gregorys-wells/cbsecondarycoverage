@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Teacher Coverage & Master Schedule System</title>
+  <title>Secondary School Teacher Coverage System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -12,230 +12,209 @@
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .tab-btn.active { background-color: #2563eb; color: #ffffff; font-weight: 700; shadow: 0 1px 2px rgba(0,0,0,0.1); }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- Top Header Navigation -->
-  <header class="bg-indigo-900 text-white shadow-md border-b border-indigo-800 sticky top-0 z-50">
+  <!-- Main Navigation Header -->
+  <header class="bg-indigo-950 text-white sticky top-0 z-50 shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
       
-      <!-- System Title & Tab Switcher -->
-      <div class="flex items-center space-x-6">
-        <div class="flex items-center space-x-3">
-          <div class="bg-indigo-700 p-2 rounded-lg shadow-inner">
-            <i class="fa-solid fa-school text-indigo-200 text-xl"></i>
-          </div>
-          <div>
-            <h1 class="text-lg font-bold tracking-tight">Teacher Coverage System</h1>
-            <p class="text-xs text-indigo-200">Secondary & Primary Operations Portal</p>
-          </div>
+      <!-- System Title -->
+      <div class="flex items-center space-x-3">
+        <div class="bg-blue-600 p-2.5 rounded-xl shadow-sm">
+          <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
         </div>
-
-        <!-- View Tabs -->
-        <nav class="hidden md:flex space-x-1 bg-indigo-950/60 p-1 rounded-xl border border-indigo-700/50">
-          <button id="tabCoverageBtn" onclick="switchTab('coverage')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5">
-            <i class="fa-solid fa-user-check"></i>
-            <span>Daily Coverage Workstation</span>
-          </button>
-          <button id="tabMatrixBtn" onclick="switchTab('matrix')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-indigo-200 hover:text-white hover:bg-indigo-800/50 flex items-center gap-1.5">
-            <i class="fa-solid fa-table-cells"></i>
-            <span>Master Schedule Matrix</span>
-          </button>
-          <button id="tabLogBtn" onclick="switchTab('log')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-indigo-200 hover:text-white hover:bg-indigo-800/50 flex items-center gap-1.5">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>Absence Audit Log</span>
-          </button>
-        </nav>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight leading-tight">Teacher Coverage Portal</h1>
+          <p class="text-xs text-indigo-300 font-medium">Principal Management & Operations</p>
+        </div>
       </div>
 
-      <!-- Date Stepper Controls (Back & Forth Switcher) -->
-      <div class="flex items-center bg-indigo-950/60 rounded-xl p-1 border border-indigo-700/50 shadow-inner">
-        <button onclick="changeDate(-1)" class="p-2 text-indigo-200 hover:text-white hover:bg-indigo-800/60 rounded-lg transition-colors" title="Previous Day">
-          <i class="fa-solid fa-chevron-left text-xs"></i>
+      <!-- Date Switcher Controls -->
+      <div class="flex items-center bg-indigo-900/80 p-1.5 rounded-xl border border-indigo-700/60 shadow-inner gap-2">
+        <button onclick="navigateDate(-1)" class="px-2.5 py-1.5 bg-indigo-800 hover:bg-blue-600 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 text-white">
+          <i class="fa-solid fa-chevron-left"></i> Prev
         </button>
 
-        <div class="flex items-center px-2 py-1 space-x-2">
-          <i class="fa-regular fa-calendar-days text-indigo-300"></i>
+        <div class="flex items-center px-2 py-1 bg-indigo-950 rounded-lg border border-indigo-800">
+          <i class="fa-regular fa-calendar text-blue-400 mr-2 text-xs"></i>
           <input type="date" id="datePicker" class="bg-transparent text-white font-semibold text-xs focus:outline-none cursor-pointer">
         </div>
 
-        <button onclick="changeDate(1)" class="p-2 text-indigo-200 hover:text-white hover:bg-indigo-800/60 rounded-lg transition-colors" title="Next Day">
-          <i class="fa-solid fa-chevron-right text-xs"></i>
+        <button onclick="navigateDate(1)" class="px-2.5 py-1.5 bg-indigo-800 hover:bg-blue-600 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 text-white">
+          Next <i class="fa-solid fa-chevron-right"></i>
         </button>
 
-        <div class="h-5 w-px bg-indigo-700/60 mx-1"></div>
+        <button onclick="jumpToToday()" class="px-2 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-bold text-white shadow-sm">
+          Today
+        </button>
 
-        <div id="dayBadge" class="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-indigo-600 text-white shadow-sm flex items-center gap-1">
-          <span>Day A</span>
-          <span class="text-[10px] opacity-75 font-normal">(Mon)</span>
+        <div id="dayTypeBadge" class="ml-1 px-3 py-1 bg-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider rounded-lg shadow-sm">
+          Day A (Mon)
         </div>
       </div>
 
     </div>
+
+    <!-- Navigation Tabs -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-indigo-900/50 border-t border-indigo-800/60 flex space-x-2 py-2 overflow-x-auto">
+      <button id="tabBtnDaily" onclick="switchMainTab('daily')" class="tab-btn active px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-indigo-200 hover:text-white">
+        <i class="fa-solid fa-user-check"></i> Daily Coverage Workstation
+      </button>
+      <button id="tabBtnMatrix" onclick="switchMainTab('matrix')" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-indigo-200 hover:text-white">
+        <i class="fa-solid fa-table-cells"></i> Full Master Schedule Matrix
+      </button>
+      <button id="tabBtnLogs" onclick="switchMainTab('logs')" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-indigo-200 hover:text-white">
+        <i class="fa-solid fa-list-check"></i> Absences & Coverage Log
+      </button>
+    </div>
   </header>
 
-  <!-- Mobile Tab Bar -->
-  <div class="md:hidden bg-indigo-950 px-4 py-2 flex justify-around border-b border-indigo-800">
-    <button onclick="switchTab('coverage')" class="text-xs font-bold text-white flex items-center gap-1">
-      <i class="fa-solid fa-user-check"></i> Workstation
-    </button>
-    <button onclick="switchTab('matrix')" class="text-xs font-bold text-indigo-300 flex items-center gap-1">
-      <i class="fa-solid fa-table-cells"></i> Master Schedule
-    </button>
-    <button onclick="switchTab('log')" class="text-xs font-bold text-indigo-300 flex items-center gap-1">
-      <i class="fa-solid fa-clock-rotate-left"></i> Absence Log
-    </button>
-  </div>
+  <!-- Main View Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
 
-  <!-- Main Workstation View -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-6">
+    <!-- TAB 1: DAILY COVERAGE WORKSTATION -->
+    <div id="tabDailyView" class="space-y-6">
 
-    <!-- TAB 1: COVERAGE WORKSTATION -->
-    <div id="viewCoverage" class="space-y-6">
-      
-      <!-- Action Banner: Mark Teacher Absent -->
-      <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <!-- Action Panel: Mark Teacher Absent -->
+      <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+        <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
           
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full md:w-auto flex-grow">
-            <!-- Select Teacher -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
+            <!-- Teacher Selection -->
             <div>
-              <label for="teacherSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Select Teacher</label>
-              <select id="teacherSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 p-2.5 font-medium cursor-pointer">
-                <option value="">-- Choose Teacher --</option>
+              <label for="teacherSelect" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Select Teacher</label>
+              <select id="teacherSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <option value="">-- Select Teacher --</option>
               </select>
             </div>
 
             <!-- Absence Type -->
             <div>
-              <label for="absenceTypeSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Type of Absence</label>
-              <select id="absenceTypeSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 p-2.5 font-medium cursor-pointer">
+              <label for="absenceTypeSelect" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Absence Reason</label>
+              <select id="absenceTypeSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="Absent">Absent</option>
                 <option value="Wells Business">Wells Business</option>
               </select>
             </div>
 
             <!-- Role Badge -->
-            <div class="flex flex-col justify-end">
-              <div id="teacherTypePill" class="hidden text-xs font-medium px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 flex items-center gap-2">
-                <i class="fa-solid fa-user-tag text-slate-400"></i>
-                <span id="teacherTypeLabel">Secondary Teacher</span>
+            <div class="flex items-end">
+              <div id="roleInfoBadge" class="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-600 font-medium flex items-center gap-2">
+                <i class="fa-solid fa-info-circle text-blue-500"></i>
+                <span id="roleInfoText">Select a teacher to view details</span>
               </div>
             </div>
           </div>
 
           <!-- Mark Absent Button -->
-          <div class="w-full md:w-auto flex items-end justify-end pt-2 md:pt-0">
-            <button id="markAbsentBtn" class="w-full md:w-auto bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm px-6 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
-              <i class="fa-solid fa-user-xmark"></i>
-              <span>Mark Teacher Absent</span>
+          <div class="flex items-end">
+            <button onclick="markTeacherAbsent()" class="w-full lg:w-auto bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-user-xmark"></i> Mark Absent
             </button>
           </div>
 
         </div>
       </section>
 
-      <!-- Active Absences Banner for Selected Date -->
-      <section id="absentTeachersBanner" class="hidden bg-rose-50 border border-rose-200 rounded-2xl p-4 shadow-sm">
+      <!-- Active Absences Summary Banner for Selected Date -->
+      <section id="dateAbsencesBanner" class="hidden bg-rose-50 border border-rose-200 rounded-2xl p-4 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-bold text-rose-900 uppercase tracking-wide flex items-center gap-2">
-            <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
-            <span>Recorded Absences for Selected Date</span>
+          <h2 class="text-xs font-bold text-rose-900 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+            Recorded Absences for <span id="bannerDateText">Selected Date</span>
           </h2>
-          <span id="absentCountBadge" class="bg-rose-200 text-rose-800 text-xs font-bold px-2.5 py-0.5 rounded-full">0 Teachers</span>
+          <span id="bannerCountBadge" class="bg-rose-200 text-rose-900 text-xs font-bold px-2.5 py-0.5 rounded-full">0</span>
         </div>
-        <div id="absentList" class="flex flex-wrap gap-2"></div>
+        <div id="bannerAbsenceList" class="flex flex-wrap gap-2"></div>
       </section>
 
-      <!-- Workstation Grid -->
+      <!-- Workstation Schedule Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Schedule Column -->
-        <div class="lg:col-span-7 space-y-6">
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        
+        <!-- Left: Selected Teacher Schedule (7 Cols) -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
               <div>
-                <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <i class="fa-regular fa-clock text-indigo-600"></i>
-                  <span id="scheduleTitle">Teacher Daily Schedule</span>
-                </h2>
-                <p class="text-xs text-slate-500 mt-0.5" id="scheduleSubtitle">Select a teacher above to view schedule and free cover options.</p>
+                <h2 id="teacherScheduleHeading" class="text-base font-bold text-slate-900">Teacher Daily Schedule</h2>
+                <p id="teacherScheduleSubheading" class="text-xs text-slate-500 mt-0.5">Click any slot to manually toggle slot state between Free and Teaching.</p>
               </div>
-              <div id="dayStructurePill" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
-                Blocks
+              <div id="dayFormatBadge" class="text-xs font-bold px-3 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200">
+                4 Blocks
               </div>
             </div>
 
-            <div id="slotsContainer" class="space-y-4">
+            <!-- Schedule Slot Cards Container -->
+            <div id="slotCardsContainer" class="space-y-3">
               <div class="text-center py-12 text-slate-400">
                 <i class="fa-solid fa-calendar-day text-4xl mb-3 text-slate-300"></i>
-                <p class="text-sm">Please select a teacher to display their class schedule.</p>
+                <p class="text-sm font-medium">Please select a teacher above to inspect their schedule.</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Recommendation Rules & History Summary -->
+        <!-- Right: Smart Recommendation Summary (5 Cols) -->
         <div class="lg:col-span-5 space-y-6">
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
-              <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
-              <span>Smart Recommendation Engine</span>
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wide flex items-center gap-2 pb-3 border-b border-slate-100 mb-3">
+              <i class="fa-solid fa-sliders text-blue-600"></i> Smart Recommendation Engine
             </h2>
             <div class="space-y-3 text-xs text-slate-600">
-              <p>Cover recommendations are ranked dynamically using three core parameters:</p>
-              <ul class="space-y-2 pl-2">
-                <li class="flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                  <span><strong>Fewest Coverages:</strong> Prioritizes staff with least assigned cover duty</span>
+              <p>Free teachers are ranked for each block/period using 3 weighted parameters:</p>
+              <ul class="space-y-2">
+                <li class="flex items-start gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                  <i class="fa-solid fa-check text-blue-600 mt-0.5"></i>
+                  <span><strong>Fewest Prior Coverages:</strong> Equalizes duty load across staff.</span>
                 </li>
-                <li class="flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span><strong>Lightest Day Schedule:</strong> Prefers teachers with most free periods today</span>
+                <li class="flex items-start gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                  <i class="fa-solid fa-check text-blue-600 mt-0.5"></i>
+                  <span><strong>Most Free Time Today:</strong> Lightest schedule on selected date.</span>
                 </li>
-                <li class="flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                  <span><strong>Absence Recency:</strong> Factor in recency of staff's own absence</span>
+                <li class="flex items-start gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                  <i class="fa-solid fa-check text-blue-600 mt-0.5"></i>
+                  <span><strong>Absence Recency:</strong> Takes into account recency of staff's last absence.</span>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
-                <span>Recent History</span>
-              </h2>
-              <button onclick="switchTab('log')" class="text-xs text-indigo-600 hover:underline font-semibold">View Full Log →</button>
+          <!-- Quick Today Log -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+              <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wide">Quick Activity Log</h2>
+              <button onclick="switchMainTab('logs')" class="text-xs font-bold text-blue-600 hover:underline">View All Logs →</button>
             </div>
-            <div id="quickHistoryContainer" class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar"></div>
+            <div id="quickLogContainer" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
           </div>
         </div>
+
       </div>
 
     </div>
 
-    <!-- TAB 2: MASTER SCHEDULE MATRIX -->
-    <div id="viewMatrix" class="hidden space-y-6">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
+    <!-- TAB 2: FULL MASTER SCHEDULE MATRIX -->
+    <div id="tabMatrixView" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
           <div>
-            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-              <i class="fa-solid fa-table-cells text-indigo-600"></i>
-              <span>Full School Master Schedule Matrix</span>
-            </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Live view of all teachers across all blocks and periods for <strong id="matrixDateLabel">Selected Date</strong>.</p>
+            <h2 class="text-base font-bold text-slate-900">Full School Master Schedule Matrix</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Side-by-side view of all teachers on <strong id="matrixDateHeading">Selected Date</strong>.</p>
           </div>
-          <input type="text" id="matrixSearch" onkeyup="filterMatrix()" placeholder="Filter teacher or subject..." class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 w-full sm:w-64">
+          <div class="w-full md:w-72">
+            <input type="text" id="matrixFilterInput" onkeyup="filterMatrixTable()" placeholder="Search teacher or subject..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
         </div>
 
+        <!-- Table Container -->
         <div class="overflow-x-auto custom-scrollbar">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
-              <tr class="bg-indigo-900 text-white font-semibold">
-                <th class="p-3 rounded-tl-xl">Teacher Name</th>
+              <tr class="bg-indigo-950 text-white font-bold">
+                <th class="p-3 rounded-tl-xl">Teacher</th>
                 <th class="p-3">Type</th>
                 <th class="p-3">Status Today</th>
                 <th class="p-3">Block / Period 1</th>
@@ -244,39 +223,39 @@
                 <th class="p-3 rounded-tr-xl">Block / Period 4</th>
               </tr>
             </thead>
-            <tbody id="matrixTableBody" class="divide-y divide-slate-200">
-              <!-- Populated by JavaScript -->
+            <tbody id="matrixTbody" class="divide-y divide-slate-200">
+              <!-- Rendered via JS -->
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- TAB 3: ABSENCE AUDIT LOG -->
-    <div id="viewLog" class="hidden space-y-6">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
+    <!-- TAB 3: ABSENCES & COVERAGE LOG -->
+    <div id="tabLogsView" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
           <div>
-            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-              <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
-              <span>Absence & Coverage Audit Log</span>
-            </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Historical archive of all recorded teacher absences and cover assignments.</p>
+            <h2 class="text-base font-bold text-slate-900">Absence & Coverage History Log</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Historical log of all recorded absences and cover assignments across all dates.</p>
           </div>
-          <button id="clearHistoryBtn" onclick="clearHistory()" class="text-xs bg-rose-50 text-rose-600 border border-rose-200 px-3 py-1.5 rounded-lg hover:bg-rose-100 font-semibold transition-colors">Clear Entire Log</button>
+          <button onclick="clearAllLogs()" class="bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs font-bold px-4 py-2 rounded-xl transition-all">
+            <i class="fa-solid fa-trash-can mr-1"></i> Clear Log History
+          </button>
         </div>
 
-        <div id="fullHistoryLog" class="space-y-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1"></div>
+        <div id="fullLogList" class="space-y-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1"></div>
       </div>
     </div>
 
   </main>
 
   <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500 mt-auto">
-    <p>Secondary & Primary Teacher Coverage System &bull; Principal Portal</p>
+    Secondary School Teacher Coverage Portal &bull; Principal Console
   </footer>
 
   <script>
+    // Staff Roster
     const TEACHERS = [
       { name: "Mr. John", type: "secondary" },
       { name: "Ms. Philmi", type: "secondary" },
@@ -301,6 +280,7 @@
       { name: "Ms. Kan", type: "secondary" }
     ];
 
+    // Bell Schedules
     const BLOCK_SCHEDULE = [
       { slot: 1, name: "Block 1", time: "08:00 - 09:30" },
       { slot: 2, name: "Block 2", time: "09:45 - 11:10" },
@@ -319,6 +299,7 @@
       { slot: 8, name: "Period 8", time: "02:00 - 02:40" }
     ];
 
+    // Master Weekly Schedules
     const SCHEDULES = {
       "Day A": {
         "Mr. John": { B1: "Language Arts I (G6)", B3: "HS Language Arts I ESL (G9)" },
@@ -413,22 +394,24 @@
       }
     };
 
+    // Application State
     let selectedDate = new Date().toISOString().split('T')[0];
     let selectedDayType = "Day A";
-    let activeTab = "coverage";
+    let activeMainTab = "daily";
 
-    let absences = JSON.parse(localStorage.getItem('tsc_absences') || '{}');
-    let coverAssignments = JSON.parse(localStorage.getItem('tsc_coverages') || '{}');
-    let historyLogs = JSON.parse(localStorage.getItem('tsc_history') || '[]');
+    let absences = JSON.parse(localStorage.getItem('tsc_absences_v2') || '{}');
+    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v2') || '{}');
+    let overrides = JSON.parse(localStorage.getItem('tsc_overrides_v2') || '{}');
+    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v2') || '[]');
 
     document.addEventListener('DOMContentLoaded', () => {
       initDatePicker();
-      populateTeacherDropdown();
+      populateTeachersDropdown();
       setupEventListeners();
-      renderAbsencesBanner();
-      renderHistoryLog();
-      updateSelectedTeacherSchedule();
-      renderMasterMatrix();
+      renderDateAbsencesBanner();
+      renderTeacherScheduleView();
+      renderMasterMatrixTable();
+      renderLogHistory();
     });
 
     function getDayTypeFromDate(dateStr) {
@@ -439,7 +422,7 @@
       if (day === 3) return { code: "Day C", name: "Wednesday" };
       if (day === 4) return { code: "Day D", name: "Thursday" };
       if (day === 5) return { code: "Day E", name: "Friday" };
-      return { code: "Day A", name: "Weekend Default (Mon)" };
+      return { code: "Day A", name: "Mon (Default)" };
     }
 
     function initDatePicker() {
@@ -448,52 +431,61 @@
       updateDayBadge();
     }
 
-    function changeDate(daysOffset) {
-      const current = new Date(selectedDate);
-      current.setDate(current.getDate() + daysOffset);
-      selectedDate = current.toISOString().split('T')[0];
+    function navigateDate(days) {
+      const cur = new Date(selectedDate);
+      cur.setDate(cur.getDate() + days);
+      selectedDate = cur.toISOString().split('T')[0];
       document.getElementById('datePicker').value = selectedDate;
       updateDayBadge();
-      renderAbsencesBanner();
-      updateSelectedTeacherSchedule();
-      renderMasterMatrix();
+      renderDateAbsencesBanner();
+      renderTeacherScheduleView();
+      renderMasterMatrixTable();
+    }
+
+    function jumpToToday() {
+      selectedDate = new Date().toISOString().split('T')[0];
+      document.getElementById('datePicker').value = selectedDate;
+      updateDayBadge();
+      renderDateAbsencesBanner();
+      renderTeacherScheduleView();
+      renderMasterMatrixTable();
     }
 
     function updateDayBadge() {
       const info = getDayTypeFromDate(selectedDate);
       selectedDayType = info.code;
-      const badge = document.getElementById('dayBadge');
-      badge.querySelector('span:first-child').textContent = info.code;
-      badge.querySelector('span:last-child').textContent = `(${info.name.substring(0,3)})`;
-      document.getElementById('matrixDateLabel').textContent = `${selectedDate} (${info.code})`;
+      document.getElementById('dayTypeBadge').textContent = `${info.code} (${info.name.substring(0,3)})`;
+      document.getElementById('matrixDateHeading').textContent = `${selectedDate} (${info.code})`;
+      document.getElementById('bannerDateText').textContent = selectedDate;
     }
 
-    function switchTab(tab) {
-      activeTab = tab;
-      document.getElementById('viewCoverage').classList.add('hidden');
-      document.getElementById('viewMatrix').classList.add('hidden');
-      document.getElementById('viewLog').classList.add('hidden');
+    function switchMainTab(tab) {
+      activeMainTab = tab;
+      document.getElementById('tabDailyView').classList.add('hidden');
+      document.getElementById('tabMatrixView').classList.add('hidden');
+      document.getElementById('tabLogsView').classList.add('hidden');
 
-      document.getElementById('tabCoverageBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-indigo-200 hover:text-white flex items-center gap-1.5";
-      document.getElementById('tabMatrixBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-indigo-200 hover:text-white flex items-center gap-1.5";
-      document.getElementById('tabLogBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-indigo-200 hover:text-white flex items-center gap-1.5";
+      document.getElementById('tabBtnDaily').classList.remove('active');
+      document.getElementById('tabBtnMatrix').classList.remove('active');
+      document.getElementById('tabBtnLogs').classList.remove('active');
 
-      if (tab === 'coverage') {
-        document.getElementById('viewCoverage').classList.remove('hidden');
-        document.getElementById('tabCoverageBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5";
+      if (tab === 'daily') {
+        document.getElementById('tabDailyView').classList.remove('hidden');
+        document.getElementById('tabBtnDaily').classList.add('active');
       } else if (tab === 'matrix') {
-        document.getElementById('viewMatrix').classList.remove('hidden');
-        document.getElementById('tabMatrixBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5";
-        renderMasterMatrix();
-      } else if (tab === 'log') {
-        document.getElementById('viewLog').classList.remove('hidden');
-        document.getElementById('tabLogBtn').className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5";
+        document.getElementById('tabMatrixView').classList.remove('hidden');
+        document.getElementById('tabBtnMatrix').classList.add('active');
+        renderMasterMatrixTable();
+      } else if (tab === 'logs') {
+        document.getElementById('tabLogsView').classList.remove('hidden');
+        document.getElementById('tabBtnLogs').classList.add('active');
+        renderLogHistory();
       }
     }
 
-    function populateTeacherDropdown() {
+    function populateTeachersDropdown() {
       const select = document.getElementById('teacherSelect');
-      select.innerHTML = '<option value="">-- Choose Teacher --</option>';
+      select.innerHTML = '<option value="">-- Select Teacher --</option>';
       TEACHERS.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
         const opt = document.createElement('option');
         opt.value = t.name;
@@ -506,33 +498,33 @@
       document.getElementById('datePicker').addEventListener('change', (e) => {
         selectedDate = e.target.value;
         updateDayBadge();
-        renderAbsencesBanner();
-        updateSelectedTeacherSchedule();
-        renderMasterMatrix();
+        renderDateAbsencesBanner();
+        renderTeacherScheduleView();
+        renderMasterMatrixTable();
       });
 
       document.getElementById('teacherSelect').addEventListener('change', (e) => {
-        const teacherName = e.target.value;
-        const teacher = TEACHERS.find(t => t.name === teacherName);
-        const pill = document.getElementById('teacherTypePill');
-        const label = document.getElementById('teacherTypeLabel');
+        const name = e.target.value;
+        const teacher = TEACHERS.find(t => t.name === name);
+        const badgeText = document.getElementById('roleInfoText');
 
         if (teacher) {
-          pill.classList.remove('hidden');
-          label.textContent = teacher.type === 'primary' ? 'Primary Teacher (8 Periods)' : teacher.type === 'hybrid' ? 'Hybrid Teacher (Blocks & Periods)' : 'Secondary Teacher (Blocks on A,B,D,E)';
+          badgeText.textContent = teacher.type === 'primary' 
+            ? `${teacher.name} is a Primary Teacher (8 Period Schedule).` 
+            : teacher.type === 'hybrid' 
+            ? `${teacher.name} is a Hybrid Teacher (Teaches Primary & Secondary).` 
+            : `${teacher.name} is a Secondary Teacher (4 Blocks on Mon, Tue, Thu, Fri).`;
         } else {
-          pill.classList.add('hidden');
+          badgeText.textContent = "Select a teacher to view details";
         }
 
-        updateSelectedTeacherSchedule();
+        renderTeacherScheduleView();
       });
-
-      document.getElementById('markAbsentBtn').addEventListener('click', recordTeacherAbsence);
     }
 
-    function recordTeacherAbsence() {
+    function markTeacherAbsent() {
       const teacherName = document.getElementById('teacherSelect').value;
-      const absenceType = document.getElementById('absenceTypeSelect').value;
+      const reason = document.getElementById('absenceTypeSelect').value;
 
       if (!teacherName) {
         alert("Please select a teacher to mark absent.");
@@ -540,47 +532,45 @@
       }
 
       if (!absences[selectedDate]) absences[selectedDate] = {};
-      
-      absences[selectedDate][teacherName] = {
-        type: absenceType,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
+      absences[selectedDate][teacherName] = { type: reason, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
+      localStorage.setItem('tsc_absences_v2', JSON.stringify(absences));
 
-      localStorage.setItem('tsc_absences', JSON.stringify(absences));
-
-      addHistoryLog({
+      addLogEntry({
         date: selectedDate,
         type: 'ABSENCE',
-        teacher: teacherName,
-        absenceType: absenceType,
-        text: `Marked ${teacherName} as ${absenceType} for ${selectedDate}`
+        text: `Marked ${teacherName} as ${reason} on ${selectedDate}`
       });
 
-      renderAbsencesBanner();
-      updateSelectedTeacherSchedule();
-      renderMasterMatrix();
+      renderDateAbsencesBanner();
+      renderTeacherScheduleView();
+      renderMasterMatrixTable();
     }
 
     function removeAbsence(teacherName) {
       if (absences[selectedDate] && absences[selectedDate][teacherName]) {
         delete absences[selectedDate][teacherName];
-        if (Object.keys(absences[selectedDate]).length === 0) {
-          delete absences[selectedDate];
-        }
-        localStorage.setItem('tsc_absences', JSON.stringify(absences));
-        renderAbsencesBanner();
-        updateSelectedTeacherSchedule();
-        renderMasterMatrix();
+        if (Object.keys(absences[selectedDate]).length === 0) delete absences[selectedDate];
+        localStorage.setItem('tsc_absences_v2', JSON.stringify(absences));
+
+        addLogEntry({
+          date: selectedDate,
+          type: 'REMOVAL',
+          text: `Removed absence record for ${teacherName} on ${selectedDate}`
+        });
+
+        renderDateAbsencesBanner();
+        renderTeacherScheduleView();
+        renderMasterMatrixTable();
       }
     }
 
-    function renderAbsencesBanner() {
-      const banner = document.getElementById('absentTeachersBanner');
-      const list = document.getElementById('absentList');
-      const badge = document.getElementById('absentCountBadge');
+    function renderDateAbsencesBanner() {
+      const banner = document.getElementById('dateAbsencesBanner');
+      const list = document.getElementById('bannerAbsenceList');
+      const badge = document.getElementById('bannerCountBadge');
 
-      const dateAbsences = absences[selectedDate] || {};
-      const names = Object.keys(dateAbsences);
+      const dayAbsences = absences[selectedDate] || {};
+      const names = Object.keys(dayAbsences);
 
       if (names.length === 0) {
         banner.classList.add('hidden');
@@ -588,17 +578,17 @@
       }
 
       banner.classList.remove('hidden');
-      badge.textContent = `${names.length} Teacher${names.length > 1 ? 's' : ''}`;
+      badge.textContent = names.length;
       list.innerHTML = '';
 
       names.forEach(name => {
-        const info = dateAbsences[name];
+        const info = dayAbsences[name];
         const tag = document.createElement('div');
-        tag.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white border border-rose-300 text-rose-900 font-semibold text-xs shadow-sm';
+        tag.className = 'inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-rose-300 text-rose-900 font-bold text-xs rounded-xl shadow-sm';
         tag.innerHTML = `
           <span>${name}</span>
-          <span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-md font-bold">${info.type}</span>
-          <button onclick="removeAbsence('${name}')" class="ml-1 text-rose-400 hover:text-rose-700">
+          <span class="text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded font-black">${info.type}</span>
+          <button onclick="removeAbsence('${name}')" class="text-rose-400 hover:text-rose-700 ml-1">
             <i class="fa-solid fa-xmark"></i>
           </button>
         `;
@@ -606,48 +596,60 @@
       });
     }
 
-    function getTeacherStats(teacherName) {
-      let totalCovers = 0;
-      let lastAbsenceDate = null;
+    function toggleSlotOverride(teacherName, slotKey) {
+      const key = `${selectedDate}_${teacherName}_${slotKey}`;
+      if (overrides[key] === 'FREE') {
+        delete overrides[key];
+      } else {
+        overrides[key] = 'FREE';
+      }
+      localStorage.setItem('tsc_overrides_v2', JSON.stringify(overrides));
+      renderTeacherScheduleView();
+      renderMasterMatrixTable();
+    }
 
-      Object.keys(coverAssignments).forEach(d => {
-        Object.keys(coverAssignments[d]).forEach(key => {
-          if (coverAssignments[d][key] === teacherName) {
-            totalCovers++;
-          }
+    function getTeacherStats(teacherName) {
+      let coverCount = 0;
+      let lastAbsence = null;
+
+      Object.keys(coverages).forEach(d => {
+        Object.keys(coverages[d]).forEach(k => {
+          if (coverages[d][k] === teacherName) coverCount++;
         });
       });
 
       Object.keys(absences).sort().reverse().forEach(d => {
-        if (absences[d][teacherName] && !lastAbsenceDate) {
-          lastAbsenceDate = d;
-        }
+        if (absences[d][teacherName] && !lastAbsence) lastAbsence = d;
       });
 
       const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName] ? SCHEDULES[selectedDayType][teacherName] : {};
-      const busySlotsCount = Object.keys(daySched).length;
-      
-      return { totalCovers, lastAbsenceDate, busySlotsCount };
+      const busyCount = Object.keys(daySched).length;
+
+      return { coverCount, lastAbsence, busyCount };
     }
 
     function getRecommendedCovers(slotKey) {
       const candidates = [];
 
       TEACHERS.forEach(t => {
+        // Skip if absent today
         if (absences[selectedDate] && absences[selectedDate][t.name]) return;
 
-        const teacherSched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][t.name] ? SCHEDULES[selectedDayType][t.name] : {};
-        if (teacherSched[slotKey]) return;
+        // Skip if busy with class unless overridden
+        const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][t.name] ? SCHEDULES[selectedDayType][t.name] : {};
+        const overrideKey = `${selectedDate}_${t.name}_${slotKey}`;
+        const isManuallyFree = overrides[overrideKey] === 'FREE';
+
+        if (daySched[slotKey] && !isManuallyFree) return; // Busy
 
         const stats = getTeacherStats(t.name);
-        let score = (stats.totalCovers * 10) + stats.busySlotsCount;
+        const score = (stats.coverCount * 10) + stats.busyCount;
 
         candidates.push({
           name: t.name,
           type: t.type,
-          coversCount: stats.totalCovers,
-          busySlots: stats.busySlotsCount,
-          lastAbsence: stats.lastAbsenceDate,
+          covers: stats.coverCount,
+          busy: stats.busyCount,
           score: score
         });
       });
@@ -656,20 +658,20 @@
       return candidates;
     }
 
-    function updateSelectedTeacherSchedule() {
+    function renderTeacherScheduleView() {
       const teacherName = document.getElementById('teacherSelect').value;
-      const container = document.getElementById('slotsContainer');
-      const title = document.getElementById('scheduleTitle');
-      const subtitle = document.getElementById('scheduleSubtitle');
-      const dayPill = document.getElementById('dayStructurePill');
+      const container = document.getElementById('slotCardsContainer');
+      const heading = document.getElementById('teacherScheduleHeading');
+      const subheading = document.getElementById('teacherScheduleSubheading');
+      const formatBadge = document.getElementById('dayFormatBadge');
 
       if (!teacherName) {
-        title.textContent = "Teacher Daily Schedule";
-        subtitle.textContent = "Select a teacher above to view schedule and free cover options.";
+        heading.textContent = "Teacher Daily Schedule";
+        subheading.textContent = "Select a teacher above to inspect their schedule.";
         container.innerHTML = `
           <div class="text-center py-12 text-slate-400">
             <i class="fa-solid fa-calendar-day text-4xl mb-3 text-slate-300"></i>
-            <p class="text-sm">Please select a teacher to display their class schedule.</p>
+            <p class="text-sm font-medium">Please select a teacher above to inspect their schedule.</p>
           </div>
         `;
         return;
@@ -679,134 +681,112 @@
       const isAbsent = absences[selectedDate] && absences[selectedDate][teacherName];
       const absenceInfo = isAbsent ? absences[selectedDate][teacherName] : null;
 
-      title.textContent = `${teacherName}'s Schedule`;
-      subtitle.textContent = isAbsent 
-        ? `Status: Marked ${absenceInfo.type} for ${selectedDate}`
-        : `Status: Present (Fresh schedule for ${selectedDate})`;
+      heading.textContent = `${teacherName}'s Schedule`;
+      subheading.textContent = isAbsent 
+        ? `Status: Marked ${absenceInfo.type} for ${selectedDate}` 
+        : `Status: Present on ${selectedDate} (${selectedDayType})`;
 
       const isBlockFormat = (selectedDayType !== "Day C") && (teacher.type !== "primary");
-      dayPill.textContent = isBlockFormat ? "Blocks Format" : "Periods Format";
+      formatBadge.textContent = isBlockFormat ? "Blocks Format" : "Periods Format";
 
-      const scheduleGrid = isBlockFormat ? BLOCK_SCHEDULE : PERIOD_SCHEDULE;
-      const teacherDaySchedule = (SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName]) ? SCHEDULES[selectedDayType][teacherName] : {};
+      const grid = isBlockFormat ? BLOCK_SCHEDULE : PERIOD_SCHEDULE;
+      const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName] ? SCHEDULES[selectedDayType][teacherName] : {};
 
       container.innerHTML = '';
 
-      scheduleGrid.forEach(slotItem => {
-        let slotKey = isBlockFormat ? `B${slotItem.slot}` : `P${slotItem.slot}`;
-        let className = teacherDaySchedule[slotKey] || null;
+      grid.forEach(item => {
+        const slotKey = isBlockFormat ? `B${item.slot}` : `P${item.slot}`;
+        let className = daySched[slotKey] || null;
 
-        if (!isBlockFormat && selectedDayType !== "Day C" && !className) {
-          if (slotItem.slot === 1 || slotItem.slot === 2) className = teacherDaySchedule['B1'];
-          else if (slotItem.slot === 3 || slotItem.slot === 4) className = teacherDaySchedule['B2'];
-          else if (slotItem.slot === 5 || slotItem.slot === 6) className = teacherDaySchedule['B3'];
-          else if (slotItem.slot === 7 || slotItem.slot === 8) className = teacherDaySchedule['B4'];
+        const overrideKey = `${selectedDate}_${teacherName}_${slotKey}`;
+        const isManuallyFree = overrides[overrideKey] === 'FREE';
+
+        if (isManuallyFree) {
+          className = null; // Toggle manually free
         }
 
-        const slotCard = document.createElement('div');
-        slotCard.className = `p-4 rounded-xl border transition-all ${className ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-50 border-slate-200/60 opacity-80'}`;
-
         const coverageKey = `${teacherName}_${slotKey}`;
-        const currentCoverTeacher = (coverAssignments[selectedDate] && coverAssignments[selectedDate][coverageKey]) || null;
+        const currentCover = (coverages[selectedDate] && coverages[selectedDate][coverageKey]) || null;
 
-        let recommendationsHtml = '';
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-xl border transition-all ${className ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-50 border-slate-200/70'}`;
 
+        let coverSelectHtml = '';
         if (className) {
           const freeTeachers = getRecommendedCovers(slotKey);
-
-          let selectOptionsHtml = `<option value="">-- Assign Cover Teacher --</option>`;
-          freeTeachers.forEach((rec, idx) => {
-            const isSelected = (currentCoverTeacher === rec.name) ? 'selected' : '';
-            const topBadge = (idx === 0) ? '⭐ Recommended: ' : '';
-            selectOptionsHtml += `
-              <option value="${rec.name}" ${isSelected}>
-                ${topBadge}${rec.name} (${rec.coversCount} prior covers | ${rec.busySlots} classes today)
-              </option>
-            `;
+          let opts = `<option value="">-- Assign Cover Teacher --</option>`;
+          freeTeachers.forEach((c, idx) => {
+            const sel = (currentCover === c.name) ? 'selected' : '';
+            const rec = (idx === 0) ? '⭐ Best Match: ' : '';
+            opts += `<option value="${c.name}" ${sel}>${rec}${c.name} (${c.covers} covers | ${c.busy} classes today)</option>`;
           });
 
-          recommendationsHtml = `
-            <div class="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-semibold text-slate-500">Free Cover Teachers:</span>
-                <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">${freeTeachers.length} Available</span>
-              </div>
-              <div class="w-full sm:w-auto min-w-[260px]">
-                <select onchange="assignCoverage('${teacherName}', '${slotKey}', this.value)" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 font-medium cursor-pointer">
-                  ${selectOptionsHtml}
-                </select>
-              </div>
+          coverSelectHtml = `
+            <div class="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <span class="text-xs font-bold text-slate-500">${freeTeachers.length} Available Free Staff:</span>
+              <select onchange="assignCoverage('${teacherName}', '${slotKey}', this.value)" class="w-full sm:w-auto bg-slate-50 border border-slate-300 text-xs rounded-lg p-2 font-semibold">
+                ${opts}
+              </select>
             </div>
           `;
         }
 
-        slotCard.innerHTML = `
+        card.innerHTML = `
           <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div class="px-2.5 py-1 bg-indigo-100 text-indigo-800 rounded-lg text-xs font-bold">
-                ${slotItem.name}
-              </div>
-              <span class="text-xs font-medium text-slate-500">
-                <i class="fa-regular fa-clock text-slate-400 mr-1"></i>${slotItem.time}
-              </span>
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-1 bg-indigo-100 text-indigo-900 font-bold text-xs rounded-lg">${item.name}</span>
+              <span class="text-xs font-semibold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>${item.time}</span>
             </div>
 
-            ${currentCoverTeacher ? `
-              <span class="px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm">
-                <i class="fa-solid fa-user-check"></i>
-                Covered by ${currentCoverTeacher}
-              </span>
-            ` : (className ? `
-              <span class="px-2.5 py-0.5 bg-amber-100 text-amber-800 rounded-md text-[11px] font-semibold">
-                Needs Coverage
-              </span>
-            ` : `
-              <span class="text-xs text-slate-400 font-medium">Free Slot</span>
-            `)}
+            <div class="flex items-center space-x-2">
+              <button onclick="toggleSlotOverride('${teacherName}', '${slotKey}')" class="text-[10px] font-bold px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition-colors">
+                ${isManuallyFree ? 'Reset Schedule' : 'Toggle Free'}
+              </button>
+              ${currentCover ? `
+                <span class="px-3 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-full text-xs font-bold">
+                  <i class="fa-solid fa-user-check mr-1"></i>Covered by ${currentCover}
+                </span>
+              ` : (className ? `
+                <span class="px-2.5 py-0.5 bg-amber-100 text-amber-900 rounded-md text-[11px] font-bold">Needs Cover</span>
+              ` : `
+                <span class="text-xs text-slate-400 font-medium italic">Free Slot</span>
+              `)}
+            </div>
           </div>
 
           <div class="mt-2.5">
-            ${className ? `
-              <h3 class="text-sm font-bold text-slate-800">${className}</h3>
-            ` : `
-              <p class="text-xs text-slate-400 italic">No class scheduled during this time slot.</p>
-            `}
+            ${className ? `<h3 class="text-sm font-bold text-slate-800">${className}</h3>` : `<p class="text-xs text-slate-400 italic">No class scheduled during this slot.</p>`}
           </div>
 
-          ${className ? recommendationsHtml : ''}
+          ${className ? coverSelectHtml : ''}
         `;
 
-        container.appendChild(slotCard);
+        container.appendChild(card);
       });
     }
 
     function assignCoverage(absentTeacher, slotKey, coverTeacher) {
-      if (!coverAssignments[selectedDate]) coverAssignments[selectedDate] = {};
-      
-      const coverageKey = `${absentTeacher}_${slotKey}`;
+      if (!coverages[selectedDate]) coverages[selectedDate] = {};
+      const key = `${absentTeacher}_${slotKey}`;
 
       if (coverTeacher) {
-        coverAssignments[selectedDate][coverageKey] = coverTeacher;
-        addHistoryLog({
+        coverages[selectedDate][key] = coverTeacher;
+        addLogEntry({
           date: selectedDate,
           type: 'COVERAGE',
-          teacher: coverTeacher,
-          absentTeacher: absentTeacher,
-          slot: slotKey,
           text: `Assigned ${coverTeacher} to cover ${absentTeacher} (${slotKey}) on ${selectedDate}`
         });
       } else {
-        delete coverAssignments[selectedDate][coverageKey];
+        delete coverages[selectedDate][key];
       }
 
-      localStorage.setItem('tsc_coverages', JSON.stringify(coverAssignments));
-      updateSelectedTeacherSchedule();
-      renderHistoryLog();
-      renderMasterMatrix();
+      localStorage.setItem('tsc_coverages_v2', JSON.stringify(coverages));
+      renderTeacherScheduleView();
+      renderMasterMatrixTable();
     }
 
-    function renderMasterMatrix() {
-      const tbody = document.getElementById('matrixTableBody');
+    function renderMasterMatrixTable() {
+      const tbody = document.getElementById('matrixTbody');
       tbody.innerHTML = '';
 
       TEACHERS.forEach(t => {
@@ -817,81 +797,81 @@
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition-colors";
 
-        let statusBadge = `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-semibold text-[10px]">Present</span>`;
+        let statusBadge = `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">Present</span>`;
         if (isAbsent) {
-          statusBadge = `<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded-md font-semibold text-[10px]">${absenceType}</span>`;
+          statusBadge = `<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-bold text-[10px]">${absenceType}</span>`;
         }
 
         tr.innerHTML = `
           <td class="p-3 font-bold text-slate-800">${t.name}</td>
-          <td class="p-3 text-slate-500 capitalize">${t.type}</td>
+          <td class="p-3 text-slate-500 capitalize font-medium">${t.type}</td>
           <td class="p-3">${statusBadge}</td>
-          <td class="p-3">${daySched.B1 || daySched.P1 || '<span class="text-slate-300 italic">Free</span>'}</td>
-          <td class="p-3">${daySched.B2 || daySched.P3 || '<span class="text-slate-300 italic">Free</span>'}</td>
-          <td class="p-3">${daySched.B3 || daySched.P5 || '<span class="text-slate-300 italic">Free</span>'}</td>
-          <td class="p-3">${daySched.B4 || daySched.P7 || '<span class="text-slate-300 italic">Free</span>'}</td>
+          <td class="p-3 font-medium">${daySched.B1 || daySched.P1 || '<span class="text-slate-300 italic">Free</span>'}</td>
+          <td class="p-3 font-medium">${daySched.B2 || daySched.P3 || '<span class="text-slate-300 italic">Free</span>'}</td>
+          <td class="p-3 font-medium">${daySched.B3 || daySched.P5 || '<span class="text-slate-300 italic">Free</span>'}</td>
+          <td class="p-3 font-medium">${daySched.B4 || daySched.P7 || '<span class="text-slate-300 italic">Free</span>'}</td>
         `;
 
         tbody.appendChild(tr);
       });
     }
 
-    function filterMatrix() {
-      const query = document.getElementById('matrixSearch').value.toLowerCase();
-      const rows = document.querySelectorAll('#matrixTableBody tr');
+    function filterMatrixTable() {
+      const query = document.getElementById('matrixFilterInput').value.toLowerCase();
+      const rows = document.querySelectorAll('#matrixTbody tr');
       rows.forEach(r => {
         r.style.display = r.textContent.toLowerCase().includes(query) ? '' : 'none';
       });
     }
 
-    function addHistoryLog(entry) {
+    function addLogEntry(entry) {
       entry.id = Date.now();
-      entry.time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      entry.time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       historyLogs.unshift(entry);
       if (historyLogs.length > 100) historyLogs.pop();
-      localStorage.setItem('tsc_history', JSON.stringify(historyLogs));
-      renderHistoryLog();
+      localStorage.setItem('tsc_logs_v2', JSON.stringify(historyLogs));
+      renderLogHistory();
     }
 
-    function renderHistoryLog() {
-      const fullContainer = document.getElementById('fullHistoryLog');
-      const quickContainer = document.getElementById('quickHistoryContainer');
+    function renderLogHistory() {
+      const fullList = document.getElementById('fullLogList');
+      const quickList = document.getElementById('quickLogContainer');
 
       if (historyLogs.length === 0) {
-        fullContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No historical records saved.</p>`;
-        quickContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No recent history.</p>`;
+        fullList.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No log history recorded yet.</p>`;
+        quickList.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No activity yet.</p>`;
         return;
       }
 
-      fullContainer.innerHTML = '';
-      quickContainer.innerHTML = '';
+      fullList.innerHTML = '';
+      quickList.innerHTML = '';
 
       historyLogs.forEach((item, idx) => {
         const isAbsence = item.type === 'ABSENCE';
-        const iconClass = isAbsence ? 'fa-user-xmark text-rose-500' : 'fa-user-check text-emerald-500';
+        const icon = isAbsence ? 'fa-user-xmark text-rose-500' : 'fa-user-check text-emerald-500';
 
-        const rowHtml = `
-          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs flex items-start justify-between gap-2">
+        const itemHtml = `
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs flex items-start justify-between gap-2">
             <div class="flex items-start gap-2">
-              <i class="fa-solid ${iconClass} mt-0.5"></i>
+              <i class="fa-solid ${icon} mt-0.5"></i>
               <div>
-                <p class="font-medium text-slate-800">${item.text}</p>
+                <p class="font-bold text-slate-800">${item.text}</p>
                 <p class="text-[10px] text-slate-400 mt-0.5">${item.date} at ${item.time}</p>
               </div>
             </div>
           </div>
         `;
 
-        fullContainer.innerHTML += rowHtml;
-        if (idx < 5) quickContainer.innerHTML += rowHtml;
+        fullList.innerHTML += itemHtml;
+        if (idx < 5) quickList.innerHTML += itemHtml;
       });
     }
 
-    function clearHistory() {
-      if (confirm("Are you sure you want to clear all history logs?")) {
+    function clearAllLogs() {
+      if (confirm("Are you sure you want to clear all log records?")) {
         historyLogs = [];
-        localStorage.removeItem('tsc_history');
-        renderHistoryLog();
+        localStorage.removeItem('tsc_logs_v2');
+        renderLogHistory();
       }
     }
   </script>
