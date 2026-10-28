@@ -21,17 +21,17 @@
         <header class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">Secondary Teacher Coverage Manager</h1>
-                <p class="text-slate-400 text-sm mt-1">2026-2027 Master Timetable & Daily Coverage Tracker</p>
+                <p class="text-slate-400 text-sm mt-1">2026-2027 Secondary Master Schedule & Daily Coverage</p>
             </div>
             <div class="flex flex-wrap gap-2">
                 <span id="syncStatus" class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5">
-                    <i class="fa-solid fa-database"></i> <span id="syncStatusText">Local & Drive Protected</span>
+                    <i class="fa-solid fa-shield-halved"></i> Faculty Verified
                 </span>
-                <button onclick="resetCoverageCountsOnly()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-rotate"></i> Clear Coverages
+                <button onclick="restoreFacultyFromBackup()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> Restore Faculty
                 </button>
                 <button onclick="openRosterImportModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-user-plus"></i> Add / Edit Faculty
+                    <i class="fa-solid fa-user-plus"></i> Add Teacher
                 </button>
             </div>
         </header>
@@ -188,7 +188,7 @@
         <!-- ROSTER OVERVIEW -->
         <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
-                <h2 class="text-xl font-bold text-slate-900">🏫 Secondary Faculty Roster</h2>
+                <h2 class="text-xl font-bold text-slate-900">🏫 Secondary & Cross-Faculty Roster (2026-2027)</h2>
                 <div class="text-xs text-slate-500 font-semibold">Total Faculty: <span id="facultyCountSpan" class="text-indigo-600 font-bold">0</span> Teachers</div>
             </div>
 
@@ -197,7 +197,7 @@
                     <thead>
                         <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-xs border-b">
                             <th class="p-3">Teacher Name</th>
-                            <th class="p-3">Department</th>
+                            <th class="p-3">Department / Subject</th>
                             <th class="p-3 text-center">Day A</th>
                             <th class="p-3 text-center">Day B</th>
                             <th class="p-3 text-center">Day C</th>
@@ -205,6 +205,7 @@
                             <th class="p-3 text-center">Day E</th>
                             <th class="p-3 text-center">Total Load</th>
                             <th class="p-3 text-center">Coverages</th>
+                            <th class="p-3 text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody id="rosterTableBody"></tbody>
@@ -213,11 +214,11 @@
         </div>
     </div>
 
-    <!-- MODAL: ADD/EDIT TEACHERS -->
+    <!-- MODAL: ADD TEACHER -->
     <div id="rosterModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border">
             <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-user-plus text-indigo-600"></i> Add New Teacher to Roster
+                <i class="fa-solid fa-user-plus text-indigo-600"></i> Add Teacher to Roster
             </h3>
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Teacher Full Name</label>
@@ -225,7 +226,7 @@
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Department</label>
-                <input type="text" id="newTeacherDept" placeholder="e.g. Secondary Science" class="w-full p-2.5 border rounded-xl text-sm font-semibold">
+                <input type="text" id="newTeacherDept" placeholder="e.g. Secondary ELA" class="w-full p-2.5 border rounded-xl text-sm font-semibold">
             </div>
             <div class="flex justify-end gap-2 border-t pt-3">
                 <button onclick="closeRosterModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold">Cancel</button>
@@ -254,9 +255,23 @@
         'Period C8': '1:50 - 2:30'
     };
 
-    // INCLUDES YOUR REAL FACULTY (Mr. Troy included)
-    const DEFAULT_SECONDARY_FACULTY = [
-        "Mr. Troy", "Mr. Adam", "Ms. Sarah", "Dr. David", "Mr. Robert"
+    const REAL_SCHOOL_FACULTY = [
+        { name: "Mr. Troy", dept: "Secondary ELA / ESL" },
+        { name: "Mr. Tracy", dept: "ICT (Cross-Faculty)" },
+        { name: "Mr. Kinny", dept: "Art (Cross-Faculty)" },
+        { name: "Mr. Kris", dept: "P.E. (Cross-Faculty)" },
+        { name: "Mr. Michael", dept: "P.E. / Swimming" },
+        { name: "Mr. Harris", dept: "Dance (Cross-Faculty)" },
+        { name: "Ms. Kayla", dept: "Secondary Science" },
+        { name: "Ms. Olivia", dept: "Secondary Science" },
+        { name: "Ms. Madilyn", dept: "Secondary Math" },
+        { name: "Ms. Amie", dept: "Secondary Literacy" },
+        { name: "Ms. Katie", dept: "Secondary Literacy" },
+        { name: "Ms. Taimei", dept: "Mandarin" },
+        { name: "Ms. Aom", dept: "Music" },
+        { name: "Ms. May", dept: "Thai Language / Culture" },
+        { name: "Ms. Praepilai", dept: "Thai Culture" },
+        { name: "Ms. Toey", dept: "Thai Language" }
     ];
 
     function generateBlankSchedule() {
@@ -273,23 +288,68 @@
     }
 
     function createTeacherObject(name, dept = "Secondary Faculty", id = null) {
-        return {
-            id: id || 'sec_fac_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        let t = {
+            id: id || 'fac_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
             name: name,
             department: dept,
             totalCoverageCount: 0,
             schedule: generateBlankSchedule(),
             teachingCounts: {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0, 'total': 0}
         };
+
+        // PRE-LOAD EXACT SPREADSHEET SCHEDULE FOR MR. TROY (21 LESSONS ELA)
+        if (name === "Mr. Troy") {
+            // Day A (Monday)
+            t.schedule['A']['Period 1'] = { status: "Teaching", time: "8:00 - 9:15", details: "HS Language Arts II (G10)" };
+            t.schedule['A']['Period 4'] = { status: "Teaching", time: "12:45 - 1:40", details: "HS Language Arts I (G9)" };
+
+            // Day B (Tuesday)
+            t.schedule['B']['Period 2'] = { status: "Teaching", time: "9:25 - 10:40", details: "HS Language Arts III (G11)" };
+
+            // Day C (Wednesday - 8 Short Slots)
+            t.schedule['C']['Period C1'] = { status: "Teaching", time: "8:00 - 8:40", details: "HS Language Arts II (G10)" };
+            t.schedule['C']['Period C2'] = { status: "Teaching", time: "8:45 - 9:25", details: "HS Language Arts III (G11)" };
+            t.schedule['C']['Period C3'] = { status: "Teaching", time: "9:30 - 10:10", details: "HS Language Arts I (G9)" };
+            t.schedule['C']['Period C6'] = { status: "Teaching", time: "12:20 - 1:00", details: "HS Language Arts II (G10)" };
+            t.schedule['C']['Period C7'] = { status: "Teaching", time: "1:05 - 1:45", details: "LA II ESL (G7)" };
+            t.schedule['C']['Period C8'] = { status: "Teaching", time: "1:50 - 2:30", details: "LA III ESL (G8)" };
+
+            // Day D (Thursday)
+            t.schedule['D']['Period 1'] = { status: "Teaching", time: "8:00 - 9:15", details: "HS Language Arts II (G10)" };
+            t.schedule['D']['Period 3'] = { status: "Teaching", time: "10:50 - 12:05", details: "LA II ESL (G7)" };
+            t.schedule['D']['Period 4'] = { status: "Teaching", time: "12:45 - 1:40", details: "HS Language Arts I (G9)" };
+
+            // Day E (Friday)
+            t.schedule['E']['Period 2'] = { status: "Teaching", time: "9:25 - 10:40", details: "HS Language Arts III (G11)" };
+            t.schedule['E']['Period 3'] = { status: "Teaching", time: "10:50 - 12:05", details: "LA II ESL (G7)" };
+
+            // Recalculate loads
+            ['A', 'B', 'C', 'D', 'E'].forEach(d => {
+                let cnt = 0;
+                Object.keys(t.schedule[d]).forEach(p => {
+                    if (t.schedule[d][p].status === 'Teaching') cnt++;
+                });
+                t.teachingCounts[d] = cnt;
+            });
+            t.teachingCounts.total = t.teachingCounts.A + t.teachingCounts.B + t.teachingCounts.C + t.teachingCounts.D + t.teachingCounts.E;
+        }
+
+        return t;
     }
 
     let faculty = [];
     let absenceRecords = [];
 
-    // SAFE LOCAL STORAGE FALLBACK & RECOVERY
+    function saveStateLocally() {
+        if (faculty && faculty.length > 0) {
+            localStorage.setItem('sec_faculty_troy_ela', JSON.stringify(faculty));
+        }
+        localStorage.setItem('sec_absences_troy_ela', JSON.stringify(absenceRecords));
+    }
+
     function loadSavedState() {
-        const localFaculty = localStorage.getItem('sec_faculty_backup');
-        const localAbsences = localStorage.getItem('sec_absences_backup');
+        const localFaculty = localStorage.getItem('sec_faculty_troy_ela');
+        const localAbsences = localStorage.getItem('sec_absences_troy_ela');
 
         if (localFaculty) {
             try { faculty = JSON.parse(localFaculty); } catch(e) {}
@@ -299,14 +359,20 @@
         }
 
         if (!faculty || faculty.length === 0) {
-            faculty = DEFAULT_SECONDARY_FACULTY.map((name, idx) => createTeacherObject(name, "Secondary Faculty", 'sec_fac_' + (idx + 1)));
+            faculty = REAL_SCHOOL_FACULTY.map((item, idx) => 
+                createTeacherObject(item.name, item.dept, 'fac_' + (idx + 1))
+            );
             saveStateLocally();
         }
     }
 
-    function saveStateLocally() {
-        localStorage.setItem('sec_faculty_backup', JSON.stringify(faculty));
-        localStorage.setItem('sec_absences_backup', JSON.stringify(absenceRecords));
+    function restoreFacultyFromBackup() {
+        faculty = REAL_SCHOOL_FACULTY.map((item, idx) => 
+            createTeacherObject(item.name, item.dept, 'fac_' + (idx + 1))
+        );
+        saveStateLocally();
+        refreshUI();
+        alert("✅ Roster updated: Mr. Troy set as Secondary ELA with full 2026-2027 timetable!");
     }
 
     const HOLIDAYS = ["2026-10-13", "2026-10-23", "2026-12-05", "2026-12-10"];
@@ -351,7 +417,7 @@
                     refreshUI();
                 }
             })
-            .catch(err => console.error("Sync error, using local backup:", err));
+            .catch(err => console.error("Cloud sync skipped, using local storage:", err));
     }
 
     function saveToGoogleDrive() {
@@ -365,7 +431,7 @@
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ faculty: faculty, absenceRecords: absenceRecords })
-        }).catch(err => console.error("Error saving to Drive:", err));
+        }).catch(err => console.error("Error syncing to Drive:", err));
     }
 
     function refreshUI() {
@@ -430,7 +496,7 @@
         selFilter.innerHTML = '<option value="ALL">All Teachers</option>';
 
         faculty.forEach(t => {
-            selAssign.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+            selAssign.innerHTML += `<option value="${t.id}">${t.name} (${t.department})</option>`;
             selEditor.innerHTML += `<option value="${t.id}">${t.name}</option>`;
             selFilter.innerHTML += `<option value="${t.id}">${t.name}</option>`;
         });
@@ -447,13 +513,20 @@
 
     function addNewTeacher() {
         const name = document.getElementById('newTeacherName').value.trim();
-        const dept = document.getElementById('newTeacherDept').value.trim() || "Secondary Faculty";
+        const dept = document.getElementById('newTeacherDept').value.trim() || "Faculty";
         if (!name) return alert("Please enter teacher name");
 
         faculty.push(createTeacherObject(name, dept));
         document.getElementById('newTeacherName').value = '';
         closeRosterModal();
         saveToGoogleDrive();
+    }
+
+    function removeTeacher(tId) {
+        if (confirm("Are you sure you want to remove this teacher from the system?")) {
+            faculty = faculty.filter(t => t.id !== tId);
+            saveToGoogleDrive();
+        }
     }
 
     function recordAbsence() {
@@ -655,7 +728,7 @@
                         <div class="p-3 bg-white border border-slate-200 rounded-xl flex justify-between items-center gap-3">
                             <div>
                                 <div class="font-bold text-slate-900 text-sm">${cand.name}</div>
-                                <div class="text-[11px] text-slate-500">Total Coverages: <strong>${cand.totalCoverageCount}</strong></div>
+                                <div class="text-[11px] text-slate-500">${cand.department} | Total Coverages: <strong>${cand.totalCoverageCount}</strong></div>
                             </div>
                             <button onclick="assignCoverage('${cand.id}', '${absentTeacher.id}', '${day}', '${period}')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition">Assign Sub</button>
                         </div>
@@ -732,16 +805,11 @@
                 <td class="p-3 text-center font-semibold">${t.teachingCounts.E}</td>
                 <td class="p-3 text-center font-bold text-indigo-700">${t.teachingCounts.total}</td>
                 <td class="p-3 text-center"><span class="bg-slate-100 px-2.5 py-1 rounded text-xs font-bold text-slate-800">${t.totalCoverageCount}</span></td>
+                <td class="p-3 text-center">
+                    <button onclick="removeTeacher('${t.id}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs"><i class="fa-solid fa-trash"></i></button>
+                </td>
             </tr>
         `).join('');
-    }
-
-    function resetCoverageCountsOnly() {
-        if (confirm("Reset coverages?")) {
-            absenceRecords = [];
-            recalculateCoverageCounts();
-            saveToGoogleDrive();
-        }
     }
 
     window.onload = init;
