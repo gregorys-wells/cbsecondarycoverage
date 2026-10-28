@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secondary School Teacher Coverage System</title>
+  <title>Teacher Coverage Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -17,49 +17,39 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- Main Navigation Header -->
   <header class="bg-indigo-950 text-white sticky top-0 z-50 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
-      
-      <!-- System Title -->
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center space-x-3">
         <div class="bg-blue-600 p-2.5 rounded-xl shadow-sm">
           <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold tracking-tight leading-tight">Teacher Coverage Portal</h1>
+          <h1 class="text-lg font-bold tracking-tight">Teacher Coverage Portal</h1>
           <p class="text-xs text-indigo-300 font-medium">Principal Operations Console</p>
         </div>
       </div>
 
-      <!-- Date Switcher Controls -->
-      <div class="flex items-center bg-indigo-900/80 p-1.5 rounded-xl border border-indigo-700/60 shadow-inner gap-2">
+      <div class="flex items-center bg-indigo-900/80 p-1.5 rounded-xl border border-indigo-700/60 gap-2">
         <button onclick="navigateDate(-1)" class="px-2.5 py-1.5 bg-indigo-800 hover:bg-blue-600 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 text-white">
           <i class="fa-solid fa-chevron-left"></i> Prev
         </button>
-
         <div class="flex items-center px-2 py-1 bg-indigo-950 rounded-lg border border-indigo-800">
           <i class="fa-regular fa-calendar text-blue-400 mr-2 text-xs"></i>
           <input type="date" id="datePicker" class="bg-transparent text-white font-semibold text-xs focus:outline-none cursor-pointer">
         </div>
-
         <button onclick="navigateDate(1)" class="px-2.5 py-1.5 bg-indigo-800 hover:bg-blue-600 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 text-white">
           Next <i class="fa-solid fa-chevron-right"></i>
         </button>
-
         <button onclick="jumpToToday()" class="px-2 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-bold text-white shadow-sm">
           Today
         </button>
-
         <div id="dayTypeBadge" class="ml-1 px-3 py-1 bg-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider rounded-lg shadow-sm">
           Day A (Mon)
         </div>
       </div>
-
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-indigo-900/50 border-t border-indigo-800/60 flex space-x-2 py-2 overflow-x-auto">
+    <div class="max-w-7xl mx-auto px-4 bg-indigo-900/50 border-t border-indigo-800/60 flex space-x-2 py-2 overflow-x-auto">
       <button id="tabBtnDaily" onclick="switchMainTab('daily')" class="tab-btn active px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-indigo-200 hover:text-white">
         <i class="fa-solid fa-user-check"></i> Daily Coverage Workstation
       </button>
@@ -72,18 +62,12 @@
     </div>
   </header>
 
-  <!-- Main View Container -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
 
-    <!-- TAB 1: DAILY COVERAGE WORKSTATION -->
     <div id="tabDailyView" class="space-y-6">
-
-      <!-- Action Panel: Mark Teacher Absent -->
       <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
         <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-          
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
-            <!-- Teacher Selection -->
             <div>
               <label for="teacherSelect" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Select Teacher</label>
               <select id="teacherSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -91,7 +75,6 @@
               </select>
             </div>
 
-            <!-- Absence Type -->
             <div>
               <label for="absenceTypeSelect" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Absence Reason</label>
               <select id="absenceTypeSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -100,7 +83,6 @@
               </select>
             </div>
 
-            <!-- Role Badge -->
             <div class="flex items-end">
               <div id="roleInfoBadge" class="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-600 font-medium flex items-center gap-2">
                 <i class="fa-solid fa-info-circle text-blue-500"></i>
@@ -109,17 +91,14 @@
             </div>
           </div>
 
-          <!-- Mark Absent Button -->
           <div class="flex items-end">
             <button onclick="markTeacherAbsent()" class="w-full lg:w-auto bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
               <i class="fa-solid fa-user-xmark"></i> Mark Absent
             </button>
           </div>
-
         </div>
       </section>
 
-      <!-- Active Absences Summary Banner for Selected Date -->
       <section id="dateAbsencesBanner" class="hidden bg-rose-50 border border-rose-200 rounded-2xl p-4 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-xs font-bold text-rose-900 uppercase tracking-wider flex items-center gap-2">
@@ -131,10 +110,7 @@
         <div id="bannerAbsenceList" class="flex flex-wrap gap-2"></div>
       </section>
 
-      <!-- Workstation Schedule Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        <!-- Left: Selected Teacher Schedule (7 Cols) -->
         <div class="lg:col-span-7 space-y-4">
           <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
@@ -146,8 +122,6 @@
                 Blocks Format
               </div>
             </div>
-
-            <!-- Schedule Slot Cards Container -->
             <div id="slotCardsContainer" class="space-y-3">
               <div class="text-center py-12 text-slate-400">
                 <i class="fa-solid fa-calendar-day text-4xl mb-3 text-slate-300"></i>
@@ -157,7 +131,6 @@
           </div>
         </div>
 
-        <!-- Right: Smart Recommendation Summary (5 Cols) -->
         <div class="lg:col-span-5 space-y-6">
           <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
             <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wide flex items-center gap-2 pb-3 border-b border-slate-100 mb-3">
@@ -182,7 +155,6 @@
             </div>
           </div>
 
-          <!-- Quick Activity Log -->
           <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
               <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wide">Quick Activity Log</h2>
@@ -191,18 +163,15 @@
             <div id="quickLogContainer" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
           </div>
         </div>
-
       </div>
-
     </div>
 
-    <!-- TAB 2: FULL MASTER SCHEDULE MATRIX -->
     <div id="tabMatrixView" class="hidden space-y-6">
       <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
           <div>
             <h2 class="text-base font-bold text-slate-900">Full School Master Schedule Matrix</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Click <strong>ANY cell</strong> in the table to edit the class, mark as FREE, or add a class. Live synced with Coverage Finder!</p>
+            <p class="text-xs text-slate-500 mt-0.5">Click <strong>ANY cell</strong> in the table to edit the class, mark as FREE, or add a class.</p>
           </div>
           <div class="w-full md:w-72">
             <input type="text" id="matrixFilterInput" onkeyup="filterMatrixTable()" placeholder="Search teacher or subject..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -222,15 +191,12 @@
                 <th class="p-3 rounded-tr-xl">Block / Period 4</th>
               </tr>
             </thead>
-            <tbody id="matrixTbody" class="divide-y divide-slate-200">
-              <!-- Rendered via JS -->
-            </tbody>
+            <tbody id="matrixTbody" class="divide-y divide-slate-200"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- TAB 3: ABSENCES & COVERAGE LOG -->
     <div id="tabLogsView" class="hidden space-y-6">
       <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
@@ -242,11 +208,9 @@
             <i class="fa-solid fa-trash-can mr-1"></i> Clear Log History
           </button>
         </div>
-
         <div id="fullLogList" class="space-y-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1"></div>
       </div>
     </div>
-
   </main>
 
   <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500 mt-auto">
@@ -390,17 +354,16 @@
       }
     };
 
-    // State
     let selectedDate = new Date().toISOString().split('T')[0];
     let selectedDayType = "Day A";
     let activeMainTab = "daily";
 
-    let absences = JSON.parse(localStorage.getItem('tsc_absences_v5') || '{}');
-    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v5') || '{}');
-    let customClasses = JSON.parse(localStorage.getItem('tsc_custom_classes_v5') || '{}');
-    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v5') || '[]');
+    let absences = JSON.parse(localStorage.getItem('tsc_absences_v6') || '{}');
+    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v6') || '{}');
+    let customClasses = JSON.parse(localStorage.getItem('tsc_custom_classes_v6') || '{}');
+    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v6') || '[]');
 
-    document.addEventListener('DOMContentLoaded', () => {
+    function initPortal() {
       initDatePicker();
       populateTeachersDropdown();
       setupEventListeners();
@@ -408,7 +371,13 @@
       renderTeacherScheduleView();
       renderMasterMatrixTable();
       renderLogHistory();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPortal);
+    } else {
+      initPortal();
+    }
 
     function getDayTypeFromDate(dateStr) {
       const d = new Date(dateStr);
@@ -423,7 +392,7 @@
 
     function initDatePicker() {
       const picker = document.getElementById('datePicker');
-      picker.value = selectedDate;
+      if (picker) picker.value = selectedDate;
       updateDayBadge();
     }
 
@@ -431,7 +400,8 @@
       const cur = new Date(selectedDate);
       cur.setDate(cur.getDate() + days);
       selectedDate = cur.toISOString().split('T')[0];
-      document.getElementById('datePicker').value = selectedDate;
+      const picker = document.getElementById('datePicker');
+      if (picker) picker.value = selectedDate;
       updateDayBadge();
       renderDateAbsencesBanner();
       renderTeacherScheduleView();
@@ -440,7 +410,8 @@
 
     function jumpToToday() {
       selectedDate = new Date().toISOString().split('T')[0];
-      document.getElementById('datePicker').value = selectedDate;
+      const picker = document.getElementById('datePicker');
+      if (picker) picker.value = selectedDate;
       updateDayBadge();
       renderDateAbsencesBanner();
       renderTeacherScheduleView();
@@ -450,9 +421,12 @@
     function updateDayBadge() {
       const info = getDayTypeFromDate(selectedDate);
       selectedDayType = info.code;
-      document.getElementById('dayTypeBadge').textContent = `${info.code} (${info.name.substring(0,3)})`;
-      document.getElementById('matrixDateHeading').textContent = `${selectedDate} (${info.code})`;
-      document.getElementById('bannerDateText').textContent = selectedDate;
+      const badge = document.getElementById('dayTypeBadge');
+      if (badge) badge.textContent = `${info.code} (${info.name.substring(0,3)})`;
+      const mHeading = document.getElementById('matrixDateHeading');
+      if (mHeading) mHeading.textContent = `${selectedDate} (${info.code})`;
+      const bText = document.getElementById('bannerDateText');
+      if (bText) bText.textContent = selectedDate;
     }
 
     function switchMainTab(tab) {
@@ -481,8 +455,9 @@
 
     function populateTeachersDropdown() {
       const select = document.getElementById('teacherSelect');
+      if (!select) return;
       select.innerHTML = '<option value="">-- Select Teacher --</option>';
-      TEACHERS.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
+      TEACHERS.slice().sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
         const opt = document.createElement('option');
         opt.value = t.name;
         opt.textContent = `${t.name} (${t.type === 'primary' ? 'Primary' : t.type === 'hybrid' ? 'Hybrid' : 'Secondary'})`;
@@ -491,45 +466,53 @@
     }
 
     function setupEventListeners() {
-      document.getElementById('datePicker').addEventListener('change', (e) => {
-        selectedDate = e.target.value;
-        updateDayBadge();
-        renderDateAbsencesBanner();
-        renderTeacherScheduleView();
-        renderMasterMatrixTable();
-      });
+      const picker = document.getElementById('datePicker');
+      if (picker) {
+        picker.addEventListener('change', (e) => {
+          selectedDate = e.target.value;
+          updateDayBadge();
+          renderDateAbsencesBanner();
+          renderTeacherScheduleView();
+          renderMasterMatrixTable();
+        });
+      }
 
-      document.getElementById('teacherSelect').addEventListener('change', (e) => {
-        const name = e.target.value;
-        const teacher = TEACHERS.find(t => t.name === name);
-        const badgeText = document.getElementById('roleInfoText');
+      const tSelect = document.getElementById('teacherSelect');
+      if (tSelect) {
+        tSelect.addEventListener('change', (e) => {
+          const name = e.target.value;
+          const teacher = TEACHERS.find(t => t.name === name);
+          const badgeText = document.getElementById('roleInfoText');
 
-        if (teacher) {
-          badgeText.textContent = teacher.type === 'primary' 
-            ? `${teacher.name} is a Primary Teacher (8 Period Schedule).` 
-            : teacher.type === 'hybrid' 
-            ? `${teacher.name} is a Hybrid Teacher (Teaches Primary & Secondary).` 
-            : `${teacher.name} is a Secondary Teacher (4 Blocks on Mon, Tue, Thu, Fri).`;
-        } else {
-          badgeText.textContent = "Select a teacher to view details";
-        }
+          if (teacher && badgeText) {
+            badgeText.textContent = teacher.type === 'primary' 
+              ? `${teacher.name} is a Primary Teacher (8 Period Schedule).` 
+              : teacher.type === 'hybrid' 
+              ? `${teacher.name} is a Hybrid Teacher (Teaches Primary & Secondary).` 
+              : `${teacher.name} is a Secondary Teacher (4 Blocks on Mon, Tue, Thu, Fri).`;
+          } else if (badgeText) {
+            badgeText.textContent = "Select a teacher to view details";
+          }
 
-        renderTeacherScheduleView();
-      });
+          renderTeacherScheduleView();
+        });
+      }
     }
 
     function markTeacherAbsent() {
-      const teacherName = document.getElementById('teacherSelect').value;
-      const reason = document.getElementById('absenceTypeSelect').value;
+      const teacherSelect = document.getElementById('teacherSelect');
+      const teacherName = teacherSelect ? teacherSelect.value : "";
+      const reasonSelect = document.getElementById('absenceTypeSelect');
+      const reason = reasonSelect ? reasonSelect.value : "Absent";
 
       if (!teacherName) {
-        alert("Please select a teacher to mark absent.");
+        alert("Please select a teacher from the dropdown first.");
         return;
       }
 
       if (!absences[selectedDate]) absences[selectedDate] = {};
       absences[selectedDate][teacherName] = { type: reason, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-      localStorage.setItem('tsc_absences_v5', JSON.stringify(absences));
+      localStorage.setItem('tsc_absences_v6', JSON.stringify(absences));
 
       addLogEntry({
         date: selectedDate,
@@ -546,7 +529,7 @@
       if (absences[selectedDate] && absences[selectedDate][teacherName]) {
         delete absences[selectedDate][teacherName];
         if (Object.keys(absences[selectedDate]).length === 0) delete absences[selectedDate];
-        localStorage.setItem('tsc_absences_v5', JSON.stringify(absences));
+        localStorage.setItem('tsc_absences_v6', JSON.stringify(absences));
 
         addLogEntry({
           date: selectedDate,
@@ -564,6 +547,8 @@
       const banner = document.getElementById('dateAbsencesBanner');
       const list = document.getElementById('bannerAbsenceList');
       const badge = document.getElementById('bannerCountBadge');
+
+      if (!banner || !list || !badge) return;
 
       const dayAbsences = absences[selectedDate] || {};
       const names = Object.keys(dayAbsences);
@@ -618,10 +603,10 @@
       const choice = prompt(
         `MANAGE MATRIX CELL for ${teacherName} (${slotKey}) on ${selectedDate}:\n` +
         `Current Status: [${currentClassName}]\n\n` +
-        `Choose an action:\n` +
-        `1. Type a NEW CLASS name to assign class\n` +
-        `2. Type "FREE" to set teacher as free for coverage\n` +
-        `3. Type "RESET" to restore original schedule`,
+        `Actions:\n` +
+        `- Enter a class name to assign class\n` +
+        `- Type "FREE" to clear slot and make available for coverage\n` +
+        `- Type "RESET" to restore default schedule`,
         currentClassName
       );
 
@@ -651,7 +636,7 @@
         });
       }
 
-      localStorage.setItem('tsc_custom_classes_v5', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v6', JSON.stringify(customClasses));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -659,7 +644,7 @@
     function removeClassFromSchedule(teacherName, slotKey) {
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       customClasses[key] = "REMOVED";
-      localStorage.setItem('tsc_custom_classes_v5', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v6', JSON.stringify(customClasses));
 
       addLogEntry({
         date: selectedDate,
@@ -677,7 +662,7 @@
 
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       customClasses[key] = className.trim();
-      localStorage.setItem('tsc_custom_classes_v5', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v6', JSON.stringify(customClasses));
 
       addLogEntry({
         date: selectedDate,
@@ -692,7 +677,7 @@
     function resetSlotSchedule(teacherName, slotKey) {
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       delete customClasses[key];
-      localStorage.setItem('tsc_custom_classes_v5', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v6', JSON.stringify(customClasses));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -755,11 +740,14 @@
     }
 
     function renderTeacherScheduleView() {
-      const teacherName = document.getElementById('teacherSelect').value;
+      const tSelect = document.getElementById('teacherSelect');
+      const teacherName = tSelect ? tSelect.value : "";
       const container = document.getElementById('slotCardsContainer');
       const heading = document.getElementById('teacherScheduleHeading');
       const subheading = document.getElementById('teacherScheduleSubheading');
       const formatBadge = document.getElementById('dayFormatBadge');
+
+      if (!container || !heading || !subheading) return;
 
       if (!teacherName) {
         heading.textContent = "Teacher Daily Schedule";
@@ -783,7 +771,7 @@
         : `Status: Present on ${selectedDate} (${selectedDayType})`;
 
       const isBlockFormat = (selectedDayType !== "Day C") && (teacher.type !== "primary");
-      formatBadge.textContent = isBlockFormat ? "Blocks Format" : "Periods Format";
+      if (formatBadge) formatBadge.textContent = isBlockFormat ? "Blocks Format" : "Periods Format";
 
       const grid = isBlockFormat ? BLOCK_SCHEDULE : PERIOD_SCHEDULE;
       const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName] ? SCHEDULES[selectedDayType][teacherName] : {};
@@ -897,13 +885,14 @@
         delete coverages[selectedDate][key];
       }
 
-      localStorage.setItem('tsc_coverages_v5', JSON.stringify(coverages));
+      localStorage.setItem('tsc_coverages_v6', JSON.stringify(coverages));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
 
     function renderMasterMatrixTable() {
       const tbody = document.getElementById('matrixTbody');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
       TEACHERS.forEach(t => {
@@ -934,8 +923,8 @@
           if (isCovered) {
             return `
               <div onclick="onMatrixCellClick('${t.name}', ${colIdx})" class="cursor-pointer p-2 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-950 font-bold text-xs flex items-center justify-between hover:bg-emerald-100 transition-all shadow-sm">
-                <span>${val || 'Class'}</span>
-                <span class="text-[9px] bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded font-black">Covered: ${isCovered}</span>
+                <span class="truncate pr-1">${val || 'Class'}</span>
+                <span class="text-[9px] bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded font-black whitespace-nowrap">Sub: ${isCovered}</span>
               </div>
             `;
           } else if (val) {
@@ -970,7 +959,8 @@
     }
 
     function filterMatrixTable() {
-      const query = document.getElementById('matrixFilterInput').value.toLowerCase();
+      const input = document.getElementById('matrixFilterInput');
+      const query = input ? input.value.toLowerCase() : "";
       const rows = document.querySelectorAll('#matrixTbody tr');
       rows.forEach(r => {
         r.style.display = r.textContent.toLowerCase().includes(query) ? '' : 'none';
@@ -982,13 +972,15 @@
       entry.time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       historyLogs.unshift(entry);
       if (historyLogs.length > 100) historyLogs.pop();
-      localStorage.setItem('tsc_logs_v5', JSON.stringify(historyLogs));
+      localStorage.setItem('tsc_logs_v6', JSON.stringify(historyLogs));
       renderLogHistory();
     }
 
     function renderLogHistory() {
       const fullList = document.getElementById('fullLogList');
       const quickList = document.getElementById('quickLogContainer');
+
+      if (!fullList || !quickList) return;
 
       if (historyLogs.length === 0) {
         fullList.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No log history recorded yet.</p>`;
@@ -1023,7 +1015,7 @@
     function clearAllLogs() {
       if (confirm("Are you sure you want to clear all log records?")) {
         historyLogs = [];
-        localStorage.removeItem('tsc_logs_v5');
+        localStorage.removeItem('tsc_logs_v6');
         renderLogHistory();
       }
     }
