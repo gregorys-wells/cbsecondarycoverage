@@ -1,843 +1,789 @@
-Thank you for clarifying. You are completely right — **Mr. Troy teaches High School & Middle School ELA (English Language Arts / ESL)**, with **21 lessons** total per week.
-
-Here is the exact breakdown of **Mr. Troy’s schedule** pulled directly from his file in your Google Drive (`Mr Troy.pdf`):
-
-### Mr. Troy — Secondary ELA / ESL (21 Lessons)
-
-| Time | Monday | Tuesday | Wednesday (Day C) | Thursday | Friday |
-| --- | --- | --- | --- | --- | --- |
-| **8:00 – 9:15 / 8:40** | **HS ELA II (G10)** | — | **HS ELA II (G10)** | **HS ELA II (G10)** | — |
-| **8:50 – 9:30** | — | — | **HS ELA III (G11)** | — | — |
-| **9:25 – 10:40 / 10:20** | — | **HS ELA III (G11)** | **HS ELA I (G9)** | — | **HS ELA III (G11)** |
-| **9:45 – 11:10** | — | — | — | **ELA II ESL (G7)** | **ELA II ESL (G7)** |
-| **11:40 – 1:10 / 12:25** | **HS ELA I (G9)** | — | **HS ELA II (G10)** | **HS ELA I (G9)** | — |
-| **12:30 – 1:10** | — | — | **ELA II ESL (G7)** | — | — |
-| **1:15 – 2:40 / 1:55** | — | — | **ELA III ESL (G8)** | — | — |
-
----
-
-### Complete Single-File Code (Updated for Mr. Troy ELA)
-
-Here is your complete code updated with **Mr. Troy designated correctly as ELA / English**, populated with his teaching periods so the coverage matching system correctly ranks available secondary substitutes.
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secondary Teacher Coverage Manager (2026-2027)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script>
-      // ==========================================================
-      // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
-      // ==========================================================
-      const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secondary School Teacher Coverage System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen p-4 md:p-6">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <div class="max-w-7xl mx-auto space-y-6">
-        <!-- HEADER -->
-        <header class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+  <!-- Header / Top Bar -->
+  <header class="bg-indigo-900 text-white shadow-md border-b border-indigo-800 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-700 p-2.5 rounded-lg shadow-inner">
+          <i class="fa-solid fa-school text-indigo-200 text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight">Principal's Teacher Coverage System</h1>
+          <p class="text-xs text-indigo-200 font-medium">Secondary School Operations & Management</p>
+        </div>
+      </div>
+
+      <!-- Date & Day Picker Controls -->
+      <div class="flex items-center bg-indigo-950/60 rounded-xl p-1.5 border border-indigo-700/50 shadow-inner">
+        <div class="flex items-center px-3 py-1.5 space-x-2">
+          <i class="fa-regular fa-calendar-days text-indigo-300"></i>
+          <input type="date" id="datePicker" class="bg-transparent text-white font-semibold text-sm focus:outline-none cursor-pointer">
+        </div>
+        <div class="h-6 w-px bg-indigo-700/60 my-auto"></div>
+        <div id="dayBadge" class="ml-2 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-indigo-600 text-white shadow-sm flex items-center gap-1.5">
+          <span>Day A</span>
+          <span class="text-[10px] opacity-75 font-normal">(Mon)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-6">
+
+    <!-- Top Controls: Select Teacher, Absence Type, Action Button -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 transition-all">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        
+        <!-- Left: Form Controls -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full md:w-auto flex-grow">
+          
+          <!-- Teacher Dropdown -->
+          <div>
+            <label for="teacherSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Select Teacher</label>
+            <div class="relative">
+              <select id="teacherSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-2.5 pr-8 appearance-none font-medium cursor-pointer">
+                <option value="">-- Choose Teacher --</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500">
+                <i class="fa-solid fa-chevron-down text-xs"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Absence Type Dropdown -->
+          <div>
+            <label for="absenceTypeSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Absence Type</label>
+            <div class="relative">
+              <select id="absenceTypeSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-2.5 pr-8 appearance-none font-medium cursor-pointer">
+                <option value="Absent">Absent</option>
+                <option value="Wells Business">Wells Business</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500">
+                <i class="fa-solid fa-chevron-down text-xs"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Teacher Role Indicator Pill -->
+          <div class="flex flex-col justify-end">
+            <div id="teacherTypePill" class="hidden text-xs font-medium px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 flex items-center gap-2">
+              <i class="fa-solid fa-user-tag text-slate-400"></i>
+              <span id="teacherTypeLabel">Secondary Teacher</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Record Absence Button -->
+        <div class="w-full md:w-auto flex items-end justify-end pt-2 md:pt-0">
+          <button id="markAbsentBtn" class="w-full md:w-auto bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm px-6 py-2.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fa-solid fa-user-xmark"></i>
+            <span>Mark Teacher Absent</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Absences Recorded Banner (if any for current date) -->
+    <section id="absentTeachersBanner" class="hidden bg-rose-50 border border-rose-200 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-bold text-rose-900 uppercase tracking-wide flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+          <span>Absences Recorded For Selected Date</span>
+        </h2>
+        <span id="absentCountBadge" class="bg-rose-200 text-rose-800 text-xs font-bold px-2.5 py-0.5 rounded-full">0 Teachers</span>
+      </div>
+      <div id="absentList" class="flex flex-wrap gap-2">
+        <!-- Badges populated by JS -->
+      </div>
+    </section>
+
+    <!-- Workstation Grid: Left = Schedule & Cover Finder, Right = Summary & Recommendations -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left Column (7 cols): Impacted Schedule & Recommended Covers -->
+      <div class="lg:col-span-7 space-y-6">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
             <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">Secondary Teacher Coverage Manager</h1>
-                <p class="text-slate-400 text-sm mt-1">2026-2027 Secondary Master Schedule & Daily Coverage</p>
+              <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-regular fa-clock text-indigo-600"></i>
+                <span id="scheduleTitle">Teacher Daily Schedule</span>
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5" id="scheduleSubtitle">Select a teacher above to view schedule and free cover options.</p>
             </div>
-            <div class="flex flex-wrap gap-2">
-                <span id="syncStatus" class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5">
-                    <i class="fa-solid fa-shield-halved"></i> Faculty Verified
-                </span>
-                <button onclick="restoreFacultyFromBackup()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-rotate-left"></i> Restore Faculty
-                </button>
-                <button onclick="openRosterImportModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-user-plus"></i> Add Teacher
-                </button>
+            <div id="dayStructurePill" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
+              4 Blocks
             </div>
-        </header>
+          </div>
 
-        <!-- DAY C BANNER -->
-        <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between text-xs font-semibold text-amber-900">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base"></i>
-                <span><strong>Schedule Alert:</strong> Days A, B, D, E follow standard 5-period slots. <strong>Day C (Wednesday)</strong> follows an 8-period short slot schedule (Periods C1–C8).</span>
+          <!-- Slots Container -->
+          <div id="slotsContainer" class="space-y-4">
+            <div class="text-center py-12 text-slate-400">
+              <i class="fa-solid fa-calendar-day text-4xl mb-3 text-slate-300"></i>
+              <p class="text-sm">Please select a teacher to display their class schedule.</p>
             </div>
+          </div>
         </div>
 
-        <!-- NAVIGATION TABS -->
-        <div class="flex border-b border-slate-300 gap-2 text-sm font-bold flex-wrap">
-            <button id="tab-assign" onclick="switchTab('assign')" class="py-3 px-5 border-b-2 border-indigo-600 text-indigo-600 bg-white rounded-t-xl shadow-sm">
-                <i class="fa-solid fa-user-check mr-2"></i>Assign Coverage
-            </button>
-            <button id="tab-log" onclick="switchTab('log')" class="py-3 px-5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 rounded-t-xl">
-                <i class="fa-solid fa-clipboard-list mr-2"></i>Absence Log & History
-            </button>
-            <button id="tab-view" onclick="switchTab('view')" class="py-3 px-5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 rounded-t-xl">
-                <i class="fa-solid fa-calendar-days mr-2"></i>Full Period Grid & Editor
-            </button>
+      </div>
+
+      <!-- Right Column (5 cols): Teacher Stats & Coverage Recommendation Engine -->
+      <div class="lg:col-span-5 space-y-6">
+
+        <!-- Selected Cover Candidate Score Breakdown / Stats -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+            <span>Smart Coverage Engine</span>
+          </h2>
+
+          <div class="space-y-3 text-xs text-slate-600">
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-start gap-2.5">
+              <i class="fa-solid fa-circle-info text-indigo-500 mt-0.5 text-sm"></i>
+              <p>
+                <strong>Recommendation Logic:</strong> Free teachers are ranked for each slot based on:
+              </p>
+            </div>
+            <ul class="space-y-2 pl-2">
+              <li class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                <span><strong>Fewest Prior Coverages:</strong> Equalized duty load</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span><strong>Most Free Time Today:</strong> Lightest schedule that day</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                <span><strong>Absence Recency:</strong> Recency of own last absence</span>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        <!-- TAB 1: ASSIGN COVERAGE -->
-        <div id="view-assign" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-5">
-                <h2 class="text-xl font-bold text-slate-900 border-b pb-3 flex items-center justify-between">
-                    <span class="flex items-center gap-2"><i class="fa-solid fa-clipboard-check text-indigo-600"></i> Mark Teacher Absence</span>
-                </h2>
+        <!-- Master Absence & Coverage History Log -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
+              <span>Coverage & Absence History Log</span>
+            </h2>
+            <button id="clearHistoryBtn" class="text-xs text-slate-400 hover:text-rose-600 font-medium transition-colors">Clear All</button>
+          </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Select Absent Teacher</label>
-                    <select id="absentTeacherSelect" onchange="updateCoverageOptions()" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
-                        <option value="">-- Select Teacher --</option>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Date of Absence</label>
-                        <input type="date" id="absenceDate" onchange="handleDateChange()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-sm font-semibold">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Schedule Day</label>
-                        <select id="scheduleDaySelect" onchange="updateCoverageOptions()" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
-                            <option value="A">Day A (Mon)</option>
-                            <option value="B">Day B (Tue)</option>
-                            <option value="C">Day C (Wed - 8 Periods)</option>
-                            <option value="D">Day D (Thu)</option>
-                            <option value="E">Day E (Fri)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Absence Reason / Type</label>
-                    <select id="absenceTypeSelect" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
-                        <option value="Absent">🔴 Absent (Sick / Personal Leave)</option>
-                        <option value="Wells Business">🔵 Wells Business (School Trip / Event)</option>
-                    </select>
-                </div>
-
-                <button onclick="recordAbsence()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm shadow transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-user-slash"></i> Record Absence
-                </button>
-            </div>
-
-            <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
-                <div class="flex justify-between items-center border-b pb-3">
-                    <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-shapes text-amber-500"></i> Periods Needing Coverage
-                    </h2>
-                    <span id="matchCount" class="text-xs font-bold px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full">0 Periods Needing Coverage</span>
-                </div>
-
-                <div id="substitutesContainer" class="space-y-4 min-h-[320px]">
-                    <div class="p-8 text-center text-slate-400">Select an absent teacher to display their periods needing coverage.</div>
-                </div>
-            </div>
+          <div id="historyLog" class="max-h-80 overflow-y-auto custom-scrollbar space-y-2.5 pr-1">
+            <p class="text-xs text-slate-400 text-center py-6">No coverage or absence logs recorded yet.</p>
+          </div>
         </div>
 
-        <!-- TAB 2: ABSENCE LOG -->
-        <div id="view-log" class="hidden bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-6">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900">📋 Absence Log & History</h2>
-                    <p class="text-xs text-slate-500">History of teacher absences and registered substitutions.</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                    <select id="logFilterTeacherSelect" onchange="renderAbsenceLogTable()" class="p-2.5 border rounded-xl bg-slate-50 font-bold text-sm focus:ring-2 focus:ring-indigo-500">
-                        <option value="ALL">All Teachers</option>
-                    </select>
-                    <button onclick="clearAllAbsences()" class="bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold px-3.5 py-2.5 rounded-xl text-xs transition whitespace-nowrap">
-                        <i class="fa-solid fa-trash-can mr-1"></i> Clear Log History
-                    </button>
-                </div>
-            </div>
+      </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-xs border-b">
-                            <th class="p-3">Date</th>
-                            <th class="p-3">Schedule Day</th>
-                            <th class="p-3">Absent Teacher</th>
-                            <th class="p-3">Absence Type</th>
-                            <th class="p-3">Coverages Assigned</th>
-                            <th class="p-3 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="absenceLogTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB 3: FULL SCHEDULE & EDITOR -->
-        <div id="view-schedule" class="hidden bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-6">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900">🗓️ Master Period Grid</h2>
-                    <p class="text-xs text-slate-500">Matrix showing master FREE and TEACHING status across days.</p>
-                </div>
-                <div class="flex items-center gap-3 w-full md:w-auto">
-                    <select id="editorTeacherSelect" onchange="renderScheduleEditor()" class="p-2.5 border rounded-xl bg-slate-50 font-bold text-sm focus:ring-2 focus:ring-indigo-500"></select>
-                    <select id="editorDaySelect" onchange="renderScheduleEditor()" class="p-2.5 border rounded-xl bg-slate-50 font-bold text-sm focus:ring-2 focus:ring-indigo-500">
-                        <option value="A">Day A (Mon)</option>
-                        <option value="B">Day B (Tue)</option>
-                        <option value="C">Day C (Wed - 8 Periods)</option>
-                        <option value="D">Day D (Thu)</option>
-                        <option value="E">Day E (Fri)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-xs border-b">
-                            <th class="p-3">Period</th>
-                            <th class="p-3">Time</th>
-                            <th class="p-3 text-center">Status</th>
-                            <th class="p-3">Class / Subject Details</th>
-                            <th class="p-3 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="editorTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ROSTER OVERVIEW -->
-        <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h2 class="text-xl font-bold text-slate-900">🏫 Secondary & Cross-Faculty Roster (2026-2027)</h2>
-                <div class="text-xs text-slate-500 font-semibold">Total Faculty: <span id="facultyCountSpan" class="text-indigo-600 font-bold">0</span> Teachers</div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-xs border-b">
-                            <th class="p-3">Teacher Name</th>
-                            <th class="p-3">Department / Subject</th>
-                            <th class="p-3 text-center">Day A</th>
-                            <th class="p-3 text-center">Day B</th>
-                            <th class="p-3 text-center">Day C</th>
-                            <th class="p-3 text-center">Day D</th>
-                            <th class="p-3 text-center">Day E</th>
-                            <th class="p-3 text-center">Total Load</th>
-                            <th class="p-3 text-center">Coverages</th>
-                            <th class="p-3 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rosterTableBody"></tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
-    <!-- MODAL: ADD TEACHER -->
-    <div id="rosterModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border">
-            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-user-plus text-indigo-600"></i> Add Teacher to Roster
-            </h3>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Teacher Full Name</label>
-                <input type="text" id="newTeacherName" placeholder="e.g. Mr. Troy" class="w-full p-2.5 border rounded-xl text-sm font-semibold">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Department</label>
-                <input type="text" id="newTeacherDept" placeholder="e.g. Secondary ELA" class="w-full p-2.5 border rounded-xl text-sm font-semibold">
-            </div>
-            <div class="flex justify-end gap-2 border-t pt-3">
-                <button onclick="closeRosterModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold">Cancel</button>
-                <button onclick="addNewTeacher()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold">Save Teacher</button>
-            </div>
-        </div>
-    </div>
+  </main>
 
-    <script>
-    const SEC_SLOTS_STANDARD = {
-        'Period 1': '8:00 - 9:15',
-        'Period 2': '9:25 - 10:40',
-        'Period 3': '10:50 - 12:05',
-        'Period 4': '12:45 - 1:40',
-        'Period 5': '1:45 - 2:40'
-    };
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
+    <p>Secondary School Teacher Coverage System &bull; Principal Portal &bull; Date-Specific Operations</p>
+  </footer>
 
-    const SEC_SLOTS_DAY_C = {
-        'Period C1': '8:00 - 8:40',
-        'Period C2': '8:45 - 9:25',
-        'Period C3': '9:30 - 10:10',
-        'Period C4': '10:15 - 10:55',
-        'Period C5': '11:00 - 11:40',
-        'Period C6': '12:20 - 1:00',
-        'Period C7': '1:05 - 1:45',
-        'Period C8': '1:50 - 2:30'
-    };
-
-    const REAL_SCHOOL_FACULTY = [
-        { name: "Mr. Troy", dept: "Secondary ELA / ESL" },
-        { name: "Mr. Tracy", dept: "ICT (Cross-Faculty)" },
-        { name: "Mr. Kinny", dept: "Art (Cross-Faculty)" },
-        { name: "Mr. Kris", dept: "P.E. (Cross-Faculty)" },
-        { name: "Mr. Michael", dept: "P.E. / Swimming" },
-        { name: "Mr. Harris", dept: "Dance (Cross-Faculty)" },
-        { name: "Ms. Kayla", dept: "Secondary Science" },
-        { name: "Ms. Olivia", dept: "Secondary Science" },
-        { name: "Ms. Madilyn", dept: "Secondary Math" },
-        { name: "Ms. Amie", dept: "Secondary Literacy" },
-        { name: "Ms. Katie", dept: "Secondary Literacy" },
-        { name: "Ms. Taimei", dept: "Mandarin" },
-        { name: "Ms. Aom", dept: "Music" },
-        { name: "Ms. May", dept: "Thai Language / Culture" },
-        { name: "Ms. Praepilai", dept: "Thai Culture" },
-        { name: "Ms. Toey", dept: "Thai Language" }
+  <!-- Inline Script with Full Schedule Data & System Logic -->
+  <script>
+    // System Data Structures
+    const TEACHERS = [
+      { name: "Mr. John", type: "secondary" },
+      { name: "Ms. Philmi", type: "secondary" },
+      { name: "Mr. Landon", type: "secondary" },
+      { name: "Mr. Fluke", type: "hybrid" },
+      { name: "Ms. Julia", type: "secondary" },
+      { name: "Mr. Simone", type: "secondary" },
+      { name: "Mr. Troy", type: "secondary" },
+      { name: "Mr. Kris", type: "secondary" },
+      { name: "Mr. Wentzel", type: "secondary" },
+      { name: "Mr. Xyries", type: "secondary" },
+      { name: "Mr. Harris", type: "hybrid" },
+      { name: "Mr. Kinny", type: "hybrid" },
+      { name: "Mr. Greg", type: "secondary" },
+      { name: "Mr. Jacob", type: "secondary" },
+      { name: "Ms. Aom", type: "hybrid" },
+      { name: "Ms. May", type: "hybrid" },
+      { name: "Mr. Tracy", type: "hybrid" },
+      { name: "Dr. Pete", type: "secondary" },
+      { name: "Ms. Praepilai", type: "hybrid" },
+      { name: "Ms. Toey", type: "hybrid" },
+      { name: "Ms. Kan", type: "secondary" }
     ];
 
-    function generateBlankSchedule() {
-        let schedule = {'A': {}, 'B': {}, 'C': {}, 'D': {}, 'E': {}};
-        ['A', 'B', 'D', 'E'].forEach(d => {
-            Object.keys(SEC_SLOTS_STANDARD).forEach(p => {
-                schedule[d][p] = { status: "Free", time: SEC_SLOTS_STANDARD[p], details: "Prep / Planning" };
-            });
-        });
-        Object.keys(SEC_SLOTS_DAY_C).forEach(p => {
-            schedule['C'][p] = { status: "Free", time: SEC_SLOTS_DAY_C[p], details: "Prep / Planning" };
-        });
-        return schedule;
+    // Bell Schedules
+    const BLOCK_SCHEDULE = [
+      { slot: 1, name: "Block 1", time: "08:00 - 09:30" },
+      { slot: 2, name: "Block 2", time: "09:45 - 11:10" },
+      { slot: 3, name: "Block 3", time: "11:40 - 01:10" },
+      { slot: 4, name: "Block 4", time: "01:15 - 02:45" }
+    ];
+
+    const PERIOD_SCHEDULE = [
+      { slot: 1, name: "Period 1", time: "08:00 - 08:40" },
+      { slot: 2, name: "Period 2", time: "08:50 - 09:30" },
+      { slot: 3, name: "Period 3", time: "09:40 - 10:20" },
+      { slot: 4, name: "Period 4", time: "10:25 - 11:05" },
+      { slot: 5, name: "Period 5", time: "11:45 - 12:25" },
+      { slot: 6, name: "Period 6", time: "12:30 - 01:10" },
+      { slot: 7, name: "Period 7", time: "01:15 - 01:55" },
+      { slot: 8, name: "Period 8", time: "02:00 - 02:40" }
+    ];
+
+    // Schedules Database (Day -> Teacher -> Slot -> Class Name)
+    const SCHEDULES = {
+      "Day A": {
+        "Mr. John": { B1: "Language Arts I (G6)", B3: "HS Language Arts I ESL (G9)", P1: "Language Arts I (G6)", P2: "Language Arts I (G6)", P5: "HS Language Arts I ESL (G9)", P6: "HS Language Arts I ESL (G9)" },
+        "Ms. Philmi": { B1: "Science II (G7)", P1: "Science II (G7)", P2: "Science II (G7)" },
+        "Mr. Landon": { B1: "Science III (G8)", B4: "MS Pre-Algebra (G7)", P1: "Science III (G8)", P2: "Science III (G8)", P7: "MS Pre-Algebra (G7)", P8: "MS Pre-Algebra (G7)" },
+        "Mr. Fluke": { B1: "MS 2nd Language (G9-11)", P1: "MS 2nd Language (G9-11)", P2: "MS 2nd Language (G9-11)", P6: "Thai Language (G5)", P7: "Thai Language (G4)" },
+        "Ms. Julia": { B1: "MS 2nd Language (G9-11)", P1: "MS 2nd Language (G9-11)", P2: "MS 2nd Language (G9-11)", P7: "Mandarin (G5)", P8: "Mandarin (G5)" },
+        "Mr. Simone": { B2: "Modern World History I (G8)", B3: "Intro Human Geo / Psych (G10)", P3: "Modern World History I (G8)", P4: "Modern World History I (G8)", P5: "Intro Human Geo (G10)", P6: "Intro Psychology (G10)" },
+        "Mr. Troy": { B3: "HS Language Arts I (G9)", P5: "HS Language Arts I (G9)", P6: "HS Language Arts I (G9)" },
+        "Mr. Kris": { B2: "P.E. (G6/7)", P1: "P.E. (G3)", P3: "P.E. (G6/7)", P4: "P.E. (G6/7)" },
+        "Mr. Wentzel": { B2: "Biology / Env Sci (G9/10)", B4: "Math Fundamentals I (G6)", P3: "Biology (G9)", P4: "Environmental Science (G10)", P7: "Math Fundamentals I (G6)", P8: "Math Fundamentals I (G6)" },
+        "Mr. Xyries": { B2: "Chemistry / Physics (G9/10)", B4: "MS Algebra I (G8)", P3: "Chemistry (G9)", P4: "Physics (G10)", P7: "MS Algebra I (G8)", P8: "MS Algebra I (G8)" },
+        "Mr. Harris": { B3: "Performing Arts Dance (G6/7)", P2: "Dance (G2)", P3: "Dance (Nursery)", P5: "Dance (K3A)", P5_B: "Performing Arts Dance (G6/7)", P6_B: "Performing Arts Dance (G6/7)" },
+        "Mr. Kinny": { B3: "Visual Arts (G8)", P1: "Art (G1A)", P2: "Art (G1A)", P3: "Art (K2A)", P5: "Visual Arts (G8)", P6: "Visual Arts (G8)" },
+        "Mr. Greg": { B3: "AP Human Geography (G11)", P5: "AP Human Geography (G11)", P6: "AP Human Geography (G11)" },
+        "Mr. Jacob": { B3: "AP Human Geography (G11)", P5: "AP Human Geography (G11)", P6: "AP Human Geography (G11)" },
+        "Ms. Aom": { B4: "Performing Arts Music (G8-11)", P3: "Music (K2B)", P5: "Music (K3B)", P7: "Performing Arts Music (G8-11)", P8: "Performing Arts Music (G8-11)" },
+        "Ms. May": { P2: "Thai Culture (G5)", P3: "Thai Culture (K1B)", P4: "Thai Language (G1A/B)", P5: "Thai Language (G2)", P7: "Thai Language (G3)" },
+        "Mr. Tracy": { P1: "ICT (G4)", P2: "ICT (G4)", P3: "ICT (K3B)" }
+      },
+      "Day B": {
+        "Mr. John": { B2: "Language Arts II (G7)", B5: "HS Language Arts II ESL (G10)", P3: "Language Arts II (G7)", P4: "Language Arts II (G7)", P1: "HS Language Arts II ESL (G10)", P2: "HS Language Arts II ESL (G10)" },
+        "Mr. Jacob": { B1: "Social Science I (G6)", B3: "Social Science II (G7)", P1: "Social Science I (G6)", P2: "Social Science I (G6)", P5: "Social Science II (G7)", P6: "Social Science II (G7)" },
+        "Ms. Philmi": { B2: "AP Pre-Calculus (G10/11)", B4: "Geometry (G8/9)", P3: "AP Pre-Calculus (G10/11)", P4: "AP Pre-Calculus (G10/11)", P7: "Geometry (G8/9)", P8: "Geometry (G8/9)" },
+        "Mr. Fluke": { B2: "MS 2nd Language (G6)", P3: "MS 2nd Language (G6)", P4: "MS 2nd Language (G6)", P6: "Thai Language (G5)", P7: "Thai Language (G4)" },
+        "Mr. Simone": { B1: "Modern World History II (G9)", B3: "Social Science II (G7)", P1: "Modern World History II (G9)", P2: "Modern World History II (G9)", P5: "Social Science II (G7)", P6: "Social Science II (G7)" },
+        "Mr. Troy": { B1: "HS Language Arts II (G10)", B2: "Language Arts II ESL (G7)", P1: "HS Language Arts II (G10)", P2: "HS Language Arts II (G10)", P3: "Language Arts II ESL (G7)", P4: "Language Arts II ESL (G7)" },
+        "Mr. Kris": { B2: "P.E. (G8-10)", B4: "P.E. (G8-11)", P2: "P.E. (G4)", P3: "P.E. (G8-10)", P4: "P.E. (G8-10)", P7: "P.E. (G8-11)", P8: "P.E. (G8-11)" },
+        "Mr. Landon": { B2: "Integrated Math (G9)", B3: "Science I (G6)", P3: "Integrated Math (G9)", P4: "Integrated Math (G9)", P5: "Science I (G6)", P6: "Science I (G6)" },
+        "Mr. Wentzel": { B4: "Algebra II (G9/10)", P7: "Algebra II (G9/10)", P8: "Algebra II (G9/10)" },
+        "Mr. Xyries": { B2: "Algebra I (G8)", B3: "AP Physics I (G11)", P3: "Algebra I (G8)", P4: "Algebra I (G8)", P5: "AP Physics I (G11)", P6: "AP Physics I (G11)" },
+        "Mr. Tracy": { B3: "ICT / TECH (G9/10)", B4: "ICT / TECH (G6/7)", P1: "ICT (G3)", P2: "ICT (G3)", P5: "ICT / TECH (G9/10)", P6: "ICT / TECH (G9/10)", P7: "ICT / TECH (G6/7)", P8: "ICT / TECH (G6/7)" },
+        "Mr. Harris": { P3: "Dance (K1A)", P4: "Dance (G3)", P5: "Dance (K3B)" },
+        "Mr. Kinny": { P1: "Art (G1B)", P2: "Art (G1B)", P3: "Art (K2B)", P4: "Art (G5)", P5: "Art (G5)" },
+        "Ms. Aom": { P2: "Music (G5)", P3: "Music (Nursery)", P5: "Music (K3A)" },
+        "Ms. May": { B1: "MS 2nd Language (G7)", P1: "MS 2nd Language (G7)", P2: "MS 2nd Language (G7)", P6: "Thai Language (G2)", P7: "Thai Language (G3)" },
+        "Ms. Praepilai": { P2: "Thai Culture (G2)", P3: "Thai Culture (K3B)", P4: "Thai Culture (G1A)", P5: "Thai Culture (G1B)" }
+      },
+      "Day C": {
+        "Mr. John": { P1: "Language Arts I (G6)", P6: "Language Arts II (G7)", P7: "Language Arts III (G8)" },
+        "Ms. Philmi": { P1: "Science II (G7)", P6: "AP Pre-Calculus (G10/11)", P8: "Geometry (G10)" },
+        "Mr. Landon": { P1: "Science III (G8)", P4: "MS Pre-Algebra (G7)", P6: "Integrated Math (G9)", P7: "Science I (G6)" },
+        "Mr. Fluke": { P1: "MS 2nd Language (G9-11)", P3: "Thai Language (K3B)", P6: "Thai Culture (G6)", P7: "Thai Language (G4)" },
+        "Ms. Praepilai": { P1: "Thai Culture (G9-11)" },
+        "Mr. Greg": { P2: "Seminar (G6/7)", P4: "Seminar (G8-11)", P3: "AP Human Geography (G11)" },
+        "Mr. Simone": { P2: "Modern World History I (G8)", P3: "Intro Human Geo / Psych (G10)", P5: "Modern World History II (G9)", P7: "Social Science II (G7)" },
+        "Mr. Wentzel": { P2: "Biology / Env Sci (G9/10)", P4: "Math Fundamentals I (G6)", P8: "Algebra II (G8/9)" },
+        "Mr. Xyries": { P2: "Chemistry / Physics (G9/10)", P4: "MS Algebra I (G7)", P6: "Algebra I (G8)", P7: "AP Physics I (G11)" },
+        "Mr. Troy": { P2: "HS Language Arts III (G11)", P3: "HS Language Arts I (G9)", P5: "HS Language Arts II (G10)", P6: "Language Arts II ESL (G7)", P7: "Language Arts III ESL (G8)" },
+        "Dr. Pete": { P3: "Health & Guidance (G6-8)", P6: "Health & Guidance (G9/10)", P8: "Health & Guidance (G9-11)" },
+        "Mr. Jacob": { P3: "AP Human Geography (G11)", P5: "Social Science I (G6)", P7: "Social Science II (G7)" },
+        "Ms. May": { P4: "Thai Language (G1A/B)", P5: "Thai Culture (G7/8)", P6: "Thai Language (G2)", P7: "Thai Language (G3)" },
+        "Ms. Kan": { P6: "SSR (G8)", P8: "SSR (G6-8)" },
+        "Mr. Kinny": { P1: "Art (G2)", P2: "Art (G2)", P3: "Art (K3A)" },
+        "Mr. Harris": { P2: "Dance (G4)", P3: "Dance (K1B)", P6: "Dance (G1B)" },
+        "Ms. Aom": { P2: "Music (G3)", P3: "Music (K1A)", P5: "Music (G1A)", P6: "Music (G4)" },
+        "Mr. Tracy": { P2: "ICT (G1B)", P6: "ICT (G5)", P7: "ICT (G5)" }
+      },
+      "Day D": {
+        "Mr. John": { B1: "Language Arts I (G6)", B3: "HS Language Arts I ESL (G9)", P1: "Language Arts I (G6)", P2: "Language Arts I (G6)", P5: "HS Language Arts I ESL (G9)", P6: "HS Language Arts I ESL (G9)" },
+        "Ms. Philmi": { B1: "Science II (G7)", P1: "Science II (G7)", P2: "Science II (G7)" },
+        "Mr. Landon": { B1: "Science III (G8)", B4: "MS Pre-Algebra (G7)", P1: "Science III (G8)", P2: "Science III (G8)", P7: "MS Pre-Algebra (G7)", P8: "MS Pre-Algebra (G7)" },
+        "Mr. Fluke": { B1: "MS 2nd Language (G9-11)", P1: "MS 2nd Language (G9-11)", P2: "MS 2nd Language (G9-11)", P4: "Thai Culture (G3)", P6: "Thai Language (G5)", P7: "Thai Language (G4)" },
+        "Ms. Julia": { B1: "MS 2nd Language (G9-11)", P1: "MS 2nd Language (G9-11)", P2: "MS 2nd Language (G9-11)", P7: "Mandarin (G5)", P8: "Mandarin (G5)" },
+        "Mr. Kris": { B2: "P.E. (G6/7)", P3: "P.E. (G6/7)", P4: "P.E. (G6/7)" },
+        "Mr. Simone": { B2: "Modern World History I (G8)", B3: "Intro Human Geo / Psych (G10)", P3: "Modern World History I (G8)", P4: "Modern World History I (G8)", P5: "Intro Human Geo (G10)", P6: "Intro Psychology (G10)" },
+        "Mr. Wentzel": { B2: "Biology / Env Sci (G9/10)", B4: "Math Fundamentals I (G6)", P3: "Biology (G9)", P4: "Environmental Science (G10)", P7: "Math Fundamentals I (G6)", P8: "Math Fundamentals I (G6)" },
+        "Mr. Xyries": { B2: "Chemistry / Physics (G9/10)", B4: "MS Algebra I (G8)", P3: "Chemistry (G9)", P4: "Physics (G10)", P7: "MS Algebra I (G8)", P8: "MS Algebra I (G8)" },
+        "Mr. Troy": { B2: "HS Language Arts III (G11)", B3: "HS Language Arts I (G9)", P3: "HS Language Arts III (G11)", P4: "HS Language Arts III (G11)", P5: "HS Language Arts I (G9)", P6: "HS Language Arts I (G9)" },
+        "Ms. Aom": { B3: "Performing Arts Music (G6/7)", P2: "Music (G2)", P3: "Music (K1B)", P5: "Performing Arts Music (G6/7)", P6: "Performing Arts Music (G6/7)" },
+        "Mr. Tracy": { B3: "ICT / TECH (G8)", P2: "ICT (G1A)", P5: "ICT / TECH (G8)", P6: "ICT / TECH (G8)" },
+        "Mr. Greg": { B3: "AP Human Geography (G11)", P5: "AP Human Geography (G11)", P6: "AP Human Geography (G11)" },
+        "Mr. Jacob": { B3: "AP Human Geography (G11)", P5: "AP Human Geography (G11)", P6: "AP Human Geography (G11)" },
+        "Mr. Harris": { B4: "Performing Arts Dance (G8-11)", P3: "Dance (K2A)", P5: "Dance (G1A)", P7: "Performing Arts Dance (G8-11)", P8: "Performing Arts Dance (G8-11)" },
+        "Mr. Kinny": { P1: "Art (G3)", P2: "Art (G3)", P3: "Art (K3B)", P4: "Art (G5)", P5: "Art (G5)" },
+        "Ms. May": { P3: "Thai Culture (K1A)", P4: "Thai Language (G1A/B)", P5: "Thai Language (K2B)", P7: "Thai Language (G3)" },
+        "Ms. Praepilai": { P2: "Thai Culture (G4)", P3: "Thai Culture (K2B)", P5: "Thai Culture (K2A)" },
+        "Ms. Toey": { P3: "Thai Language (K3A)" }
+      },
+      "Day E": {
+        "Mr. John": { B1: "HS Language Arts II ESL (G10)", B2: "Language Arts II (G7)", P1: "HS Language Arts II ESL (G10)", P2: "HS Language Arts II ESL (G10)", P3: "Language Arts II (G7)", P4: "Language Arts II (G7)" },
+        "Mr. Jacob": { B1: "Social Science I (G6)", P1: "Social Science I (G6)", P2: "Social Science I (G6)" },
+        "Ms. Philmi": { B1: "Science II (G7)", P1: "Science II (G7)", P2: "Science II (G7)" },
+        "Ms. Julia": { B1: "MS 2nd Language (G6)", P1: "MS 2nd Language (G6)", P2: "MS 2nd Language (G6)" },
+        "Mr. Fluke": { B1: "MS 2nd Language (G8)", B2: "MS 2nd Language (G6)", P1: "MS 2nd Language (G8)", P2: "MS 2nd Language (G8)", P3: "MS 2nd Language (G6)", P4: "MS 2nd Language (G6)" },
+        "Mr. Simone": { B1: "Modern World History II (G9)", B2: "P.E. (G8)", P1: "Modern World History II (G9)", P2: "Modern World History II (G9)", P3: "P.E. (G8)", P4: "P.E. (G8)" },
+        "Mr. Troy": { B1: "HS Language Arts II (G10)", P1: "HS Language Arts II (G10)", P2: "HS Language Arts II (G10)" },
+        "Mr. Kris": { B2: "P.E. (G8)", P3: "P.E. (G8)", P4: "P.E. (G8)" },
+        "Mr. Landon": { B1: "Science III (G8)", P1: "Science III (G8)", P2: "Science III (G8)" },
+        "Mr. Wentzel": { B2: "Environmental Science (G10)", P3: "Environmental Science (G10)", P4: "Environmental Science (G10)" },
+        "Mr. Xyries": { B2: "Physics (G10)", P3: "Physics (G10)", P4: "Physics (G10)" }
+      }
+    };
+
+    // State
+    let selectedDate = new Date().toISOString().split('T')[0];
+    let selectedDayType = "Day A"; // A, B, C, D, E
+    let absences = JSON.parse(localStorage.getItem('tsc_absences') || '{}');
+    let coverAssignments = JSON.parse(localStorage.getItem('tsc_coverages') || '{}');
+    let historyLogs = JSON.parse(localStorage.getItem('tsc_history') || '[]');
+
+    // Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      initDatePicker();
+      populateTeacherDropdown();
+      setupEventListeners();
+      renderAbsencesBanner();
+      renderHistoryLog();
+      updateSelectedTeacherSchedule();
+    });
+
+    // Determine Day Type from Date
+    function getDayTypeFromDate(dateStr) {
+      const d = new Date(dateStr);
+      const day = d.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+      if (day === 1) return { code: "Day A", name: "Monday" };
+      if (day === 2) return { code: "Day B", name: "Tuesday" };
+      if (day === 3) return { code: "Day C", name: "Wednesday" };
+      if (day === 4) return { code: "Day D", name: "Thursday" };
+      if (day === 5) return { code: "Day E", name: "Friday" };
+      return { code: "Day A", name: "Weekend Default (Mon)" };
     }
 
-    function createTeacherObject(name, dept = "Secondary Faculty", id = null) {
-        let t = {
-            id: id || 'fac_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-            name: name,
-            department: dept,
-            totalCoverageCount: 0,
-            schedule: generateBlankSchedule(),
-            teachingCounts: {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0, 'total': 0}
-        };
-
-        // PRE-LOAD EXACT SPREADSHEET SCHEDULE FOR MR. TROY (21 LESSONS ELA)
-        if (name === "Mr. Troy") {
-            // Day A (Monday)
-            t.schedule['A']['Period 1'] = { status: "Teaching", time: "8:00 - 9:15", details: "HS Language Arts II (G10)" };
-            t.schedule['A']['Period 4'] = { status: "Teaching", time: "12:45 - 1:40", details: "HS Language Arts I (G9)" };
-
-            // Day B (Tuesday)
-            t.schedule['B']['Period 2'] = { status: "Teaching", time: "9:25 - 10:40", details: "HS Language Arts III (G11)" };
-
-            // Day C (Wednesday - 8 Short Slots)
-            t.schedule['C']['Period C1'] = { status: "Teaching", time: "8:00 - 8:40", details: "HS Language Arts II (G10)" };
-            t.schedule['C']['Period C2'] = { status: "Teaching", time: "8:45 - 9:25", details: "HS Language Arts III (G11)" };
-            t.schedule['C']['Period C3'] = { status: "Teaching", time: "9:30 - 10:10", details: "HS Language Arts I (G9)" };
-            t.schedule['C']['Period C6'] = { status: "Teaching", time: "12:20 - 1:00", details: "HS Language Arts II (G10)" };
-            t.schedule['C']['Period C7'] = { status: "Teaching", time: "1:05 - 1:45", details: "LA II ESL (G7)" };
-            t.schedule['C']['Period C8'] = { status: "Teaching", time: "1:50 - 2:30", details: "LA III ESL (G8)" };
-
-            // Day D (Thursday)
-            t.schedule['D']['Period 1'] = { status: "Teaching", time: "8:00 - 9:15", details: "HS Language Arts II (G10)" };
-            t.schedule['D']['Period 3'] = { status: "Teaching", time: "10:50 - 12:05", details: "LA II ESL (G7)" };
-            t.schedule['D']['Period 4'] = { status: "Teaching", time: "12:45 - 1:40", details: "HS Language Arts I (G9)" };
-
-            // Day E (Friday)
-            t.schedule['E']['Period 2'] = { status: "Teaching", time: "9:25 - 10:40", details: "HS Language Arts III (G11)" };
-            t.schedule['E']['Period 3'] = { status: "Teaching", time: "10:50 - 12:05", details: "LA II ESL (G7)" };
-
-            // Recalculate loads
-            ['A', 'B', 'C', 'D', 'E'].forEach(d => {
-                let cnt = 0;
-                Object.keys(t.schedule[d]).forEach(p => {
-                    if (t.schedule[d][p].status === 'Teaching') cnt++;
-                });
-                t.teachingCounts[d] = cnt;
-            });
-            t.teachingCounts.total = t.teachingCounts.A + t.teachingCounts.B + t.teachingCounts.C + t.teachingCounts.D + t.teachingCounts.E;
-        }
-
-        return t;
+    function initDatePicker() {
+      const picker = document.getElementById('datePicker');
+      picker.value = selectedDate;
+      updateDayBadge();
     }
 
-    let faculty = [];
-    let absenceRecords = [];
-
-    function saveStateLocally() {
-        if (faculty && faculty.length > 0) {
-            localStorage.setItem('sec_faculty_troy_ela', JSON.stringify(faculty));
-        }
-        localStorage.setItem('sec_absences_troy_ela', JSON.stringify(absenceRecords));
+    function updateDayBadge() {
+      const info = getDayTypeFromDate(selectedDate);
+      selectedDayType = info.code;
+      const badge = document.getElementById('dayBadge');
+      badge.querySelector('span:first-child').textContent = info.code;
+      badge.querySelector('span:last-child').textContent = `(${info.name.substring(0,3)})`;
     }
 
-    function loadSavedState() {
-        const localFaculty = localStorage.getItem('sec_faculty_troy_ela');
-        const localAbsences = localStorage.getItem('sec_absences_troy_ela');
-
-        if (localFaculty) {
-            try { faculty = JSON.parse(localFaculty); } catch(e) {}
-        }
-        if (localAbsences) {
-            try { absenceRecords = JSON.parse(localAbsences); } catch(e) {}
-        }
-
-        if (!faculty || faculty.length === 0) {
-            faculty = REAL_SCHOOL_FACULTY.map((item, idx) => 
-                createTeacherObject(item.name, item.dept, 'fac_' + (idx + 1))
-            );
-            saveStateLocally();
-        }
+    function populateTeacherDropdown() {
+      const select = document.getElementById('teacherSelect');
+      select.innerHTML = '<option value="">-- Choose Teacher --</option>';
+      TEACHERS.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.name;
+        opt.textContent = `${t.name} (${t.type === 'hybrid' ? 'Hybrid Sec/Prim' : 'Secondary'})`;
+        select.appendChild(opt);
+      });
     }
 
-    function restoreFacultyFromBackup() {
-        faculty = REAL_SCHOOL_FACULTY.map((item, idx) => 
-            createTeacherObject(item.name, item.dept, 'fac_' + (idx + 1))
-        );
-        saveStateLocally();
-        refreshUI();
-        alert("✅ Roster updated: Mr. Troy set as Secondary ELA with full 2026-2027 timetable!");
-    }
+    function setupEventListeners() {
+      document.getElementById('datePicker').addEventListener('change', (e) => {
+        selectedDate = e.target.value;
+        updateDayBadge();
+        renderAbsencesBanner();
+        updateSelectedTeacherSchedule();
+      });
 
-    const HOLIDAYS = ["2026-10-13", "2026-10-23", "2026-12-05", "2026-12-10"];
+      document.getElementById('teacherSelect').addEventListener('change', (e) => {
+        const teacherName = e.target.value;
+        const teacher = TEACHERS.find(t => t.name === teacherName);
+        const pill = document.getElementById('teacherTypePill');
+        const label = document.getElementById('teacherTypeLabel');
 
-    function getScheduleDayForDate(dateString) {
-        if (!dateString) return "A";
-        const dateObj = new Date(dateString + "T00:00:00");
-        const dayOfWeek = dateObj.getDay();
-        if (dayOfWeek === 0 || dayOfWeek === 6 || HOLIDAYS.includes(dateString)) return null;
-
-        const startDate = new Date("2026-08-17T00:00:00");
-        if (dateObj < startDate) return "A";
-
-        let count = 0;
-        let cur = new Date(startDate);
-        while (cur <= dateObj) {
-            const d = cur.getDay();
-            const dateFormatted = cur.toISOString().split('T')[0];
-            if (d !== 0 && d !== 6 && !HOLIDAYS.includes(dateFormatted)) {
-                count++;
-            }
-            cur.setDate(cur.getDate() + 1);
-        }
-        const rotationDays = ['A', 'B', 'C', 'D', 'E'];
-        return rotationDays[(count - 1) % 5] || "A";
-    }
-
-    function loadFromGoogleDrive() {
-        loadSavedState();
-        refreshUI();
-
-        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) return;
-
-        fetch(GOOGLE_SCRIPT_URL)
-            .then(res => res.json())
-            .then(data => {
-                if (data && Array.isArray(data.faculty) && data.faculty.length > 0) {
-                    faculty = data.faculty;
-                    absenceRecords = data.absenceRecords || [];
-                    saveStateLocally();
-                    recalculateCoverageCounts();
-                    refreshUI();
-                }
-            })
-            .catch(err => console.error("Cloud sync skipped, using local storage:", err));
-    }
-
-    function saveToGoogleDrive() {
-        saveStateLocally();
-        refreshUI();
-
-        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE")) return;
-
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ faculty: faculty, absenceRecords: absenceRecords })
-        }).catch(err => console.error("Error syncing to Drive:", err));
-    }
-
-    function refreshUI() {
-        populateTeacherDropdowns();
-        populateTable();
-        updateCoverageOptions();
-        renderScheduleEditor();
-        renderAbsenceLogTable();
-    }
-
-    function init() {
-        document.getElementById('absenceDate').valueAsDate = new Date();
-        loadFromGoogleDrive();
-        handleDateChange();
-    }
-
-    function handleDateChange() {
-        const dateVal = document.getElementById('absenceDate').value;
-        const detectedDay = getScheduleDayForDate(dateVal);
-        const daySelect = document.getElementById('scheduleDaySelect');
-
-        if (!detectedDay) {
-            alert("⚠️ Selected date is a weekend or holiday! Defaulting to Day A.");
-            daySelect.value = "A";
+        if (teacher) {
+          pill.classList.remove('hidden');
+          label.textContent = teacher.type === 'hybrid' 
+            ? 'Hybrid Teacher (Teaches Sec & Primary)' 
+            : 'Secondary Only Teacher';
         } else {
-            daySelect.value = detectedDay;
+          pill.classList.add('hidden');
         }
-        updateCoverageOptions();
+
+        updateSelectedTeacherSchedule();
+      });
+
+      document.getElementById('markAbsentBtn').addEventListener('click', recordTeacherAbsence);
+      document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
     }
 
-    function switchTab(tab) {
-        document.getElementById('view-assign').classList.add('hidden');
-        document.getElementById('view-log').classList.add('hidden');
-        document.getElementById('view-schedule').classList.add('hidden');
+    // Record Absence Action
+    function recordTeacherAbsence() {
+      const teacherSelect = document.getElementById('teacherSelect');
+      const teacherName = teacherSelect.value;
+      const absenceType = document.getElementById('absenceTypeSelect').value;
 
-        document.getElementById('tab-assign').className = "py-3 px-5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 rounded-t-xl font-bold";
-        document.getElementById('tab-log').className = "py-3 px-5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 rounded-t-xl font-bold";
-        document.getElementById('tab-view').className = "py-3 px-5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 rounded-t-xl font-bold";
+      if (!teacherName) {
+        alert("Please select a teacher to mark absent.");
+        return;
+      }
 
-        if (tab === 'assign') {
-            document.getElementById('view-assign').classList.remove('hidden');
-            document.getElementById('tab-assign').className = "py-3 px-5 border-b-2 border-indigo-600 text-indigo-600 bg-white rounded-t-xl shadow-sm font-bold";
-        } else if (tab === 'log') {
-            document.getElementById('view-log').classList.remove('hidden');
-            document.getElementById('tab-log').className = "py-3 px-5 border-b-2 border-indigo-600 text-indigo-600 bg-white rounded-t-xl shadow-sm font-bold";
-            renderAbsenceLogTable();
-        } else {
-            document.getElementById('view-schedule').classList.remove('hidden');
-            document.getElementById('tab-view').className = "py-3 px-5 border-b-2 border-indigo-600 text-indigo-600 bg-white rounded-t-xl shadow-sm font-bold";
-        }
+      if (!absences[selectedDate]) absences[selectedDate] = {};
+      
+      absences[selectedDate][teacherName] = {
+        type: absenceType,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      // Save LocalStorage
+      localStorage.setItem('tsc_absences', JSON.stringify(absences));
+
+      // Add to History
+      addHistoryLog({
+        date: selectedDate,
+        type: 'ABSENCE',
+        teacher: teacherName,
+        absenceType: absenceType,
+        text: `Marked ${teacherName} as ${absenceType} for ${selectedDate}`
+      });
+
+      renderAbsencesBanner();
+      updateSelectedTeacherSchedule();
     }
 
-    function populateTeacherDropdowns() {
-        const selAssign = document.getElementById('absentTeacherSelect');
-        const selEditor = document.getElementById('editorTeacherSelect');
-        const selFilter = document.getElementById('logFilterTeacherSelect');
+    function removeAbsence(teacherName) {
+      if (absences[selectedDate] && absences[selectedDate][teacherName]) {
+        delete absences[selectedDate][teacherName];
+        if (Object.keys(absences[selectedDate]).length === 0) {
+          delete absences[selectedDate];
+        }
+        localStorage.setItem('tsc_absences', JSON.stringify(absences));
+        renderAbsencesBanner();
+        updateSelectedTeacherSchedule();
+      }
+    }
 
-        const v1 = selAssign.value, v2 = selEditor.value, v3 = selFilter.value;
+    // Render Absences Banner
+    function renderAbsencesBanner() {
+      const banner = document.getElementById('absentTeachersBanner');
+      const list = document.getElementById('absentList');
+      const badge = document.getElementById('absentCountBadge');
 
-        selAssign.innerHTML = '<option value="">-- Select Teacher --</option>';
-        selEditor.innerHTML = '';
-        selFilter.innerHTML = '<option value="ALL">All Teachers</option>';
+      const dateAbsences = absences[selectedDate] || {};
+      const names = Object.keys(dateAbsences);
 
-        faculty.forEach(t => {
-            selAssign.innerHTML += `<option value="${t.id}">${t.name} (${t.department})</option>`;
-            selEditor.innerHTML += `<option value="${t.id}">${t.name}</option>`;
-            selFilter.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+      if (names.length === 0) {
+        banner.classList.add('hidden');
+        return;
+      }
+
+      banner.classList.remove('hidden');
+      badge.textContent = `${names.length} Teacher${names.length > 1 ? 's' : ''}`;
+      list.innerHTML = '';
+
+      names.forEach(name => {
+        const info = dateAbsences[name];
+        const tag = document.createElement('div');
+        tag.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white border border-rose-300 text-rose-900 font-semibold text-xs shadow-sm';
+        tag.innerHTML = `
+          <span>${name}</span>
+          <span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-md font-bold">${info.type}</span>
+          <button onclick="removeAbsence('${name}')" class="ml-1 text-rose-400 hover:text-rose-700">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        `;
+        list.appendChild(tag);
+      });
+    }
+
+    // Calculate Teacher Free Time & Prior Covers
+    function getTeacherStats(teacherName) {
+      let totalCovers = 0;
+      let lastAbsenceDate = null;
+
+      // Count total cover assignments
+      Object.keys(coverAssignments).forEach(d => {
+        Object.keys(coverAssignments[d]).forEach(key => {
+          if (coverAssignments[d][key] === teacherName) {
+            totalCovers++;
+          }
         });
+      });
 
-        if (v1) selAssign.value = v1;
-        if (v2) selEditor.value = v2;
-        if (v3) selFilter.value = v3;
-
-        document.getElementById('facultyCountSpan').innerText = faculty.length;
-    }
-
-    function openRosterImportModal() { document.getElementById('rosterModal').classList.remove('hidden'); }
-    function closeRosterModal() { document.getElementById('rosterModal').classList.add('hidden'); }
-
-    function addNewTeacher() {
-        const name = document.getElementById('newTeacherName').value.trim();
-        const dept = document.getElementById('newTeacherDept').value.trim() || "Faculty";
-        if (!name) return alert("Please enter teacher name");
-
-        faculty.push(createTeacherObject(name, dept));
-        document.getElementById('newTeacherName').value = '';
-        closeRosterModal();
-        saveToGoogleDrive();
-    }
-
-    function removeTeacher(tId) {
-        if (confirm("Are you sure you want to remove this teacher from the system?")) {
-            faculty = faculty.filter(t => t.id !== tId);
-            saveToGoogleDrive();
+      // Find recency of own last absence
+      Object.keys(absences).sort().reverse().forEach(d => {
+        if (absences[d][teacherName] && !lastAbsenceDate) {
+          lastAbsenceDate = d;
         }
+      });
+
+      // Calculate free slots on selected day
+      const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName] ? SCHEDULES[selectedDayType][teacherName] : {};
+      const busySlotsCount = Object.keys(daySched).length;
+      
+      return { totalCovers, lastAbsenceDate, busySlotsCount };
     }
 
-    function recordAbsence() {
-        const absentId = document.getElementById('absentTeacherSelect').value;
-        const dateVal = document.getElementById('absenceDate').value;
-        const typeVal = document.getElementById('absenceTypeSelect').value;
-        const dayVal = document.getElementById('scheduleDaySelect').value;
+    // Recommendation Engine Ranking
+    function getRecommendedCovers(slotKey) {
+      const candidates = [];
 
-        if (!absentId) return alert("Please select a teacher.");
-        const teacher = faculty.find(t => t.id === absentId);
-        if (!teacher) return;
+      TEACHERS.forEach(t => {
+        // Exclude if absent today
+        if (absences[selectedDate] && absences[selectedDate][t.name]) return;
 
-        const compositeKey = `${dateVal}_${absentId}`;
-        let rec = absenceRecords.find(r => r.id === compositeKey);
+        // Exclude if busy in this slot
+        const teacherSched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][t.name] ? SCHEDULES[selectedDayType][t.name] : {};
+        if (teacherSched[slotKey]) return; // Busy!
 
-        if (!rec) {
-            rec = { id: compositeKey, teacherId: absentId, teacherName: teacher.name, date: dateVal, day: dayVal, type: typeVal, coverages: {} };
-            absenceRecords.push(rec);
-        } else {
-            rec.type = typeVal; rec.day = dayVal;
-        }
-
-        saveToGoogleDrive();
-        alert(`✅ Absence Recorded for ${dateVal} (Day ${dayVal})\nTeacher: ${teacher.name}`);
-    }
-
-    function assignCoverage(subId, absentTeacherId, day, period) {
-        const dateVal = document.getElementById('absenceDate').value;
-        const sub = faculty.find(t => t.id === subId);
-        if (!sub) return;
-
-        const compositeKey = `${dateVal}_${absentTeacherId}`;
-        let rec = absenceRecords.find(r => r.id === compositeKey);
-        if (!rec) {
-            const absentTeacher = faculty.find(t => t.id === absentTeacherId);
-            rec = { id: compositeKey, teacherId: absentTeacherId, teacherName: absentTeacher ? absentTeacher.name : 'Teacher', date: dateVal, day: day, type: 'Absent', coverages: {} };
-            absenceRecords.push(rec);
-        }
-
-        rec.coverages[period] = sub.name;
-        recalculateCoverageCounts();
-        saveToGoogleDrive();
-    }
-
-    function unassignCoverage(absentTeacherId, period) {
-        const dateVal = document.getElementById('absenceDate').value;
-        const rec = absenceRecords.find(r => r.teacherId === absentTeacherId && r.date === dateVal);
-        if (rec && rec.coverages && rec.coverages[period]) {
-            delete rec.coverages[period];
-            recalculateCoverageCounts();
-            saveToGoogleDrive();
-        }
-    }
-
-    function recalculateCoverageCounts() {
-        faculty.forEach(t => { t.totalCoverageCount = 0; });
-        absenceRecords.forEach(rec => {
-            if (rec.coverages) {
-                Object.values(rec.coverages).forEach(subName => {
-                    const sub = faculty.find(t => t.name === subName);
-                    if (sub) sub.totalCoverageCount += 1;
-                });
+        // Exclude if already assigned to cover another class in this slot today
+        const assignedKey = `${selectedDate}_${slotKey}`;
+        let alreadyCovering = false;
+        if (coverAssignments[selectedDate]) {
+          Object.keys(coverAssignments[selectedDate]).forEach(sk => {
+            if (sk === slotKey && coverAssignments[selectedDate][sk]) {
+              alreadyCovering = true;
             }
+          });
+        }
+
+        const stats = getTeacherStats(t.name);
+
+        // Scoring algorithm (lower score = higher recommendation)
+        // Weight 1: Total prior coverages (primary tiebreaker)
+        // Weight 2: Busy slots today (prefer lighter schedule)
+        let score = (stats.totalCovers * 10) + stats.busySlotsCount;
+
+        candidates.push({
+          name: t.name,
+          type: t.type,
+          coversCount: stats.totalCovers,
+          busySlots: stats.busySlotsCount,
+          lastAbsence: stats.lastAbsenceDate,
+          score: score
         });
+      });
+
+      // Sort by recommendation score ascending
+      candidates.sort((a,b) => a.score - b.score);
+      return candidates;
     }
 
-    function deleteAbsenceRecord(recId) {
-        if (confirm("Remove this log entry?")) {
-            absenceRecords = absenceRecords.filter(r => r.id !== recId);
-            recalculateCoverageCounts();
-            saveToGoogleDrive();
+    // Render Daily Schedule & Cover Recommendation Matrix
+    function updateSelectedTeacherSchedule() {
+      const teacherName = document.getElementById('teacherSelect').value;
+      const container = document.getElementById('slotsContainer');
+      const title = document.getElementById('scheduleTitle');
+      const subtitle = document.getElementById('scheduleSubtitle');
+      const dayPill = document.getElementById('dayStructurePill');
+
+      if (!teacherName) {
+        title.textContent = "Teacher Daily Schedule";
+        subtitle.textContent = "Select a teacher above to view schedule and free cover options.";
+        container.innerHTML = `
+          <div class="text-center py-12 text-slate-400">
+            <i class="fa-solid fa-calendar-day text-4xl mb-3 text-slate-300"></i>
+            <p class="text-sm">Please select a teacher to display their class schedule.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const teacher = TEACHERS.find(t => t.name === teacherName);
+      const isAbsent = absences[selectedDate] && absences[selectedDate][teacherName];
+      const absenceInfo = isAbsent ? absences[selectedDate][teacherName] : null;
+
+      title.textContent = `${teacherName}'s Schedule`;
+      subtitle.textContent = isAbsent 
+        ? `Status: Marked ${absenceInfo.type} for ${selectedDate}`
+        : `Status: Present (Fresh schedule for ${selectedDate})`;
+
+      // Determine schedule format
+      const isBlockDay = (selectedDayType !== "Day C") && (teacher.type === "secondary");
+      dayPill.textContent = isBlockDay ? "4 Blocks Format" : "8 Periods Format";
+
+      const scheduleGrid = isBlockDay ? BLOCK_SCHEDULE : PERIOD_SCHEDULE;
+      const teacherDaySchedule = (SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName]) ? SCHEDULES[selectedDayType][teacherName] : {};
+
+      container.innerHTML = '';
+
+      scheduleGrid.forEach(slotItem => {
+        // Slot Key mapping
+        let slotKey = isBlockDay ? `B${slotItem.slot}` : `P${slotItem.slot}`;
+        let className = teacherDaySchedule[slotKey] || null;
+
+        // If hybrid teacher in Secondary Block day, map B1 -> P1/P2, B2 -> P3/P4, B3 -> P5/P6, B4 -> P7/P8
+        if (!isBlockDay && selectedDayType !== "Day C" && !className) {
+          if (slotItem.slot === 1 || slotItem.slot === 2) className = teacherDaySchedule['B1'];
+          else if (slotItem.slot === 3 || slotItem.slot === 4) className = teacherDaySchedule['B2'];
+          else if (slotItem.slot === 5 || slotItem.slot === 6) className = teacherDaySchedule['B3'];
+          else if (slotItem.slot === 7 || slotItem.slot === 8) className = teacherDaySchedule['B4'];
         }
-    }
 
-    function clearAllAbsences() {
-        if (confirm("Clear all absence history?")) {
-            absenceRecords = [];
-            recalculateCoverageCounts();
-            saveToGoogleDrive();
-        }
-    }
+        const slotCard = document.createElement('div');
+        slotCard.className = `p-4 rounded-xl border transition-all ${className ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-50 border-slate-200/60 opacity-80'}`;
 
-    function renderAbsenceLogTable() {
-        const tbody = document.getElementById('absenceLogTableBody');
-        const filterTeacherId = document.getElementById('logFilterTeacherSelect').value;
-        if (!tbody) return;
+        // Check if coverage is assigned for this slot
+        const coverageKey = `${teacherName}_${slotKey}`;
+        const currentCoverTeacher = (coverAssignments[selectedDate] && coverAssignments[selectedDate][coverageKey]) || null;
 
-        let filtered = filterTeacherId !== 'ALL' ? absenceRecords.filter(r => r.teacherId === filterTeacherId) : absenceRecords;
-        if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No absence logs recorded.</td></tr>`;
-            return;
-        }
+        let recommendationsHtml = '';
 
-        tbody.innerHTML = filtered.slice().reverse().map(r => {
-            let covSummary = 'None';
-            if (r.coverages && Object.keys(r.coverages).length > 0) {
-                covSummary = Object.entries(r.coverages).map(([p, sub]) => `<span class="bg-purple-50 text-purple-800 px-2 py-0.5 rounded text-[11px] font-semibold border border-purple-200 mr-1">${p}: ${sub}</span>`).join(' ');
-            }
-            return `
-                <tr class="border-b hover:bg-slate-50">
-                    <td class="p-3 font-semibold">${r.date}</td>
-                    <td class="p-3"><span class="bg-slate-200 text-slate-800 font-bold text-xs px-2 py-0.5 rounded">Day ${r.day}</span></td>
-                    <td class="p-3 font-bold">${r.teacherName}</td>
-                    <td class="p-3"><span class="bg-rose-100 text-rose-800 font-bold px-2.5 py-1 rounded-full text-xs">${r.type}</span></td>
-                    <td class="p-3">${covSummary}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="deleteAbsenceRecord('${r.id}')" class="text-rose-600 font-bold text-xs"><i class="fa-solid fa-trash-can"></i></button>
-                    </td>
-                </tr>
+        if (className) {
+          const freeTeachers = getRecommendedCovers(slotKey);
+
+          let selectOptionsHtml = `<option value="">-- Assign Cover Teacher --</option>`;
+          freeTeachers.forEach((rec, idx) => {
+            const isSelected = (currentCoverTeacher === rec.name) ? 'selected' : '';
+            const topBadge = (idx === 0) ? '⭐ Recommended: ' : '';
+            selectOptionsHtml += `
+              <option value="${rec.name}" ${isSelected}>
+                ${topBadge}${rec.name} (${rec.coversCount} prior covers | ${rec.busySlots} classes today)
+              </option>
             `;
-        }).join('');
-    }
+          });
 
-    function parseMin(tStr) {
-        try {
-            const p = tStr.split('-');
-            const s = p[0].trim().split(':'), e = p[1].trim().split(':');
-            let sh = parseInt(s[0]), sm = parseInt(s[1]), eh = parseInt(e[0]), em = parseInt(e[1]);
-            if (sh < 7) sh += 12; if (eh < 7) eh += 12; if (eh < sh) eh += 12;
-            return [sh * 60 + sm, eh * 60 + em];
-        } catch(e) { return null; }
-    }
-
-    function updateCoverageOptions() {
-        const absentId = document.getElementById('absentTeacherSelect').value;
-        const day = document.getElementById('scheduleDaySelect').value;
-        const dateVal = document.getElementById('absenceDate').value;
-        const container = document.getElementById('substitutesContainer');
-
-        if (!absentId) {
-            container.innerHTML = '<div class="p-8 text-center text-slate-400">Select an absent teacher to view slots needing coverage.</div>';
-            document.getElementById('matchCount').innerText = '0 Periods Needing Coverage';
-            return;
+          recommendationsHtml = `
+            <div class="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-slate-500">Free Cover Teachers:</span>
+                <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">${freeTeachers.length} Available</span>
+              </div>
+              <div class="w-full sm:w-auto min-w-[260px]">
+                <select onchange="assignCoverage('${teacherName}', '${slotKey}', this.value)" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 font-medium cursor-pointer">
+                  ${selectOptionsHtml}
+                </select>
+              </div>
+            </div>
+          `;
         }
 
-        const absentTeacher = faculty.find(t => t.id === absentId);
-        if (!absentTeacher) return;
+        slotCard.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="px-2.5 py-1 bg-indigo-100 text-indigo-800 rounded-lg text-xs font-bold">
+                ${slotItem.name}
+              </div>
+              <span class="text-xs font-medium text-slate-500">
+                <i class="fa-regular fa-clock text-slate-400 mr-1"></i>${slotItem.time}
+              </span>
+            </div>
 
-        const dateRec = absenceRecords.find(r => r.teacherId === absentId && r.date === dateVal);
-        const daySched = absentTeacher.schedule[day] || {};
-        const teachingSlots = Object.keys(daySched).filter(pName => daySched[pName].status === 'Teaching');
+            ${currentCoverTeacher ? `
+              <span class="px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-user-check"></i>
+                Covered by ${currentCoverTeacher}
+              </span>
+            ` : (className ? `
+              <span class="px-2.5 py-0.5 bg-amber-100 text-amber-800 rounded-md text-[11px] font-semibold">
+                Needs Coverage
+              </span>
+            ` : `
+              <span class="text-xs text-slate-400 font-medium">Free Period</span>
+            `)}
+          </div>
 
-        document.getElementById('matchCount').innerText = `${teachingSlots.length} Periods Needing Coverage`;
+          <div class="mt-2.5">
+            ${className ? `
+              <h3 class="text-sm font-bold text-slate-800">${className}</h3>
+            ` : `
+              <p class="text-xs text-slate-400 italic">No class scheduled during this time slot.</p>
+            `}
+          </div>
 
-        if (teachingSlots.length === 0) {
-            container.innerHTML = `<div class="p-6 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-center text-sm font-semibold">🎉 ${absentTeacher.name} has NO teaching periods on Day ${day}!</div>`;
-            return;
-        }
+          ${className ? recommendationsHtml : ''}
+        `;
 
-        let html = '';
-        teachingSlots.forEach(period => {
-            const slotDetails = daySched[period];
-            const assignedSubName = (dateRec && dateRec.coverages) ? dateRec.coverages[period] : null;
-            const isAlreadyCovered = !!assignedSubName;
-            const absentRange = parseMin(slotDetails.time);
+        container.appendChild(slotCard);
+      });
+    }
 
-            let candidates = faculty.filter(t => {
-                if (t.id === absentId) return false;
-                const candDaySched = t.schedule[day] || {};
-                let isBusy = false;
-                Object.keys(candDaySched).forEach(cp => {
-                    if (candDaySched[cp].status === 'Teaching') {
-                        const candRange = parseMin(candDaySched[cp].time);
-                        if (absentRange && candRange && (absentRange[0] < candRange[1] && absentRange[1] > candRange[0])) {
-                            isBusy = true;
-                        }
-                    }
-                });
-                return !isBusy;
-            });
+    // Assign Coverage Action
+    function assignCoverage(absentTeacher, slotKey, coverTeacher) {
+      if (!coverAssignments[selectedDate]) coverAssignments[selectedDate] = {};
+      
+      const coverageKey = `${absentTeacher}_${slotKey}`;
 
-            candidates.sort((a, b) => a.totalCoverageCount - b.totalCoverageCount);
-
-            const headerBadge = isAlreadyCovered
-                ? `<span class="bg-purple-100 text-purple-800 font-bold text-xs px-3 py-1 rounded-full">✅ COVERED by ${assignedSubName}</span>`
-                : `<span class="bg-rose-100 text-rose-800 font-bold text-xs px-3 py-1 rounded-full">${period} (${slotDetails.time})</span>`;
-
-            html += `
-                <div class="bg-slate-50 border ${isAlreadyCovered ? 'border-purple-300 bg-purple-50/40' : 'border-slate-300'} rounded-2xl p-5 space-y-4 shadow-sm">
-                    <div class="flex justify-between items-center border-b pb-3">
-                        <div>${headerBadge}<h3 class="text-base font-bold text-slate-900 mt-2">${slotDetails.details}</h3></div>
-                        <span class="text-xs font-semibold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg">${candidates.length} Available Subs</span>
-                    </div>
-                    <div class="space-y-2.5">
-            `;
-
-            if (isAlreadyCovered) {
-                html += `
-                    <div class="p-3 bg-purple-100/80 border border-purple-300 rounded-xl flex justify-between items-center text-xs font-bold text-purple-900">
-                        <span>Covered on ${dateVal} by: <strong>${assignedSubName}</strong></span>
-                        <button onclick="unassignCoverage('${absentTeacher.id}', '${period}')" class="text-rose-600 bg-white px-3 py-1.5 rounded-lg border border-rose-200">Remove Sub</button>
-                    </div>
-                `;
-            } else if (candidates.length === 0) {
-                html += `<div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold text-center">⚠️ No free teachers available for this slot.</div>`;
-            } else {
-                candidates.forEach((cand, idx) => {
-                    html += `
-                        <div class="p-3 bg-white border border-slate-200 rounded-xl flex justify-between items-center gap-3">
-                            <div>
-                                <div class="font-bold text-slate-900 text-sm">${cand.name}</div>
-                                <div class="text-[11px] text-slate-500">${cand.department} | Total Coverages: <strong>${cand.totalCoverageCount}</strong></div>
-                            </div>
-                            <button onclick="assignCoverage('${cand.id}', '${absentTeacher.id}', '${day}', '${period}')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition">Assign Sub</button>
-                        </div>
-                    `;
-                });
-            }
-            html += `</div></div>`;
+      if (coverTeacher) {
+        coverAssignments[selectedDate][coverageKey] = coverTeacher;
+        addHistoryLog({
+          date: selectedDate,
+          type: 'COVERAGE',
+          teacher: coverTeacher,
+          absentTeacher: absentTeacher,
+          slot: slotKey,
+          text: `Assigned ${coverTeacher} to cover ${absentTeacher} (${slotKey}) on ${selectedDate}`
         });
-        container.innerHTML = html;
+      } else {
+        delete coverAssignments[selectedDate][coverageKey];
+      }
+
+      localStorage.setItem('tsc_coverages', JSON.stringify(coverAssignments));
+      updateSelectedTeacherSchedule();
+      renderHistoryLog();
     }
 
-    function renderScheduleEditor() {
-        const sel = document.getElementById('editorTeacherSelect');
-        if (!sel || !sel.value) return;
-        const teacher = faculty.find(t => t.id === sel.value);
-        if (!teacher) return;
-
-        const day = document.getElementById('editorDaySelect').value;
-        const tbody = document.getElementById('editorTableBody');
-        const daySched = teacher.schedule[day] || {};
-
-        tbody.innerHTML = Object.keys(daySched).map(pName => {
-            const slot = daySched[pName];
-            return `
-                <tr class="border-b hover:bg-slate-50">
-                    <td class="p-3 font-bold">${pName}</td>
-                    <td class="p-3 text-slate-600">${slot.time}</td>
-                    <td class="p-3 text-center"><span class="${slot.status === 'Teaching' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'} font-bold px-3 py-1 rounded-full text-xs">${slot.status}</span></td>
-                    <td class="p-3"><input type="text" id="input_${pName}" value="${slot.details}" class="w-full p-2 border rounded-lg text-xs bg-white font-semibold"></td>
-                    <td class="p-3 text-center"><button onclick="toggleSlotStatus('${teacher.id}', '${day}', '${pName}')" class="bg-indigo-600 text-white font-bold text-xs px-3 py-1.5 rounded-lg">Toggle Status</button></td>
-                </tr>
-            `;
-        }).join('');
+    // History Log Management
+    function addHistoryLog(entry) {
+      entry.id = Date.now();
+      entry.time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      historyLogs.unshift(entry);
+      if (historyLogs.length > 50) historyLogs.pop(); // Keep last 50
+      localStorage.setItem('tsc_history', JSON.stringify(historyLogs));
+      renderHistoryLog();
     }
 
-    function toggleSlotStatus(teacherId, day, period) {
-        const teacher = faculty.find(t => t.id === teacherId);
-        if (!teacher) return;
-        const slot = teacher.schedule[day][period];
-        const detailInput = document.getElementById(`input_${period}`);
+    function renderHistoryLog() {
+      const container = document.getElementById('historyLog');
+      if (historyLogs.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No coverage or absence logs recorded yet.</p>`;
+        return;
+      }
 
-        if (slot.status === 'Teaching') {
-            slot.status = 'Free';
-            slot.details = detailInput ? detailInput.value : 'Prep / Planning';
-        } else {
-            slot.status = 'Teaching';
-            slot.details = detailInput && detailInput.value !== 'Prep / Planning' ? detailInput.value : 'Class Assigned';
-        }
+      container.innerHTML = '';
+      historyLogs.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs flex items-start justify-between gap-2';
+        
+        const isAbsence = item.type === 'ABSENCE';
+        const iconClass = isAbsence ? 'fa-user-xmark text-rose-500' : 'fa-user-check text-emerald-500';
 
-        let count = 0;
-        Object.keys(teacher.schedule[day]).forEach(p => {
-            if (teacher.schedule[day][p].status === 'Teaching') count++;
-        });
-        teacher.teachingCounts[day] = count;
-
-        let total = 0;
-        ['A', 'B', 'C', 'D', 'E'].forEach(d => { total += teacher.teachingCounts[d]; });
-        teacher.teachingCounts.total = total;
-
-        saveToGoogleDrive();
+        div.innerHTML = `
+          <div class="flex items-start gap-2">
+            <i class="fa-solid ${iconClass} mt-0.5"></i>
+            <div>
+              <p class="font-medium text-slate-800">${item.text}</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">${item.date} at ${item.time}</p>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
     }
 
-    function populateTable() {
-        const tbody = document.getElementById('rosterTableBody');
-        if (!tbody) return;
-        tbody.innerHTML = faculty.map(t => `
-            <tr class="border-b hover:bg-slate-50 text-slate-700">
-                <td class="p-3 font-bold text-slate-900">${t.name}</td>
-                <td class="p-3 text-xs text-slate-600">${t.department}</td>
-                <td class="p-3 text-center font-semibold">${t.teachingCounts.A}</td>
-                <td class="p-3 text-center font-semibold">${t.teachingCounts.B}</td>
-                <td class="p-3 text-center font-semibold">${t.teachingCounts.C}</td>
-                <td class="p-3 text-center font-semibold">${t.teachingCounts.D}</td>
-                <td class="p-3 text-center font-semibold">${t.teachingCounts.E}</td>
-                <td class="p-3 text-center font-bold text-indigo-700">${t.teachingCounts.total}</td>
-                <td class="p-3 text-center"><span class="bg-slate-100 px-2.5 py-1 rounded text-xs font-bold text-slate-800">${t.totalCoverageCount}</span></td>
-                <td class="p-3 text-center">
-                    <button onclick="removeTeacher('${t.id}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs"><i class="fa-solid fa-trash"></i></button>
-                </td>
-            </tr>
-        `).join('');
+    function clearHistory() {
+      if (confirm("Are you sure you want to clear all history logs?")) {
+        historyLogs = [];
+        localStorage.removeItem('tsc_history');
+        renderHistoryLog();
+      }
     }
-
-    window.onload = init;
-    </script>
+  </script>
 </body>
 </html>
-
-```
