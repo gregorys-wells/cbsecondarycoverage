@@ -29,7 +29,7 @@
         </div>
       </div>
 
-      <div class="flex items-center bg-indigo-900/80 p-1.5 rounded-xl border border-indigo-700/60 gap-2">
+      <div class="flex items-center bg-indigo-900/80 p-1.5 rounded-xl border border-indigo-700/60 gap-2 flex-wrap">
         <button onclick="navigateDate(-1)" class="px-2.5 py-1.5 bg-indigo-800 hover:bg-blue-600 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 text-white">
           <i class="fa-solid fa-chevron-left"></i> Prev
         </button>
@@ -46,6 +46,9 @@
         <div id="dayTypeBadge" class="ml-1 px-3 py-1 bg-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider rounded-lg shadow-sm">
           Day A (Mon)
         </div>
+        <button onclick="openScheduleModal()" class="ml-2 px-3 py-1.5 bg-purple-700 hover:bg-purple-600 rounded-lg text-xs font-bold text-white shadow-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-gear"></i> Schedule Settings
+        </button>
       </div>
     </div>
 
@@ -69,7 +72,7 @@
         <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
             <div>
-              <label for="teacherSelect" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Select Teacher</label>
+              <label for="teacherSelect" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Select Absent Teacher</label>
               <select id="teacherSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="">-- Select Teacher --</option>
                 <option value="Dr. Pete">Dr. Pete (Secondary)</option>
@@ -137,7 +140,7 @@
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
               <div>
                 <h2 id="teacherScheduleHeading" class="text-base font-bold text-slate-900">Teacher Daily Schedule</h2>
-                <p id="teacherScheduleSubheading" class="text-xs text-slate-500 mt-0.5">Edit classes directly or click cells in the Full Matrix tab.</p>
+                <p id="teacherScheduleSubheading" class="text-xs text-slate-500 mt-0.5">Edit classes or delete ghost classes that do not require coverage.</p>
               </div>
               <div id="dayFormatBadge" class="text-xs font-bold px-3 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200">
                 Blocks Format
@@ -170,7 +173,7 @@
                 </li>
                 <li class="flex items-start gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
                   <i class="fa-solid fa-check text-blue-600 mt-0.5"></i>
-                  <span><strong>Absence Recency:</strong> Takes into account recency of staff's last absence.</span>
+                  <span><strong>Ghost Class Filtering:</strong> Deleted/ghost classes are excluded so no sub is assigned.</span>
                 </li>
               </ul>
             </div>
@@ -192,10 +195,13 @@
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
           <div>
             <h2 class="text-base font-bold text-slate-900">Full School Master Schedule Matrix</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Click <strong>ANY cell</strong> in the table to edit the class, mark as FREE, or add a class.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Click <strong>ANY cell</strong> to edit, delete ghost classes, or mark as FREE for coverage.</p>
           </div>
-          <div class="w-full md:w-72">
-            <input type="text" id="matrixFilterInput" onkeyup="filterMatrixTable()" placeholder="Search teacher or subject..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <div class="flex items-center gap-3 w-full md:w-auto">
+            <input type="text" id="matrixFilterInput" onkeyup="filterMatrixTable()" placeholder="Search teacher or subject..." class="w-full md:w-64 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <button onclick="openScheduleModal()" class="px-3 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-bold whitespace-nowrap shadow-sm">
+              <i class="fa-solid fa-file-import mr-1"></i> Import Next Year Matrix
+            </button>
           </div>
         </div>
 
@@ -233,6 +239,44 @@
       </div>
     </div>
   </main>
+
+  <!-- Modal: Import / Manage Next Year's Master Schedule Matrix -->
+  <div id="scheduleModal" class="hidden fixed inset-0 z-50 bg-indigo-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-calendar-plus text-purple-600"></i> Manage Academic Schedule Matrix
+        </h3>
+        <button onclick="closeScheduleModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="text-xs text-slate-600 space-y-2">
+        <p>You can update the baseline schedule matrix for future academic years by editing or pasting a JSON schedule object below.</p>
+        <div class="flex items-center gap-2 py-1">
+          <button onclick="exportCurrentSchedule()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold border border-slate-300">
+            <i class="fa-solid fa-download mr-1"></i> Export Current Schedule JSON
+          </button>
+          <button onclick="resetScheduleToDefault()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold border border-rose-200">
+            <i class="fa-solid fa-rotate-left mr-1"></i> Reset to Original Default
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Schedule JSON Configuration</label>
+        <textarea id="scheduleJsonInput" rows="10" class="w-full font-mono text-xs p-3 bg-slate-900 text-emerald-400 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 custom-scrollbar"></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+        <button onclick="closeScheduleModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">Cancel</button>
+        <button onclick="saveCustomScheduleMatrix()" class="px-5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-bold shadow-sm">
+          <i class="fa-solid fa-floppy-disk mr-1"></i> Save & Apply Matrix
+        </button>
+      </div>
+    </div>
+  </div>
 
   <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500 mt-auto">
     Secondary School Teacher Coverage Portal &bull; Principal Console
@@ -281,7 +325,7 @@
       { slot: 8, name: "Period 8", time: "02:00 - 02:40" }
     ];
 
-    const SCHEDULES = {
+    const DEFAULT_SCHEDULES = {
       "Day A": {
         "Mr. John": { B1: "Language Arts I (G6)", B3: "HS Language Arts I ESL (G9)" },
         "Ms. Philmi": { B1: "Science II (G7)" },
@@ -375,14 +419,16 @@
       }
     };
 
+    let SCHEDULES = JSON.parse(localStorage.getItem('tsc_master_schedules_v8')) || DEFAULT_SCHEDULES;
+
     let selectedDate = new Date().toISOString().split('T')[0];
     let selectedDayType = "Day A";
     let activeMainTab = "daily";
 
-    let absences = JSON.parse(localStorage.getItem('tsc_absences_v7') || '{}');
-    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v7') || '{}');
-    let customClasses = JSON.parse(localStorage.getItem('tsc_custom_classes_v7') || '{}');
-    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v7') || '[]');
+    let absences = JSON.parse(localStorage.getItem('tsc_absences_v8') || '{}');
+    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v8') || '{}');
+    let customClasses = JSON.parse(localStorage.getItem('tsc_custom_classes_v8') || '{}');
+    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v8') || '[]');
 
     function initPortal() {
       initDatePicker();
@@ -397,6 +443,51 @@
       document.addEventListener('DOMContentLoaded', initPortal);
     } else {
       initPortal();
+    }
+
+    function openScheduleModal() {
+      document.getElementById('scheduleModal').classList.remove('hidden');
+      document.getElementById('scheduleJsonInput').value = JSON.stringify(SCHEDULES, null, 2);
+    }
+
+    function closeScheduleModal() {
+      document.getElementById('scheduleModal').classList.add('hidden');
+    }
+
+    function exportCurrentSchedule() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(SCHEDULES, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `master_schedule_matrix_${selectedDate}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function resetScheduleToDefault() {
+      if (confirm("Reset to default master schedule matrix?")) {
+        SCHEDULES = JSON.parse(JSON.stringify(DEFAULT_SCHEDULES));
+        localStorage.setItem('tsc_master_schedules_v8', JSON.stringify(SCHEDULES));
+        document.getElementById('scheduleJsonInput').value = JSON.stringify(SCHEDULES, null, 2);
+        renderTeacherScheduleView();
+        renderMasterMatrixTable();
+        addLogEntry({ date: selectedDate, type: 'EDIT', text: 'Reset baseline Master Schedule Matrix to system default' });
+      }
+    }
+
+    function saveCustomScheduleMatrix() {
+      try {
+        const parsed = JSON.parse(document.getElementById('scheduleJsonInput').value);
+        SCHEDULES = parsed;
+        localStorage.setItem('tsc_master_schedules_v8', JSON.stringify(SCHEDULES));
+        closeScheduleModal();
+        renderTeacherScheduleView();
+        renderMasterMatrixTable();
+        addLogEntry({ date: selectedDate, type: 'EDIT', text: 'Updated Master Schedule Matrix JSON' });
+        alert("Master Schedule Matrix updated successfully!");
+      } catch (err) {
+        alert("Invalid JSON format! Please check syntax and try again: " + err.message);
+      }
     }
 
     function getDayTypeFromDate(dateStr) {
@@ -518,7 +609,7 @@
 
       if (!absences[selectedDate]) absences[selectedDate] = {};
       absences[selectedDate][teacherName] = { type: reason, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-      localStorage.setItem('tsc_absences_v7', JSON.stringify(absences));
+      localStorage.setItem('tsc_absences_v8', JSON.stringify(absences));
 
       addLogEntry({
         date: selectedDate,
@@ -535,7 +626,7 @@
       if (absences[selectedDate] && absences[selectedDate][teacherName]) {
         delete absences[selectedDate][teacherName];
         if (Object.keys(absences[selectedDate]).length === 0) delete absences[selectedDate];
-        localStorage.setItem('tsc_absences_v7', JSON.stringify(absences));
+        localStorage.setItem('tsc_absences_v8', JSON.stringify(absences));
 
         addLogEntry({
           date: selectedDate,
@@ -602,29 +693,30 @@
       const currentEdit = customClasses[editKey];
 
       let currentClassName = null;
-      if (currentEdit === "REMOVED") currentClassName = "FREE";
+      if (currentEdit === "REMOVED") currentClassName = "DELETED / GHOST CLASS";
       else if (currentEdit) currentClassName = currentEdit;
       else currentClassName = daySched[slotKey] || "FREE";
 
       const choice = prompt(
-        `MANAGE MATRIX CELL for ${teacherName} (${slotKey}) on ${selectedDate}:\n` +
+        `MANAGE MATRIX CELL: ${teacherName} (${slotKey}) on ${selectedDate}\n` +
         `Current Status: [${currentClassName}]\n\n` +
-        `Actions:\n` +
-        `- Enter a class name to assign class\n` +
-        `- Type "FREE" to clear slot and make available for coverage\n` +
-        `- Type "RESET" to restore default schedule`,
-        currentClassName
+        `Choose an Action:\n` +
+        `1. Type a NEW CLASS name to assign class\n` +
+        `2. Type "DELETE" or "GHOST" to completely remove class (NO coverage needed)\n` +
+        `3. Type "RESET" to restore default master schedule`,
+        currentClassName === "DELETED / GHOST CLASS" ? "DELETE" : currentClassName
       );
 
       if (choice === null) return;
 
       const trimmed = choice.trim();
-      if (trimmed.toUpperCase() === "FREE") {
+      if (trimmed.toUpperCase() === "DELETE" || trimmed.toUpperCase() === "GHOST" || trimmed.toUpperCase() === "FREE") {
         customClasses[editKey] = "REMOVED";
+        if (coverages[selectedDate]) delete coverages[selectedDate][`${teacherName}_${slotKey}`];
         addLogEntry({
           date: selectedDate,
           type: 'EDIT',
-          text: `Matrix Edit: Set ${teacherName} (${slotKey}) to FREE on ${selectedDate}`
+          text: `Matrix Edit: Removed class / set to GHOST for ${teacherName} (${slotKey}) on ${selectedDate}`
         });
       } else if (trimmed.toUpperCase() === "RESET") {
         delete customClasses[editKey];
@@ -642,7 +734,8 @@
         });
       }
 
-      localStorage.setItem('tsc_custom_classes_v7', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v8', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_coverages_v8', JSON.stringify(coverages));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -650,12 +743,15 @@
     function removeClassFromSchedule(teacherName, slotKey) {
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       customClasses[key] = "REMOVED";
-      localStorage.setItem('tsc_custom_classes_v7', JSON.stringify(customClasses));
+      if (coverages[selectedDate]) delete coverages[selectedDate][`${teacherName}_${slotKey}`];
+      
+      localStorage.setItem('tsc_custom_classes_v8', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_coverages_v8', JSON.stringify(coverages));
 
       addLogEntry({
         date: selectedDate,
         type: 'EDIT',
-        text: `Removed class for ${teacherName} (${slotKey}) on ${selectedDate}`
+        text: `Removed class (marked ghost class / no cover needed) for ${teacherName} (${slotKey}) on ${selectedDate}`
       });
 
       renderTeacherScheduleView();
@@ -668,7 +764,7 @@
 
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       customClasses[key] = className.trim();
-      localStorage.setItem('tsc_custom_classes_v7', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v8', JSON.stringify(customClasses));
 
       addLogEntry({
         date: selectedDate,
@@ -683,7 +779,7 @@
     function resetSlotSchedule(teacherName, slotKey) {
       const key = `${selectedDate}_${teacherName}_${slotKey}`;
       delete customClasses[key];
-      localStorage.setItem('tsc_custom_classes_v7', JSON.stringify(customClasses));
+      localStorage.setItem('tsc_custom_classes_v8', JSON.stringify(customClasses));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -845,7 +941,7 @@
 
               ${className ? `
                 <button onclick="removeClassFromSchedule('${teacherName}', '${slotKey}')" class="text-[10px] font-bold px-2 py-1 bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200">
-                  <i class="fa-solid fa-minus mr-1"></i>Remove Class
+                  <i class="fa-solid fa-trash mr-1"></i>Delete Class
                 </button>
               ` : `
                 <button onclick="addClassToSchedule('${teacherName}', '${slotKey}')" class="text-[10px] font-bold px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg hover:bg-emerald-200">
@@ -860,13 +956,13 @@
               ` : (className ? `
                 <span class="px-2.5 py-0.5 bg-amber-100 text-amber-900 rounded-md text-[11px] font-bold">Needs Cover</span>
               ` : `
-                <span class="text-xs text-slate-400 font-medium italic">Free Slot</span>
+                <span class="text-xs text-slate-400 font-medium italic">Free / No Cover Needed</span>
               `)}
             </div>
           </div>
 
           <div class="mt-2.5">
-            ${className ? `<h3 class="text-sm font-bold text-slate-800">${className}</h3>` : `<p class="text-xs text-slate-400 italic">No class scheduled during this slot.</p>`}
+            ${className ? `<h3 class="text-sm font-bold text-slate-800">${className}</h3>` : `<p class="text-xs text-slate-400 italic">No active class scheduled (ghost / free slot).</p>`}
           </div>
 
           ${className ? coverSelectHtml : ''}
@@ -891,7 +987,7 @@
         delete coverages[selectedDate][key];
       }
 
-      localStorage.setItem('tsc_coverages_v7', JSON.stringify(coverages));
+      localStorage.setItem('tsc_coverages_v8', JSON.stringify(coverages));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -978,7 +1074,7 @@
       entry.time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       historyLogs.unshift(entry);
       if (historyLogs.length > 100) historyLogs.pop();
-      localStorage.setItem('tsc_logs_v7', JSON.stringify(historyLogs));
+      localStorage.setItem('tsc_logs_v8', JSON.stringify(historyLogs));
       renderLogHistory();
     }
 
@@ -1021,7 +1117,7 @@
     function clearAllLogs() {
       if (confirm("Are you sure you want to clear all log records?")) {
         historyLogs = [];
-        localStorage.removeItem('tsc_logs_v7');
+        localStorage.removeItem('tsc_logs_v8');
         renderLogHistory();
       }
     }
