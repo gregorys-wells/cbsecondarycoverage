@@ -74,6 +74,11 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Date of Absence</label>
+                        <input type="date" id="absenceDate" onchange="handleDateChange()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-sm font-semibold">
+                    </div>
+
+                    <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Schedule Day</label>
                         <select id="scheduleDaySelect" onchange="updateCoverageOptions()" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500 text-sm font-semibold">
                             <option value="A">Day A (Mon)</option>
@@ -82,11 +87,6 @@
                             <option value="D">Day D (Thu)</option>
                             <option value="E">Day E (Fri)</option>
                         </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Date of Absence</label>
-                        <input type="date" id="absenceDate" onchange="updateCoverageOptions()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-sm font-semibold">
                     </div>
                 </div>
 
@@ -275,6 +275,38 @@
         {"name": "Mr. Robert", "dept": "Social Studies", "day": "E", "period": "Period 3", "details": "G12 AP US History"}
     ];
 
+    const HOLIDAYS = [
+        "2026-10-13", "2026-10-23", "2026-12-05", "2026-12-10", 
+        "2026-12-21", "2026-12-22", "2026-12-23", "2026-12-24", "2026-12-25"
+    ];
+
+    function getScheduleDayForDate(dateString) {
+        if (!dateString) return "A";
+        const dateObj = new Date(dateString + "T00:00:00");
+        const dayOfWeek = dateObj.getDay();
+
+        if (dayOfWeek === 0 || dayOfWeek === 6) return null;
+        if (HOLIDAYS.includes(dateString)) return null;
+
+        const startDate = new Date("2026-08-17T00:00:00");
+        if (dateObj < startDate) return "A";
+
+        let count = 0;
+        let cur = new Date(startDate);
+        while (cur <= dateObj) {
+            const d = cur.getDay();
+            const dateFormatted = cur.toISOString().split('T')[0];
+            if (d !== 0 && d !== 6 && !HOLIDAYS.includes(dateFormatted)) {
+                count++;
+            }
+            cur.setDate(cur.getDate() + 1);
+        }
+
+        const rotationDays = ['A', 'B', 'C', 'D', 'E'];
+        const dayIndex = (count - 1) % 5;
+        return rotationDays[dayIndex >= 0 ? dayIndex : 0];
+    }
+
     function buildMasterFaculty() {
         const uniqueTeachers = Array.from(new Set(RAW_ASSIGNMENTS_MASTER.map(a => a.name)));
         return uniqueTeachers.map((tName, idx) => {
@@ -366,12 +398,27 @@
 
     function init() {
         document.getElementById('absenceDate').valueAsDate = new Date();
+        handleDateChange();
         populateTeacherDropdowns();
         populateTable();
         renderAbsenceLogTable();
-        updateCoverageOptions();
         renderScheduleEditor();
         loadFromGoogleDrive();
+    }
+
+    function handleDateChange() {
+        const dateVal = document.getElementById('absenceDate').value;
+        const detectedDay = getScheduleDayForDate(dateVal);
+        const daySelect = document.getElementById('scheduleDaySelect');
+
+        if (!detectedDay) {
+            alert("⚠️ Selected date is a weekend or scheduled holiday! Defaulting to Day A.");
+            daySelect.value = "A";
+        } else {
+            daySelect.value = detectedDay;
+        }
+
+        updateCoverageOptions();
     }
 
     function switchTab(tab) {
