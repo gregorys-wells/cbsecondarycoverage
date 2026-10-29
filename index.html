@@ -350,7 +350,7 @@
   </footer>
 
   <script>
-    let TEACHERS = JSON.parse(localStorage.getItem('tsc_teachers_v14')) || [
+    let TEACHERS = JSON.parse(localStorage.getItem('tsc_teachers_v15')) || [
       { name: "Mr. John", type: "secondary" },
       { name: "Ms. Philmi", type: "secondary" },
       { name: "Mr. Landon", type: "secondary" },
@@ -486,22 +486,22 @@
       }
     };
 
-    let SCHEDULES = JSON.parse(localStorage.getItem('tsc_master_schedules_v14')) || DEFAULT_SCHEDULES;
+    let SCHEDULES = JSON.parse(localStorage.getItem('tsc_master_schedules_v15')) || DEFAULT_SCHEDULES;
 
     let selectedDate = new Date().toISOString().split('T')[0];
     let selectedDayType = "Day A";
     let activeMainTab = "daily";
 
-    let absences = JSON.parse(localStorage.getItem('tsc_absences_v14') || '{}');
-    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v14') || '{}');
-    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v14') || '[]');
+    let absences = JSON.parse(localStorage.getItem('tsc_absences_v15') || '{}');
+    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v15') || '{}');
+    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v15') || '[]');
 
     function saveTeachers() {
-      localStorage.setItem('tsc_teachers_v14', JSON.stringify(TEACHERS));
+      localStorage.setItem('tsc_teachers_v15', JSON.stringify(TEACHERS));
     }
 
     function saveMasterSchedules() {
-      localStorage.setItem('tsc_master_schedules_v14', JSON.stringify(SCHEDULES));
+      localStorage.setItem('tsc_master_schedules_v15', JSON.stringify(SCHEDULES));
     }
 
     function initPortal() {
@@ -770,7 +770,7 @@
 
       if (!absences[selectedDate]) absences[selectedDate] = {};
       absences[selectedDate][teacherName] = { type: reason, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-      localStorage.setItem('tsc_absences_v14', JSON.stringify(absences));
+      localStorage.setItem('tsc_absences_v15', JSON.stringify(absences));
 
       addLogEntry({
         date: selectedDate,
@@ -788,7 +788,7 @@
       if (absences[selectedDate] && absences[selectedDate][teacherName]) {
         delete absences[selectedDate][teacherName];
         if (Object.keys(absences[selectedDate]).length === 0) delete absences[selectedDate];
-        localStorage.setItem('tsc_absences_v14', JSON.stringify(absences));
+        localStorage.setItem('tsc_absences_v15', JSON.stringify(absences));
 
         addLogEntry({
           date: selectedDate,
@@ -1225,20 +1225,22 @@
       if (coverTeacher) {
         coverages[selectedDate][key] = coverTeacher;
         
-        // Log entry 1: For the teacher PROVIDING coverage
+        // Log entry 1: For the teacher PROVIDING coverage (Sub Duty)
         addLogEntry({
           date: selectedDate,
           teacher: coverTeacher,
+          coverTeacher: coverTeacher,
           absentTeacher: absentTeacher,
           type: 'COVERAGE_PROVIDED',
           text: `${coverTeacher} assigned to cover for ${absentTeacher} (${slotKey}) on ${selectedDate}`
         });
 
-        // Log entry 2: For the absent teacher RECEIVING coverage
+        // Log entry 2: For the absent teacher RECEIVING coverage (Class Covered)
         addLogEntry({
           date: selectedDate,
           teacher: absentTeacher,
-          coveringTeacher: coverTeacher,
+          coverTeacher: coverTeacher,
+          absentTeacher: absentTeacher,
           type: 'COVERAGE_RECEIVED',
           text: `${absentTeacher}'s class (${slotKey}) is covered by ${coverTeacher} on ${selectedDate}`
         });
@@ -1246,7 +1248,7 @@
         delete coverages[selectedDate][key];
       }
 
-      localStorage.setItem('tsc_coverages_v14', JSON.stringify(coverages));
+      localStorage.setItem('tsc_coverages_v15', JSON.stringify(coverages));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -1265,7 +1267,7 @@
       entry.time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       historyLogs.unshift(entry);
       if (historyLogs.length > 250) historyLogs.pop();
-      localStorage.setItem('tsc_logs_v14', JSON.stringify(historyLogs));
+      localStorage.setItem('tsc_logs_v15', JSON.stringify(historyLogs));
       renderLogHistory();
     }
 
@@ -1315,9 +1317,19 @@
       }
 
       let filtered = historyLogs.filter(l => {
-        if (teacherFilter && l.teacher !== teacherFilter && (!l.text.includes(teacherFilter))) return false;
+        // Teacher Specific Filtering
+        if (teacherFilter) {
+          if (l.type === 'COVERAGE_PROVIDED' && l.coverTeacher !== teacherFilter) return false;
+          if (l.type === 'COVERAGE_RECEIVED' && l.absentTeacher !== teacherFilter) return false;
+          if (l.type !== 'COVERAGE_PROVIDED' && l.type !== 'COVERAGE_RECEIVED' && l.teacher !== teacherFilter) return false;
+        }
+
+        // Category Type Filtering
         if (typeFilter && l.type !== typeFilter) return false;
+
+        // Keyword Search
         if (searchInput && !l.text.toLowerCase().includes(searchInput) && !l.date.includes(searchInput)) return false;
+
         return true;
       });
 
@@ -1374,7 +1386,7 @@
     function clearAllLogs() {
       if (confirm("Are you sure you want to clear all log records?")) {
         historyLogs = [];
-        localStorage.removeItem('tsc_logs_v14');
+        localStorage.removeItem('tsc_logs_v15');
         renderLogHistory();
       }
     }
