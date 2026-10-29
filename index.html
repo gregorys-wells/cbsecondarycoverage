@@ -17,6 +17,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
+  <!-- TOP HEADER -->
   <header class="bg-indigo-950 text-white sticky top-0 z-50 shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center space-x-3">
@@ -47,8 +48,12 @@
           Day A (Mon)
         </div>
 
-        <button onclick="openUploadModal()" class="ml-2 px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold shadow-md flex items-center gap-2 transition-all border border-purple-400">
-          <i class="fa-solid fa-cloud-arrow-up text-sm"></i> Upload Next Year Matrix
+        <button onclick="openManageTeachersModal()" class="ml-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow-md flex items-center gap-1.5 transition-all border border-emerald-400">
+          <i class="fa-solid fa-users-gear text-xs"></i> Manage Staff
+        </button>
+
+        <button onclick="openUploadModal()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold shadow-md flex items-center gap-1.5 transition-all border border-purple-400">
+          <i class="fa-solid fa-cloud-arrow-up text-xs"></i> Upload Matrix
         </button>
       </div>
     </div>
@@ -68,6 +73,7 @@
 
   <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
 
+    <!-- DAILY WORKSTATION TAB -->
     <div id="tabDailyView" class="space-y-6">
       <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
         <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
@@ -76,27 +82,6 @@
               <label for="teacherSelect" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Select Absent Teacher</label>
               <select id="teacherSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="">-- Select Teacher --</option>
-                <option value="Dr. Pete">Dr. Pete (Secondary)</option>
-                <option value="Mr. Fluke">Mr. Fluke (Hybrid)</option>
-                <option value="Mr. Greg">Mr. Greg (Secondary)</option>
-                <option value="Mr. Harris">Mr. Harris (Primary)</option>
-                <option value="Mr. Jacob">Mr. Jacob (Secondary)</option>
-                <option value="Mr. John">Mr. John (Secondary)</option>
-                <option value="Mr. Kinny">Mr. Kinny (Primary)</option>
-                <option value="Mr. Kris">Mr. Kris (Secondary)</option>
-                <option value="Mr. Landon">Mr. Landon (Secondary)</option>
-                <option value="Mr. Simone">Mr. Simone (Secondary)</option>
-                <option value="Mr. Tracy">Mr. Tracy (Primary)</option>
-                <option value="Mr. Troy">Mr. Troy (Secondary)</option>
-                <option value="Mr. Wentzel">Mr. Wentzel (Secondary)</option>
-                <option value="Mr. Xyries">Mr. Xyries (Secondary)</option>
-                <option value="Ms. Aom">Ms. Aom (Primary)</option>
-                <option value="Ms. Julia">Ms. Julia (Secondary)</option>
-                <option value="Ms. Kan">Ms. Kan (Secondary)</option>
-                <option value="Ms. May">Ms. May (Hybrid)</option>
-                <option value="Ms. Philmi">Ms. Philmi (Secondary)</option>
-                <option value="Ms. Praepilai">Ms. Praepilai (Primary)</option>
-                <option value="Ms. Toey">Ms. Toey (Primary)</option>
               </select>
             </div>
 
@@ -191,6 +176,7 @@
       </div>
     </div>
 
+    <!-- FULL MATRIX TAB -->
     <div id="tabMatrixView" class="hidden space-y-6">
 
       <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-blue-900 text-white rounded-2xl p-6 shadow-md border border-purple-700/50 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -200,15 +186,15 @@
             <i class="fa-solid fa-file-circle-plus text-purple-300 text-xl"></i> Upload Next Year Master Schedule (.json)
           </h3>
           <p class="text-xs text-purple-200 max-w-xl">
-            Upload your updated JSON schedule file here to replace the current master matrix for next school year. All matrix edits sync across all matching Day Cycles automatically!
+            Upload your updated JSON schedule file here to replace the current master matrix. All cell changes sync across all matching Day Cycles automatically!
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <button onclick="exportCurrentSchedule()" class="px-4 py-2.5 bg-indigo-950/90 hover:bg-indigo-900 text-indigo-100 rounded-xl text-xs font-bold border border-indigo-700/60 shadow-sm transition-all flex items-center gap-2">
-            <i class="fa-solid fa-download"></i> Download Current Matrix JSON
+            <i class="fa-solid fa-download"></i> Download Matrix JSON
           </button>
           <label class="px-5 py-2.5 bg-purple-500 hover:bg-purple-400 text-white rounded-xl text-xs font-black shadow-lg cursor-pointer transition-all flex items-center gap-2 border border-purple-300">
-            <i class="fa-solid fa-upload text-sm"></i> Select & Upload New File (.json)
+            <i class="fa-solid fa-upload text-sm"></i> Upload JSON File
             <input type="file" accept=".json" onchange="handleFileUpload(event)" class="hidden">
           </label>
         </div>
@@ -217,8 +203,8 @@
       <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
           <div>
-            <h2 class="text-base font-bold text-slate-900">Full School Master Schedule Matrix</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Primary teachers show periods 1-8 on all days. Secondary teachers show blocks (1-4) on block days (A, B, D, E) & periods (1-8) on Day C. Edits sync across all <span id="matrixDayCycleText" class="font-bold text-blue-600">Day A</span>'s!</p>
+            <h2 class="text-base font-bold text-slate-900">Full Master Schedule Matrix</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Primary & Hybrid staff show all 8 periods on all days. Secondary staff show 4 blocks on block days (A, B, D, E) & 8 periods on Day C. Changes sync across all <span id="matrixDayCycleText" class="font-bold text-blue-600">Day A</span>'s!</p>
           </div>
           <div class="w-full md:w-64">
             <input type="text" id="matrixFilterInput" onkeyup="filterMatrixTable()" placeholder="Search teacher or subject..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -234,53 +220,34 @@
       </div>
     </div>
 
+    <!-- HISTORY LOGS TAB -->
     <div id="tabLogsView" class="hidden space-y-6">
       <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
           <div>
             <h2 class="text-base font-bold text-slate-900">Absence & Coverage History Log</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Filter logs by specific teacher, absence type, or keyword search.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Search and filter logs by specific teacher name, absence reason, or keyword.</p>
           </div>
           <button onclick="clearAllLogs()" class="bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs font-bold px-4 py-2 rounded-xl transition-all">
             <i class="fa-solid fa-trash-can mr-1"></i> Clear Log History
           </button>
         </div>
 
+        <!-- SEARCH / FILTER CONSOLE -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 mb-4">
           <div>
             <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter by Teacher</label>
             <select id="logTeacherFilter" onchange="renderLogHistory()" class="w-full bg-white border border-slate-300 text-xs font-semibold rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-              <option value="">-- All Teachers --</option>
-              <option value="Dr. Pete">Dr. Pete</option>
-              <option value="Mr. Fluke">Mr. Fluke</option>
-              <option value="Mr. Greg">Mr. Greg</option>
-              <option value="Mr. Harris">Mr. Harris</option>
-              <option value="Mr. Jacob">Mr. Jacob</option>
-              <option value="Mr. John">Mr. John</option>
-              <option value="Mr. Kinny">Mr. Kinny</option>
-              <option value="Mr. Kris">Mr. Kris</option>
-              <option value="Mr. Landon">Mr. Landon</option>
-              <option value="Mr. Simone">Mr. Simone</option>
-              <option value="Mr. Tracy">Mr. Tracy</option>
-              <option value="Mr. Troy">Mr. Troy</option>
-              <option value="Mr. Wentzel">Mr. Wentzel</option>
-              <option value="Mr. Xyries">Mr. Xyries</option>
-              <option value="Ms. Aom">Ms. Aom</option>
-              <option value="Ms. Julia">Ms. Julia</option>
-              <option value="Ms. Kan">Ms. Kan</option>
-              <option value="Ms. May">Ms. May</option>
-              <option value="Ms. Philmi">Ms. Philmi</option>
-              <option value="Ms. Praepilai">Ms. Praepilai</option>
-              <option value="Ms. Toey">Ms. Toey</option>
+              <option value="">-- All Staff Members --</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter by Log Type</label>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter by Entry Type</label>
             <select id="logTypeFilter" onchange="renderLogHistory()" class="w-full bg-white border border-slate-300 text-xs font-semibold rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-              <option value="">-- All Entry Types --</option>
+              <option value="">-- All Log Types --</option>
               <option value="ABSENCE">Absences Only</option>
-              <option value="COVERAGE">Coverages Only</option>
+              <option value="COVERAGE">Coverages Provided Only</option>
               <option value="EDIT">Schedule Edits Only</option>
             </select>
           </div>
@@ -288,18 +255,19 @@
           <div>
             <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Search Keywords</label>
             <div class="relative">
-              <input type="text" id="logSearchInput" onkeyup="renderLogHistory()" placeholder="Search date, teacher name, block..." class="w-full bg-white border border-slate-300 rounded-lg pl-8 pr-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <input type="text" id="logSearchInput" onkeyup="renderLogHistory()" placeholder="Type date, teacher name, block..." class="w-full bg-white border border-slate-300 rounded-lg pl-8 pr-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
               <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
             </div>
           </div>
         </div>
 
+        <!-- TEACHER SUMMARY STATS CARD -->
         <div id="teacherSummaryStatsCard" class="hidden p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 mb-4 flex flex-wrap justify-between items-center gap-2">
           <div>
-            <span id="summaryTeacherName" class="font-black text-sm">Mr. Simone</span> Summary Statistics:
+            <span id="summaryTeacherName" class="font-black text-sm">Teacher</span> Summary Statistics:
           </div>
           <div class="flex gap-4 font-bold">
-            <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-lg border border-rose-200"><i class="fa-solid fa-user-xmark mr-1"></i> <span id="summaryAbsenceCount">0</span> Absences</span>
+            <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-lg border border-rose-200"><i class="fa-solid fa-user-xmark mr-1"></i> <span id="summaryAbsenceCount">0</span> Absences Recorded</span>
             <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200"><i class="fa-solid fa-user-check mr-1"></i> <span id="summaryCoverageCount">0</span> Coverages Provided</span>
           </div>
         </div>
@@ -309,11 +277,50 @@
     </div>
   </main>
 
+  <!-- MANAGE TEACHERS MODAL -->
+  <div id="manageTeachersModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 space-y-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-users-gear text-emerald-600"></i> Staff Roster Management
+        </h3>
+        <button onclick="closeManageTeachersModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+        <h4 class="text-xs font-bold text-slate-700 uppercase">Add New Teacher</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <input type="text" id="newTeacherNameInput" placeholder="Teacher Name (e.g. Ms. Sarah)" class="col-span-2 bg-white border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <select id="newTeacherTypeInput" class="bg-white border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="secondary">Secondary</option>
+            <option value="primary">Primary</option>
+            <option value="hybrid">Hybrid</option>
+          </select>
+        </div>
+        <button onclick="addNewTeacherFromModal()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-plus"></i> Add Teacher to Roster
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold text-slate-700 uppercase">Current Teaching Staff (<span id="modalStaffCount">0</span>)</h4>
+        <div id="modalTeacherList" class="max-h-56 overflow-y-auto custom-scrollbar divide-y divide-slate-100 border border-slate-200 rounded-xl p-2 bg-white"></div>
+      </div>
+
+      <button onclick="closeManageTeachersModal()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+        Done
+      </button>
+    </div>
+  </div>
+
+  <!-- UPLOAD JSON MATRIX MODAL -->
   <div id="uploadModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-5">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up text-purple-600"></i> Upload Next Year Master Schedule File
+          <i class="fa-solid fa-cloud-arrow-up text-purple-600"></i> Upload Master Schedule Matrix
         </h3>
         <button onclick="closeUploadModal()" class="text-slate-400 hover:text-slate-600 text-lg">
           <i class="fa-solid fa-xmark"></i>
@@ -321,11 +328,7 @@
       </div>
 
       <div class="space-y-3 text-xs text-slate-600">
-        <p>Please select a JSON file containing the updated master schedule matrix for next year.</p>
-        <div class="p-4 bg-purple-50 border border-purple-200 rounded-xl text-purple-900 space-y-1">
-          <p class="font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Format Requirement:</p>
-          <p class="text-[11px]">The JSON file should contain schedule objects structured by day cycles (<code>"Day A"</code>, <code>"Day B"</code>, etc.) and teacher names.</p>
-        </div>
+        <p>Please select a JSON file containing the updated master schedule matrix.</p>
       </div>
 
       <div class="pt-2 flex flex-col gap-3">
@@ -345,7 +348,7 @@
   </footer>
 
   <script>
-    const TEACHERS = [
+    let TEACHERS = JSON.parse(localStorage.getItem('tsc_teachers_v12')) || [
       { name: "Mr. John", type: "secondary" },
       { name: "Ms. Philmi", type: "secondary" },
       { name: "Mr. Landon", type: "secondary" },
@@ -481,21 +484,26 @@
       }
     };
 
-    let SCHEDULES = JSON.parse(localStorage.getItem('tsc_master_schedules_v11')) || DEFAULT_SCHEDULES;
+    let SCHEDULES = JSON.parse(localStorage.getItem('tsc_master_schedules_v12')) || DEFAULT_SCHEDULES;
 
     let selectedDate = new Date().toISOString().split('T')[0];
     let selectedDayType = "Day A";
     let activeMainTab = "daily";
 
-    let absences = JSON.parse(localStorage.getItem('tsc_absences_v11') || '{}');
-    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v11') || '{}');
-    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v11') || '[]');
+    let absences = JSON.parse(localStorage.getItem('tsc_absences_v12') || '{}');
+    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v12') || '{}');
+    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v12') || '[]');
+
+    function saveTeachers() {
+      localStorage.setItem('tsc_teachers_v12', JSON.stringify(TEACHERS));
+    }
 
     function saveMasterSchedules() {
-      localStorage.setItem('tsc_master_schedules_v11', JSON.stringify(SCHEDULES));
+      localStorage.setItem('tsc_master_schedules_v12', JSON.stringify(SCHEDULES));
     }
 
     function initPortal() {
+      populateTeacherDropdowns();
       initDatePicker();
       setupEventListeners();
       renderDateAbsencesBanner();
@@ -510,18 +518,103 @@
       initPortal();
     }
 
-    function openUploadModal() {
-      document.getElementById('uploadModal').classList.remove('hidden');
+    function populateTeacherDropdowns() {
+      const select = document.getElementById('teacherSelect');
+      const filterSelect = document.getElementById('logTeacherFilter');
+
+      const currentVal = select ? select.value : "";
+      const currentFilterVal = filterSelect ? filterSelect.value : "";
+
+      if (select) {
+        select.innerHTML = `<option value="">-- Select Absent Teacher --</option>`;
+        TEACHERS.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
+          select.innerHTML += `<option value="${t.name}">${t.name} (${t.type})</option>`;
+        });
+        select.value = currentVal;
+      }
+
+      if (filterSelect) {
+        filterSelect.innerHTML = `<option value="">-- All Staff Members --</option>`;
+        TEACHERS.forEach(t => {
+          filterSelect.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+        });
+        filterSelect.value = currentFilterVal;
+      }
     }
 
-    function closeUploadModal() {
-      document.getElementById('uploadModal').classList.add('hidden');
+    function openManageTeachersModal() {
+      renderManageTeachersList();
+      document.getElementById('manageTeachersModal').classList.remove('hidden');
     }
 
-    function handleFileUploadModal(event) {
-      handleFileUpload(event);
-      closeUploadModal();
+    function closeManageTeachersModal() {
+      document.getElementById('manageTeachersModal').classList.add('hidden');
+      populateTeacherDropdowns();
+      renderTeacherScheduleView();
+      renderMasterMatrixTable();
     }
+
+    function renderManageTeachersList() {
+      const container = document.getElementById('modalTeacherList');
+      const count = document.getElementById('modalStaffCount');
+      if (!container) return;
+
+      count.textContent = TEACHERS.length;
+      container.innerHTML = '';
+
+      TEACHERS.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between p-2 hover:bg-slate-50 text-xs";
+        div.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-slate-800">${t.name}</span>
+            <span class="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">${t.type}</span>
+          </div>
+          <button onclick="deleteTeacher('${t.name}')" class="text-rose-500 hover:text-rose-700 px-2 py-1 rounded hover:bg-rose-50 font-bold text-xs flex items-center gap-1">
+            <i class="fa-solid fa-trash text-[11px]"></i> Delete
+          </button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addNewTeacherFromModal() {
+      const nameInput = document.getElementById('newTeacherNameInput');
+      const typeInput = document.getElementById('newTeacherTypeInput');
+
+      const name = nameInput ? nameInput.value.trim() : "";
+      const type = typeInput ? typeInput.value : "secondary";
+
+      if (!name) {
+        alert("Please enter teacher name.");
+        return;
+      }
+
+      if (TEACHERS.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+        alert("A teacher with this name already exists!");
+        return;
+      }
+
+      TEACHERS.push({ name, type });
+      saveTeachers();
+      addLogEntry({ date: selectedDate, type: 'EDIT', text: `Added new staff member: ${name} (${type})` });
+
+      nameInput.value = '';
+      renderManageTeachersList();
+    }
+
+    function deleteTeacher(name) {
+      if (confirm(`Are you sure you want to remove ${name} from the school roster?`)) {
+        TEACHERS = TEACHERS.filter(t => t.name !== name);
+        saveTeachers();
+        addLogEntry({ date: selectedDate, type: 'EDIT', text: `Removed staff member: ${name}` });
+        renderManageTeachersList();
+      }
+    }
+
+    function openUploadModal() { document.getElementById('uploadModal').classList.remove('hidden'); }
+    function closeUploadModal() { document.getElementById('uploadModal').classList.add('hidden'); }
+    function handleFileUploadModal(e) { handleFileUpload(e); closeUploadModal(); }
 
     function handleFileUpload(event) {
       const file = event.target.files[0];
@@ -531,16 +624,14 @@
       reader.onload = function(e) {
         try {
           const parsed = JSON.parse(e.target.result);
-          if (typeof parsed !== 'object') throw new Error("Invalid structure");
-          
           SCHEDULES = parsed;
           saveMasterSchedules();
           renderTeacherScheduleView();
           renderMasterMatrixTable();
           addLogEntry({ date: selectedDate, type: 'EDIT', text: `Uploaded new Master Schedule file: ${file.name}` });
-          alert(`Successfully uploaded and applied new matrix file: ${file.name}`);
+          alert(`Successfully uploaded matrix file: ${file.name}`);
         } catch (err) {
-          alert("Error parsing file! Please make sure it is a valid JSON matrix file.\n" + err.message);
+          alert("Error parsing JSON schedule file!\n" + err.message);
         }
       };
       reader.readAsText(file);
@@ -677,7 +768,7 @@
 
       if (!absences[selectedDate]) absences[selectedDate] = {};
       absences[selectedDate][teacherName] = { type: reason, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-      localStorage.setItem('tsc_absences_v11', JSON.stringify(absences));
+      localStorage.setItem('tsc_absences_v12', JSON.stringify(absences));
 
       addLogEntry({
         date: selectedDate,
@@ -695,7 +786,7 @@
       if (absences[selectedDate] && absences[selectedDate][teacherName]) {
         delete absences[selectedDate][teacherName];
         if (Object.keys(absences[selectedDate]).length === 0) delete absences[selectedDate];
-        localStorage.setItem('tsc_absences_v11', JSON.stringify(absences));
+        localStorage.setItem('tsc_absences_v12', JSON.stringify(absences));
 
         addLogEntry({
           date: selectedDate,
@@ -800,7 +891,7 @@
             cellsHtml += `<td class="p-1.5">${renderMatrixCellHtml(t.name, pKey, val, isCovered)}</td>`;
           }
         } else {
-          if (t.type === 'primary') {
+          if (t.type === 'primary' || t.type === 'hybrid') {
             const blockMapping = [[1, 2], [3, 4], [5, 6], [7, 8]];
 
             blockMapping.forEach((pPair, bIdx) => {
@@ -964,19 +1055,6 @@
         text: `Added class "${className.trim()}" for ${teacherName} (${slotKey}) across all ${selectedDayType}'s`
       });
 
-      renderTeacherScheduleView();
-      renderMasterMatrixTable();
-    }
-
-    function resetSlotSchedule(teacherName, slotKey) {
-      if (DEFAULT_SCHEDULES[selectedDayType] && DEFAULT_SCHEDULES[selectedDayType][teacherName] && DEFAULT_SCHEDULES[selectedDayType][teacherName][slotKey]) {
-        SCHEDULES[selectedDayType][teacherName][slotKey] = DEFAULT_SCHEDULES[selectedDayType][teacherName][slotKey];
-      } else {
-        if (SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName]) {
-          delete SCHEDULES[selectedDayType][teacherName][slotKey];
-        }
-      }
-      saveMasterSchedules();
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -1154,7 +1232,7 @@
         delete coverages[selectedDate][key];
       }
 
-      localStorage.setItem('tsc_coverages_v11', JSON.stringify(coverages));
+      localStorage.setItem('tsc_coverages_v12', JSON.stringify(coverages));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -1173,7 +1251,7 @@
       entry.time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       historyLogs.unshift(entry);
       if (historyLogs.length > 200) historyLogs.pop();
-      localStorage.setItem('tsc_logs_v11', JSON.stringify(historyLogs));
+      localStorage.setItem('tsc_logs_v12', JSON.stringify(historyLogs));
       renderLogHistory();
     }
 
@@ -1248,7 +1326,7 @@
     function clearAllLogs() {
       if (confirm("Are you sure you want to clear all log records?")) {
         historyLogs = [];
-        localStorage.removeItem('tsc_logs_v10');
+        localStorage.removeItem('tsc_logs_v12');
         renderLogHistory();
       }
     }
