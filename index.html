@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     body { font-family: 'Inter', sans-serif; }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
@@ -47,11 +47,9 @@
           Day A (Mon)
         </div>
 
-        <!-- Big Prominent Upload Button Header -->
-        <label class="ml-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold shadow-sm cursor-pointer flex items-center gap-1.5 transition-all">
+        <button onclick="openUploadModal()" class="ml-2 px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold shadow-md flex items-center gap-2 transition-all border border-purple-400">
           <i class="fa-solid fa-cloud-arrow-up text-sm"></i> Upload Next Year Matrix
-          <input type="file" id="headerFileUpload" accept=".json" onchange="handleFileUpload(event)" class="hidden">
-        </label>
+        </button>
       </div>
     </div>
 
@@ -195,20 +193,22 @@
 
     <div id="tabMatrixView" class="hidden space-y-6">
 
-      <!-- Prominent Matrix File Upload Banner -->
-      <div class="bg-gradient-to-r from-purple-900 to-indigo-900 text-white rounded-2xl p-5 shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="space-y-1">
-          <h3 class="text-base font-bold flex items-center gap-2">
-            <i class="fa-solid fa-folder-open text-purple-300"></i> Next Year Master Schedule Upload Center
+      <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-blue-900 text-white rounded-2xl p-6 shadow-md border border-purple-700/50 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-2">
+          <span class="px-3 py-1 bg-purple-500/30 text-purple-200 border border-purple-400/40 text-[11px] font-black uppercase tracking-wider rounded-full">Next Academic Year Preparation</span>
+          <h3 class="text-lg font-bold flex items-center gap-2">
+            <i class="fa-solid fa-file-circle-plus text-purple-300 text-xl"></i> Upload Next Year Master Schedule (.json)
           </h3>
-          <p class="text-xs text-purple-200">Upload a new `.json` matrix file to update the schedule for next academic year, or download your current backup.</p>
+          <p class="text-xs text-purple-200 max-w-xl">
+            Upload your updated JSON schedule file here to replace the current master matrix for next school year. All matrix edits sync across all matching Day Cycles automatically!
+          </p>
         </div>
-        <div class="flex items-center gap-3">
-          <button onclick="exportCurrentSchedule()" class="px-3.5 py-2 bg-indigo-950/80 hover:bg-indigo-950 text-indigo-100 rounded-xl text-xs font-bold border border-indigo-700/60 shadow-sm transition-all flex items-center gap-1.5">
-            <i class="fa-solid fa-download"></i> Download Backup
+        <div class="flex flex-wrap items-center gap-3">
+          <button onclick="exportCurrentSchedule()" class="px-4 py-2.5 bg-indigo-950/90 hover:bg-indigo-900 text-indigo-100 rounded-xl text-xs font-bold border border-indigo-700/60 shadow-sm transition-all flex items-center gap-2">
+            <i class="fa-solid fa-download"></i> Download Current Matrix JSON
           </button>
-          <label class="px-4 py-2 bg-purple-500 hover:bg-purple-400 text-white rounded-xl text-xs font-black shadow-md cursor-pointer transition-all flex items-center gap-2">
-            <i class="fa-solid fa-file-arrow-up"></i> Select & Upload Matrix File (.json)
+          <label class="px-5 py-2.5 bg-purple-500 hover:bg-purple-400 text-white rounded-xl text-xs font-black shadow-lg cursor-pointer transition-all flex items-center gap-2 border border-purple-300">
+            <i class="fa-solid fa-upload text-sm"></i> Select & Upload New File (.json)
             <input type="file" accept=".json" onchange="handleFileUpload(event)" class="hidden">
           </label>
         </div>
@@ -218,7 +218,7 @@
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
           <div>
             <h2 class="text-base font-bold text-slate-900">Full School Master Schedule Matrix</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Click <strong>ANY cell</strong> to edit, delete ghost classes, or mark as FREE for coverage.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Primary teachers show periods 1-8 on all days. Secondary teachers show blocks (1-4) on block days (A, B, D, E) & periods (1-8) on Day C. Edits sync across all <span id="matrixDayCycleText" class="font-bold text-blue-600">Day A</span>'s!</p>
           </div>
           <div class="w-full md:w-64">
             <input type="text" id="matrixFilterInput" onkeyup="filterMatrixTable()" placeholder="Search teacher or subject..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -227,17 +227,7 @@
 
         <div class="overflow-x-auto custom-scrollbar">
           <table class="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr class="bg-indigo-950 text-white font-bold">
-                <th class="p-3 rounded-tl-xl">Teacher</th>
-                <th class="p-3">Type</th>
-                <th class="p-3">Status Today</th>
-                <th class="p-3">Block / Period 1</th>
-                <th class="p-3">Block / Period 2</th>
-                <th class="p-3">Block / Period 3</th>
-                <th class="p-3 rounded-tr-xl">Block / Period 4</th>
-              </tr>
-            </thead>
+            <thead></thead>
             <tbody id="matrixTbody" class="divide-y divide-slate-200"></tbody>
           </table>
         </div>
@@ -249,16 +239,106 @@
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
           <div>
             <h2 class="text-base font-bold text-slate-900">Absence & Coverage History Log</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Historical log of all recorded absences, schedule edits, and cover assignments.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Filter logs by specific teacher, absence type, or keyword search.</p>
           </div>
           <button onclick="clearAllLogs()" class="bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs font-bold px-4 py-2 rounded-xl transition-all">
             <i class="fa-solid fa-trash-can mr-1"></i> Clear Log History
           </button>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 mb-4">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter by Teacher</label>
+            <select id="logTeacherFilter" onchange="renderLogHistory()" class="w-full bg-white border border-slate-300 text-xs font-semibold rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="">-- All Teachers --</option>
+              <option value="Dr. Pete">Dr. Pete</option>
+              <option value="Mr. Fluke">Mr. Fluke</option>
+              <option value="Mr. Greg">Mr. Greg</option>
+              <option value="Mr. Harris">Mr. Harris</option>
+              <option value="Mr. Jacob">Mr. Jacob</option>
+              <option value="Mr. John">Mr. John</option>
+              <option value="Mr. Kinny">Mr. Kinny</option>
+              <option value="Mr. Kris">Mr. Kris</option>
+              <option value="Mr. Landon">Mr. Landon</option>
+              <option value="Mr. Simone">Mr. Simone</option>
+              <option value="Mr. Tracy">Mr. Tracy</option>
+              <option value="Mr. Troy">Mr. Troy</option>
+              <option value="Mr. Wentzel">Mr. Wentzel</option>
+              <option value="Mr. Xyries">Mr. Xyries</option>
+              <option value="Ms. Aom">Ms. Aom</option>
+              <option value="Ms. Julia">Ms. Julia</option>
+              <option value="Ms. Kan">Ms. Kan</option>
+              <option value="Ms. May">Ms. May</option>
+              <option value="Ms. Philmi">Ms. Philmi</option>
+              <option value="Ms. Praepilai">Ms. Praepilai</option>
+              <option value="Ms. Toey">Ms. Toey</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter by Log Type</label>
+            <select id="logTypeFilter" onchange="renderLogHistory()" class="w-full bg-white border border-slate-300 text-xs font-semibold rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="">-- All Entry Types --</option>
+              <option value="ABSENCE">Absences Only</option>
+              <option value="COVERAGE">Coverages Only</option>
+              <option value="EDIT">Schedule Edits Only</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Search Keywords</label>
+            <div class="relative">
+              <input type="text" id="logSearchInput" onkeyup="renderLogHistory()" placeholder="Search date, teacher name, block..." class="w-full bg-white border border-slate-300 rounded-lg pl-8 pr-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+            </div>
+          </div>
+        </div>
+
+        <div id="teacherSummaryStatsCard" class="hidden p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 mb-4 flex flex-wrap justify-between items-center gap-2">
+          <div>
+            <span id="summaryTeacherName" class="font-black text-sm">Mr. Simone</span> Summary Statistics:
+          </div>
+          <div class="flex gap-4 font-bold">
+            <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-lg border border-rose-200"><i class="fa-solid fa-user-xmark mr-1"></i> <span id="summaryAbsenceCount">0</span> Absences</span>
+            <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200"><i class="fa-solid fa-user-check mr-1"></i> <span id="summaryCoverageCount">0</span> Coverages Provided</span>
+          </div>
+        </div>
+
         <div id="fullLogList" class="space-y-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1"></div>
       </div>
     </div>
   </main>
+
+  <div id="uploadModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up text-purple-600"></i> Upload Next Year Master Schedule File
+        </h3>
+        <button onclick="closeUploadModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-600">
+        <p>Please select a JSON file containing the updated master schedule matrix for next year.</p>
+        <div class="p-4 bg-purple-50 border border-purple-200 rounded-xl text-purple-900 space-y-1">
+          <p class="font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Format Requirement:</p>
+          <p class="text-[11px]">The JSON file should contain schedule objects structured by day cycles (<code>"Day A"</code>, <code>"Day B"</code>, etc.) and teacher names.</p>
+        </div>
+      </div>
+
+      <div class="pt-2 flex flex-col gap-3">
+        <label class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer text-center flex items-center justify-center gap-2 transition-all">
+          <i class="fa-solid fa-folder-open text-base"></i> Choose JSON File from Computer
+          <input type="file" accept=".json" onchange="handleFileUploadModal(event)" class="hidden">
+        </label>
+        <button onclick="closeUploadModal()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
 
   <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500 mt-auto">
     Secondary School Teacher Coverage Portal &bull; Principal Console
@@ -392,25 +472,28 @@
         "Ms. Philmi": { B1: "Science II (G7)" },
         "Ms. Julia": { B1: "MS 2nd Language (G6)" },
         "Mr. Fluke": { B1: "MS 2nd Language (G8)", B2: "MS 2nd Language (G6)" },
-        "Mr. Simone": { B1: "Modern World History II (G9)", B2: "P.E. (G8)" },
+        "Mr. Simone": { B1: "Modern World History II (G9)" },
         "Mr. Troy": { B1: "HS Language Arts II (G10)" },
-        "Mr. Kris": { B2: "P.E. (G8)" },
+        "Mr. Kris": { B2: "P.E. (G8)", B4: "P.E. (G8)" },
         "Mr. Landon": { B1: "Science III (G8)" },
         "Mr. Wentzel": { B2: "Environmental Science (G10)" },
         "Mr. Xyries": { B2: "Physics (G10)" }
       }
     };
 
-    let SCHEDULES = JSON.parse(localStorage.getItem('tsc_master_schedules_v9')) || DEFAULT_SCHEDULES;
+    let SCHEDULES = JSON.parse(localStorage.getItem('tsc_master_schedules_v11')) || DEFAULT_SCHEDULES;
 
     let selectedDate = new Date().toISOString().split('T')[0];
     let selectedDayType = "Day A";
     let activeMainTab = "daily";
 
-    let absences = JSON.parse(localStorage.getItem('tsc_absences_v9') || '{}');
-    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v9') || '{}');
-    let customClasses = JSON.parse(localStorage.getItem('tsc_custom_classes_v9') || '{}');
-    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v9') || '[]');
+    let absences = JSON.parse(localStorage.getItem('tsc_absences_v11') || '{}');
+    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v11') || '{}');
+    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v11') || '[]');
+
+    function saveMasterSchedules() {
+      localStorage.setItem('tsc_master_schedules_v11', JSON.stringify(SCHEDULES));
+    }
 
     function initPortal() {
       initDatePicker();
@@ -427,6 +510,19 @@
       initPortal();
     }
 
+    function openUploadModal() {
+      document.getElementById('uploadModal').classList.remove('hidden');
+    }
+
+    function closeUploadModal() {
+      document.getElementById('uploadModal').classList.add('hidden');
+    }
+
+    function handleFileUploadModal(event) {
+      handleFileUpload(event);
+      closeUploadModal();
+    }
+
     function handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -438,7 +534,7 @@
           if (typeof parsed !== 'object') throw new Error("Invalid structure");
           
           SCHEDULES = parsed;
-          localStorage.setItem('tsc_master_schedules_v9', JSON.stringify(SCHEDULES));
+          saveMasterSchedules();
           renderTeacherScheduleView();
           renderMasterMatrixTable();
           addLogEntry({ date: selectedDate, type: 'EDIT', text: `Uploaded new Master Schedule file: ${file.name}` });
@@ -506,6 +602,8 @@
       if (badge) badge.textContent = `${info.code} (${info.name.substring(0,3)})`;
       const bText = document.getElementById('bannerDateText');
       if (bText) bText.textContent = selectedDate;
+      const mText = document.getElementById('matrixDayCycleText');
+      if (mText) mText.textContent = info.code;
     }
 
     function switchMainTab(tab) {
@@ -579,10 +677,11 @@
 
       if (!absences[selectedDate]) absences[selectedDate] = {};
       absences[selectedDate][teacherName] = { type: reason, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-      localStorage.setItem('tsc_absences_v9', JSON.stringify(absences));
+      localStorage.setItem('tsc_absences_v11', JSON.stringify(absences));
 
       addLogEntry({
         date: selectedDate,
+        teacher: teacherName,
         type: 'ABSENCE',
         text: `Marked ${teacherName} as ${reason} on ${selectedDate}`
       });
@@ -596,10 +695,11 @@
       if (absences[selectedDate] && absences[selectedDate][teacherName]) {
         delete absences[selectedDate][teacherName];
         if (Object.keys(absences[selectedDate]).length === 0) delete absences[selectedDate];
-        localStorage.setItem('tsc_absences_v9', JSON.stringify(absences));
+        localStorage.setItem('tsc_absences_v11', JSON.stringify(absences));
 
         addLogEntry({
           date: selectedDate,
+          teacher: teacherName,
           type: 'REMOVAL',
           text: `Removed absence record for ${teacherName} on ${selectedDate}`
         });
@@ -644,84 +744,203 @@
       });
     }
 
-    function getSlotKeyForCell(teacher, colIdx) {
-      const isBlockFormat = (selectedDayType !== "Day C") && (teacher.type !== "primary");
-      if (isBlockFormat) {
-        return `B${colIdx}`;
+    function renderMasterMatrixTable() {
+      const tbody = document.getElementById('matrixTbody');
+      const thead = document.querySelector('#tabMatrixView table thead');
+      if (!tbody || !thead) return;
+
+      tbody.innerHTML = '';
+      const isBlockDay = selectedDayType !== "Day C";
+
+      thead.innerHTML = `
+        <tr class="bg-indigo-950 text-white font-bold">
+          <th class="p-3 rounded-tl-xl sticky left-0 z-10 bg-indigo-950">Teacher</th>
+          <th class="p-3">Type</th>
+          <th class="p-3">Status Today</th>
+          ${isBlockDay ? `
+            <th class="p-3 text-center">Block 1 / P1-P2</th>
+            <th class="p-3 text-center">Block 2 / P3-P4</th>
+            <th class="p-3 text-center">Block 3 / P5-P6</th>
+            <th class="p-3 text-center rounded-tr-xl">Block 4 / P7-P8</th>
+          ` : `
+            <th class="p-2 text-center">P1</th>
+            <th class="p-2 text-center">P2</th>
+            <th class="p-2 text-center">P3</th>
+            <th class="p-2 text-center">P4</th>
+            <th class="p-2 text-center">P5</th>
+            <th class="p-2 text-center">P6</th>
+            <th class="p-2 text-center">P7</th>
+            <th class="p-2 text-center rounded-tr-xl">P8</th>
+          `}
+        </tr>
+      `;
+
+      TEACHERS.forEach(t => {
+        const isAbsent = absences[selectedDate] && absences[selectedDate][t.name];
+        const absenceType = isAbsent ? absences[selectedDate][t.name].type : null;
+        const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][t.name] ? SCHEDULES[selectedDayType][t.name] : {};
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-200";
+
+        let statusBadge = `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">Present</span>`;
+        if (isAbsent) {
+          statusBadge = `<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-bold text-[10px]">${absenceType}</span>`;
+        }
+
+        let cellsHtml = '';
+
+        if (!isBlockDay) {
+          for (let p = 1; p <= 8; p++) {
+            const pKey = `P${p}`;
+            const coverKey = `${t.name}_${pKey}`;
+            const isCovered = coverages[selectedDate] && coverages[selectedDate][coverKey];
+            const val = daySched[pKey] || null;
+
+            cellsHtml += `<td class="p-1.5">${renderMatrixCellHtml(t.name, pKey, val, isCovered)}</td>`;
+          }
+        } else {
+          if (t.type === 'primary') {
+            const blockMapping = [[1, 2], [3, 4], [5, 6], [7, 8]];
+
+            blockMapping.forEach((pPair, bIdx) => {
+              const bNum = bIdx + 1;
+              const blockKey = `B${bNum}`;
+              const blockVal = daySched[blockKey];
+
+              const p1Key = `P${pPair[0]}`;
+              const p2Key = `P${pPair[1]}`;
+
+              const v1 = daySched[p1Key] || blockVal || null;
+              const v2 = daySched[p2Key] || blockVal || null;
+
+              const isCovered1 = coverages[selectedDate] && coverages[selectedDate][`${t.name}_${p1Key}`];
+              const isCovered2 = coverages[selectedDate] && coverages[selectedDate][`${t.name}_${p2Key}`];
+
+              cellsHtml += `
+                <td class="p-1.5">
+                  <div class="flex flex-col gap-1">
+                    <div class="text-[10px] font-semibold text-slate-500">P${pPair[0]}: ${renderMatrixCellHtml(t.name, p1Key, v1, isCovered1)}</div>
+                    <div class="text-[10px] font-semibold text-slate-500">P${pPair[1]}: ${renderMatrixCellHtml(t.name, p2Key, v2, isCovered2)}</div>
+                  </div>
+                </td>
+              `;
+            });
+          } else {
+            for (let b = 1; b <= 4; b++) {
+              const bKey = `B${b}`;
+              const coverKey = `${t.name}_${bKey}`;
+              const isCovered = coverages[selectedDate] && coverages[selectedDate][coverKey];
+              const val = daySched[bKey] || null;
+
+              cellsHtml += `<td class="p-2">${renderMatrixCellHtml(t.name, bKey, val, isCovered)}</td>`;
+            }
+          }
+        }
+
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-slate-800 sticky left-0 bg-white z-10 border-r border-slate-200">${t.name}</td>
+          <td class="p-3 text-slate-500 capitalize font-medium">${t.type}</td>
+          <td class="p-3">${statusBadge}</td>
+          ${cellsHtml}
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderMatrixCellHtml(teacherName, slotKey, val, isCovered) {
+      if (isCovered) {
+        return `
+          <div onclick="onMatrixSlotClick('${teacherName}', '${slotKey}')" class="cursor-pointer p-1.5 rounded bg-emerald-50 border border-emerald-300 text-emerald-950 font-bold text-xs flex items-center justify-between hover:bg-emerald-100 transition-all shadow-sm">
+            <span class="truncate pr-1">${val || 'Class'}</span>
+            <span class="text-[9px] bg-emerald-200 text-emerald-900 px-1 py-0.5 rounded font-black whitespace-nowrap">Sub: ${isCovered}</span>
+          </div>
+        `;
+      } else if (val) {
+        return `
+          <div onclick="onMatrixSlotClick('${teacherName}', '${slotKey}')" class="cursor-pointer p-1.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-950 font-bold text-xs flex items-center justify-between hover:bg-blue-100 hover:border-blue-400 transition-all shadow-sm group">
+            <span class="truncate pr-1">${val}</span>
+            <i class="fa-solid fa-pen text-[9px] text-indigo-400 group-hover:text-blue-600"></i>
+          </div>
+        `;
       } else {
-        return `P${(colIdx * 2) - 1}`;
+        return `
+          <div onclick="onMatrixSlotClick('${teacherName}', '${slotKey}')" class="cursor-pointer p-1.5 rounded bg-slate-50 border border-dashed border-slate-300 text-slate-400 font-semibold text-[11px] flex items-center justify-between hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-800 transition-all">
+            <span>FREE</span>
+            <span class="text-[9px] text-slate-400">+ Add</span>
+          </div>
+        `;
       }
     }
 
-    function onMatrixCellClick(teacherName, colIdx) {
-      const teacher = TEACHERS.find(t => t.name === teacherName);
-      if (!teacher) return;
+    function onMatrixSlotClick(teacherName, slotKey) {
+      if (!SCHEDULES[selectedDayType]) SCHEDULES[selectedDayType] = {};
+      if (!SCHEDULES[selectedDayType][teacherName]) SCHEDULES[selectedDayType][teacherName] = {};
 
-      const slotKey = getSlotKeyForCell(teacher, colIdx);
-      const editKey = `${selectedDate}_${teacherName}_${slotKey}`;
-      const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName] ? SCHEDULES[selectedDayType][teacherName] : {};
-      const currentEdit = customClasses[editKey];
-
-      let currentClassName = null;
-      if (currentEdit === "REMOVED") currentClassName = "DELETED / GHOST CLASS";
-      else if (currentEdit) currentClassName = currentEdit;
-      else currentClassName = daySched[slotKey] || "FREE";
+      const currentClassName = SCHEDULES[selectedDayType][teacherName][slotKey] || "FREE";
 
       const choice = prompt(
-        `MANAGE MATRIX CELL: ${teacherName} (${slotKey}) on ${selectedDate}\n` +
+        `MANAGE MASTER MATRIX (${selectedDayType} - ALL DATES IN CYCLE):\n` +
+        `Teacher: ${teacherName} (${slotKey})\n` +
         `Current Status: [${currentClassName}]\n\n` +
-        `Choose an Action:\n` +
+        `Actions (Will sync across all ${selectedDayType}'s):\n` +
         `1. Type a NEW CLASS name to assign class\n` +
-        `2. Type "DELETE" or "GHOST" to completely remove class (NO coverage needed)\n` +
-        `3. Type "RESET" to restore default master schedule`,
-        currentClassName === "DELETED / GHOST CLASS" ? "DELETE" : currentClassName
+        `2. Type "DELETE" or "FREE" to clear class across all ${selectedDayType}'s\n` +
+        `3. Type "RESET" to restore default schedule`,
+        currentClassName
       );
 
       if (choice === null) return;
 
       const trimmed = choice.trim();
       if (trimmed.toUpperCase() === "DELETE" || trimmed.toUpperCase() === "GHOST" || trimmed.toUpperCase() === "FREE") {
-        customClasses[editKey] = "REMOVED";
-        if (coverages[selectedDate]) delete coverages[selectedDate][`${teacherName}_${slotKey}`];
+        delete SCHEDULES[selectedDayType][teacherName][slotKey];
         addLogEntry({
           date: selectedDate,
+          teacher: teacherName,
           type: 'EDIT',
-          text: `Matrix Edit: Removed class / set to GHOST for ${teacherName} (${slotKey}) on ${selectedDate}`
+          text: `Master Matrix Edit: Removed ${slotKey} for ${teacherName} on all ${selectedDayType}'s`
         });
       } else if (trimmed.toUpperCase() === "RESET") {
-        delete customClasses[editKey];
+        if (DEFAULT_SCHEDULES[selectedDayType] && DEFAULT_SCHEDULES[selectedDayType][teacherName] && DEFAULT_SCHEDULES[selectedDayType][teacherName][slotKey]) {
+          SCHEDULES[selectedDayType][teacherName][slotKey] = DEFAULT_SCHEDULES[selectedDayType][teacherName][slotKey];
+        } else {
+          delete SCHEDULES[selectedDayType][teacherName][slotKey];
+        }
         addLogEntry({
           date: selectedDate,
+          teacher: teacherName,
           type: 'EDIT',
-          text: `Matrix Edit: Reset ${teacherName} (${slotKey}) to default on ${selectedDate}`
+          text: `Master Matrix Edit: Reset ${slotKey} for ${teacherName} on all ${selectedDayType}'s`
         });
       } else if (trimmed.length > 0) {
-        customClasses[editKey] = trimmed;
+        SCHEDULES[selectedDayType][teacherName][slotKey] = trimmed;
         addLogEntry({
           date: selectedDate,
+          teacher: teacherName,
           type: 'EDIT',
-          text: `Matrix Edit: Assigned "${trimmed}" to ${teacherName} (${slotKey}) on ${selectedDate}`
+          text: `Master Matrix Edit: Set "${trimmed}" for ${teacherName} (${slotKey}) on all ${selectedDayType}'s`
         });
       }
 
-      localStorage.setItem('tsc_custom_classes_v9', JSON.stringify(customClasses));
-      localStorage.setItem('tsc_coverages_v9', JSON.stringify(coverages));
+      saveMasterSchedules();
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
 
     function removeClassFromSchedule(teacherName, slotKey) {
-      const key = `${selectedDate}_${teacherName}_${slotKey}`;
-      customClasses[key] = "REMOVED";
-      if (coverages[selectedDate]) delete coverages[selectedDate][`${teacherName}_${slotKey}`];
-      
-      localStorage.setItem('tsc_custom_classes_v9', JSON.stringify(customClasses));
-      localStorage.setItem('tsc_coverages_v9', JSON.stringify(coverages));
+      if (!SCHEDULES[selectedDayType]) SCHEDULES[selectedDayType] = {};
+      if (!SCHEDULES[selectedDayType][teacherName]) SCHEDULES[selectedDayType][teacherName] = {};
+
+      delete SCHEDULES[selectedDayType][teacherName][slotKey];
+      saveMasterSchedules();
 
       addLogEntry({
         date: selectedDate,
+        teacher: teacherName,
         type: 'EDIT',
-        text: `Removed class (marked ghost class / no cover needed) for ${teacherName} (${slotKey}) on ${selectedDate}`
+        text: `Removed ${slotKey} class for ${teacherName} across all ${selectedDayType}'s`
       });
 
       renderTeacherScheduleView();
@@ -729,17 +948,20 @@
     }
 
     function addClassToSchedule(teacherName, slotKey) {
-      const className = prompt(`Enter class name for ${teacherName} on ${slotKey}:`, "Study Hall");
+      const className = prompt(`Enter class name for ${teacherName} on ${slotKey} (syncs to all ${selectedDayType}'s):`, "Study Hall");
       if (!className || !className.trim()) return;
 
-      const key = `${selectedDate}_${teacherName}_${slotKey}`;
-      customClasses[key] = className.trim();
-      localStorage.setItem('tsc_custom_classes_v9', JSON.stringify(customClasses));
+      if (!SCHEDULES[selectedDayType]) SCHEDULES[selectedDayType] = {};
+      if (!SCHEDULES[selectedDayType][teacherName]) SCHEDULES[selectedDayType][teacherName] = {};
+
+      SCHEDULES[selectedDayType][teacherName][slotKey] = className.trim();
+      saveMasterSchedules();
 
       addLogEntry({
         date: selectedDate,
+        teacher: teacherName,
         type: 'EDIT',
-        text: `Added class "${className.trim()}" for ${teacherName} (${slotKey}) on ${selectedDate}`
+        text: `Added class "${className.trim()}" for ${teacherName} (${slotKey}) across all ${selectedDayType}'s`
       });
 
       renderTeacherScheduleView();
@@ -747,9 +969,14 @@
     }
 
     function resetSlotSchedule(teacherName, slotKey) {
-      const key = `${selectedDate}_${teacherName}_${slotKey}`;
-      delete customClasses[key];
-      localStorage.setItem('tsc_custom_classes_v9', JSON.stringify(customClasses));
+      if (DEFAULT_SCHEDULES[selectedDayType] && DEFAULT_SCHEDULES[selectedDayType][teacherName] && DEFAULT_SCHEDULES[selectedDayType][teacherName][slotKey]) {
+        SCHEDULES[selectedDayType][teacherName][slotKey] = DEFAULT_SCHEDULES[selectedDayType][teacherName][slotKey];
+      } else {
+        if (SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][teacherName]) {
+          delete SCHEDULES[selectedDayType][teacherName][slotKey];
+        }
+      }
+      saveMasterSchedules();
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -781,17 +1008,7 @@
         if (absences[selectedDate] && absences[selectedDate][t.name]) return;
 
         const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][t.name] ? SCHEDULES[selectedDayType][t.name] : {};
-        const editKey = `${selectedDate}_${t.name}_${slotKey}`;
-        const editedClass = customClasses[editKey];
-
-        let isBusy = false;
-        if (editedClass === "REMOVED") {
-          isBusy = false;
-        } else if (editedClass) {
-          isBusy = true;
-        } else if (daySched[slotKey]) {
-          isBusy = true;
-        }
+        let isBusy = !!daySched[slotKey];
 
         if (isBusy) return;
 
@@ -852,22 +1069,7 @@
 
       grid.forEach(item => {
         const slotKey = isBlockFormat ? `B${item.slot}` : `P${item.slot}`;
-        
-        const editKey = `${selectedDate}_${teacherName}_${slotKey}`;
-        const customEntry = customClasses[editKey];
-
-        let className = null;
-        let isEdited = false;
-
-        if (customEntry === "REMOVED") {
-          className = null;
-          isEdited = true;
-        } else if (customEntry) {
-          className = customEntry;
-          isEdited = true;
-        } else {
-          className = daySched[slotKey] || null;
-        }
+        const className = daySched[slotKey] || null;
 
         const coverageKey = `${teacherName}_${slotKey}`;
         const currentCover = (coverages[selectedDate] && coverages[selectedDate][coverageKey]) || null;
@@ -903,12 +1105,6 @@
             </div>
 
             <div class="flex items-center space-x-2">
-              ${isEdited ? `
-                <button onclick="resetSlotSchedule('${teacherName}', '${slotKey}')" class="text-[10px] font-bold px-2 py-1 bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200">
-                  <i class="fa-solid fa-rotate-left mr-1"></i>Reset
-                </button>
-              ` : ''}
-
               ${className ? `
                 <button onclick="removeClassFromSchedule('${teacherName}', '${slotKey}')" class="text-[10px] font-bold px-2 py-1 bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200">
                   <i class="fa-solid fa-trash mr-1"></i>Delete Class
@@ -950,6 +1146,7 @@
         coverages[selectedDate][key] = coverTeacher;
         addLogEntry({
           date: selectedDate,
+          teacher: coverTeacher,
           type: 'COVERAGE',
           text: `Assigned ${coverTeacher} to cover ${absentTeacher} (${slotKey}) on ${selectedDate}`
         });
@@ -957,77 +1154,9 @@
         delete coverages[selectedDate][key];
       }
 
-      localStorage.setItem('tsc_coverages_v9', JSON.stringify(coverages));
+      localStorage.setItem('tsc_coverages_v11', JSON.stringify(coverages));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
-    }
-
-    function renderMasterMatrixTable() {
-      const tbody = document.getElementById('matrixTbody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-
-      TEACHERS.forEach(t => {
-        const isAbsent = absences[selectedDate] && absences[selectedDate][t.name];
-        const absenceType = isAbsent ? absences[selectedDate][t.name].type : null;
-        const daySched = SCHEDULES[selectedDayType] && SCHEDULES[selectedDayType][t.name] ? SCHEDULES[selectedDayType][t.name] : {};
-
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 transition-colors";
-
-        let statusBadge = `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">Present</span>`;
-        if (isAbsent) {
-          statusBadge = `<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-bold text-[10px]">${absenceType}</span>`;
-        }
-
-        const buildCellHtml = (colIdx) => {
-          const slotKey = getSlotKeyForCell(t, colIdx);
-          const editKey = `${selectedDate}_${t.name}_${slotKey}`;
-          const cEntry = customClasses[editKey];
-          const coverKey = `${t.name}_${slotKey}`;
-          const isCovered = coverages[selectedDate] && coverages[selectedDate][coverKey];
-
-          let val = null;
-          if (cEntry === "REMOVED") val = null;
-          else if (cEntry) val = cEntry;
-          else val = daySched[slotKey] || null;
-
-          if (isCovered) {
-            return `
-              <div onclick="onMatrixCellClick('${t.name}', ${colIdx})" class="cursor-pointer p-2 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-950 font-bold text-xs flex items-center justify-between hover:bg-emerald-100 transition-all shadow-sm">
-                <span class="truncate pr-1">${val || 'Class'}</span>
-                <span class="text-[9px] bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded font-black whitespace-nowrap">Sub: ${isCovered}</span>
-              </div>
-            `;
-          } else if (val) {
-            return `
-              <div onclick="onMatrixCellClick('${t.name}', ${colIdx})" class="cursor-pointer p-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-950 font-bold text-xs flex items-center justify-between hover:bg-blue-100 hover:border-blue-400 transition-all shadow-sm group">
-                <span class="truncate pr-1">${val}</span>
-                <i class="fa-solid fa-pen text-[10px] text-indigo-400 group-hover:text-blue-600"></i>
-              </div>
-            `;
-          } else {
-            return `
-              <div onclick="onMatrixCellClick('${t.name}', ${colIdx})" class="cursor-pointer p-2 rounded-lg bg-slate-50 border border-dashed border-slate-300 text-slate-500 font-bold text-xs flex items-center justify-between hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-800 transition-all">
-                <span>FREE</span>
-                <span class="text-[9px] text-slate-400">+ Add</span>
-              </div>
-            `;
-          }
-        };
-
-        tr.innerHTML = `
-          <td class="p-3 font-bold text-slate-800">${t.name}</td>
-          <td class="p-3 text-slate-500 capitalize font-medium">${t.type}</td>
-          <td class="p-3">${statusBadge}</td>
-          <td class="p-2">${buildCellHtml(1)}</td>
-          <td class="p-2">${buildCellHtml(2)}</td>
-          <td class="p-2">${buildCellHtml(3)}</td>
-          <td class="p-2">${buildCellHtml(4)}</td>
-        `;
-
-        tbody.appendChild(tr);
-      });
     }
 
     function filterMatrixTable() {
@@ -1043,8 +1172,8 @@
       entry.id = Date.now();
       entry.time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       historyLogs.unshift(entry);
-      if (historyLogs.length > 100) historyLogs.pop();
-      localStorage.setItem('tsc_logs_v9', JSON.stringify(historyLogs));
+      if (historyLogs.length > 200) historyLogs.pop();
+      localStorage.setItem('tsc_logs_v11', JSON.stringify(historyLogs));
       renderLogHistory();
     }
 
@@ -1054,18 +1183,49 @@
 
       if (!fullList || !quickList) return;
 
-      if (historyLogs.length === 0) {
-        fullList.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No log history recorded yet.</p>`;
-        quickList.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No activity yet.</p>`;
+      const teacherFilter = document.getElementById('logTeacherFilter') ? document.getElementById('logTeacherFilter').value : "";
+      const typeFilter = document.getElementById('logTypeFilter') ? document.getElementById('logTypeFilter').value : "";
+      const searchInput = document.getElementById('logSearchInput') ? document.getElementById('logSearchInput').value.toLowerCase().trim() : "";
+
+      const statsCard = document.getElementById('teacherSummaryStatsCard');
+      if (teacherFilter && statsCard) {
+        statsCard.classList.remove('hidden');
+        document.getElementById('summaryTeacherName').textContent = teacherFilter;
+
+        let totalAbs = 0;
+        let totalCov = 0;
+
+        historyLogs.forEach(l => {
+          if (l.text.includes(teacherFilter) && l.type === 'ABSENCE') totalAbs++;
+          if (l.text.includes(teacherFilter) && l.type === 'COVERAGE') totalCov++;
+        });
+
+        document.getElementById('summaryAbsenceCount').textContent = totalAbs;
+        document.getElementById('summaryCoverageCount').textContent = totalCov;
+      } else if (statsCard) {
+        statsCard.classList.add('hidden');
+      }
+
+      let filtered = historyLogs.filter(l => {
+        if (teacherFilter && !l.text.includes(teacherFilter)) return false;
+        if (typeFilter && l.type !== typeFilter) return false;
+        if (searchInput && !l.text.toLowerCase().includes(searchInput) && !l.date.includes(searchInput)) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        fullList.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No log history matching your filters.</p>`;
+        quickList.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No recent activity.</p>`;
         return;
       }
 
       fullList.innerHTML = '';
       quickList.innerHTML = '';
 
-      historyLogs.forEach((item, idx) => {
+      filtered.forEach((item, idx) => {
         const isAbsence = item.type === 'ABSENCE';
-        const icon = isAbsence ? 'fa-user-xmark text-rose-500' : 'fa-user-check text-emerald-500';
+        const isCoverage = item.type === 'COVERAGE';
+        const icon = isAbsence ? 'fa-user-xmark text-rose-500' : isCoverage ? 'fa-user-check text-emerald-500' : 'fa-pen-to-square text-indigo-500';
 
         const itemHtml = `
           <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs flex items-start justify-between gap-2">
@@ -1076,6 +1236,7 @@
                 <p class="text-[10px] text-slate-400 mt-0.5">${item.date} at ${item.time}</p>
               </div>
             </div>
+            <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${isAbsence ? 'bg-rose-100 text-rose-800' : isCoverage ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'}">${item.type}</span>
           </div>
         `;
 
@@ -1087,7 +1248,7 @@
     function clearAllLogs() {
       if (confirm("Are you sure you want to clear all log records?")) {
         historyLogs = [];
-        localStorage.removeItem('tsc_logs_v9');
+        localStorage.removeItem('tsc_logs_v10');
         renderLogHistory();
       }
     }
