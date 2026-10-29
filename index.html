@@ -266,8 +266,9 @@
           <div>
             <span id="summaryTeacherName" class="font-black text-sm">Teacher</span> Summary Statistics:
           </div>
-          <div class="flex gap-4 font-bold">
-            <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-lg border border-rose-200"><i class="fa-solid fa-user-xmark mr-1"></i> <span id="summaryAbsenceCount">0</span> Absences Recorded</span>
+          <div class="flex gap-3 font-bold flex-wrap">
+            <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-lg border border-rose-200"><i class="fa-solid fa-user-xmark mr-1"></i> <span id="summaryAbsenceCount">0</span> Absences</span>
+            <span class="bg-amber-100 text-amber-900 px-2.5 py-1 rounded-lg border border-amber-200"><i class="fa-solid fa-handshake mr-1"></i> <span id="summaryCoveredCount">0</span> Coverages Received</span>
             <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200"><i class="fa-solid fa-user-check mr-1"></i> <span id="summaryCoverageCount">0</span> Coverages Provided</span>
           </div>
         </div>
@@ -348,7 +349,7 @@
   </footer>
 
   <script>
-    let TEACHERS = JSON.parse(localStorage.getItem('tsc_teachers_v12')) || [
+    let TEACHERS = JSON.parse(localStorage.getItem('tsc_teachers_v13')) || [
       { name: "Mr. John", type: "secondary" },
       { name: "Ms. Philmi", type: "secondary" },
       { name: "Mr. Landon", type: "secondary" },
@@ -484,22 +485,22 @@
       }
     };
 
-    let SCHEDULES = JSON.parse(localStorage.getItem('tsc_master_schedules_v12')) || DEFAULT_SCHEDULES;
+    let SCHEDULES = JSON.parse(localStorage.getItem('tsc_master_schedules_v13')) || DEFAULT_SCHEDULES;
 
     let selectedDate = new Date().toISOString().split('T')[0];
     let selectedDayType = "Day A";
     let activeMainTab = "daily";
 
-    let absences = JSON.parse(localStorage.getItem('tsc_absences_v12') || '{}');
-    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v12') || '{}');
-    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v12') || '[]');
+    let absences = JSON.parse(localStorage.getItem('tsc_absences_v13') || '{}');
+    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v13') || '{}');
+    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v13') || '[]');
 
     function saveTeachers() {
-      localStorage.setItem('tsc_teachers_v12', JSON.stringify(TEACHERS));
+      localStorage.setItem('tsc_teachers_v13', JSON.stringify(TEACHERS));
     }
 
     function saveMasterSchedules() {
-      localStorage.setItem('tsc_master_schedules_v12', JSON.stringify(SCHEDULES));
+      localStorage.setItem('tsc_master_schedules_v13', JSON.stringify(SCHEDULES));
     }
 
     function initPortal() {
@@ -768,7 +769,7 @@
 
       if (!absences[selectedDate]) absences[selectedDate] = {};
       absences[selectedDate][teacherName] = { type: reason, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-      localStorage.setItem('tsc_absences_v12', JSON.stringify(absences));
+      localStorage.setItem('tsc_absences_v13', JSON.stringify(absences));
 
       addLogEntry({
         date: selectedDate,
@@ -786,7 +787,7 @@
       if (absences[selectedDate] && absences[selectedDate][teacherName]) {
         delete absences[selectedDate][teacherName];
         if (Object.keys(absences[selectedDate]).length === 0) delete absences[selectedDate];
-        localStorage.setItem('tsc_absences_v12', JSON.stringify(absences));
+        localStorage.setItem('tsc_absences_v13', JSON.stringify(absences));
 
         addLogEntry({
           date: selectedDate,
@@ -1225,14 +1226,15 @@
         addLogEntry({
           date: selectedDate,
           teacher: coverTeacher,
+          absentTeacher: absentTeacher,
           type: 'COVERAGE',
-          text: `Assigned ${coverTeacher} to cover ${absentTeacher} (${slotKey}) on ${selectedDate}`
+          text: `Assigned ${coverTeacher} to cover for ${absentTeacher} (${slotKey}) on ${selectedDate}`
         });
       } else {
         delete coverages[selectedDate][key];
       }
 
-      localStorage.setItem('tsc_coverages_v12', JSON.stringify(coverages));
+      localStorage.setItem('tsc_coverages_v13', JSON.stringify(coverages));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -1251,7 +1253,7 @@
       entry.time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       historyLogs.unshift(entry);
       if (historyLogs.length > 200) historyLogs.pop();
-      localStorage.setItem('tsc_logs_v12', JSON.stringify(historyLogs));
+      localStorage.setItem('tsc_logs_v13', JSON.stringify(historyLogs));
       renderLogHistory();
     }
 
@@ -1271,15 +1273,31 @@
         document.getElementById('summaryTeacherName').textContent = teacherFilter;
 
         let totalAbs = 0;
-        let totalCov = 0;
+        let totalCoveredRec = 0;
+        let totalCovProvided = 0;
 
-        historyLogs.forEach(l => {
-          if (l.text.includes(teacherFilter) && l.type === 'ABSENCE') totalAbs++;
-          if (l.text.includes(teacherFilter) && l.type === 'COVERAGE') totalCov++;
+        // Absences recorded for this teacher
+        Object.keys(absences).forEach(d => {
+          if (absences[d][teacherFilter]) totalAbs++;
+        });
+
+        // Coverages received (this teacher was absent and someone covered for them)
+        Object.keys(coverages).forEach(d => {
+          Object.keys(coverages[d]).forEach(k => {
+            if (k.startsWith(teacherFilter + "_")) totalCoveredRec++;
+          });
+        });
+
+        // Coverages provided (this teacher covered someone else)
+        Object.keys(coverages).forEach(d => {
+          Object.keys(coverages[d]).forEach(k => {
+            if (coverages[d][k] === teacherFilter) totalCovProvided++;
+          });
         });
 
         document.getElementById('summaryAbsenceCount').textContent = totalAbs;
-        document.getElementById('summaryCoverageCount').textContent = totalCov;
+        document.getElementById('summaryCoveredCount').textContent = totalCoveredRec;
+        document.getElementById('summaryCoverageCount').textContent = totalCovProvided;
       } else if (statsCard) {
         statsCard.classList.add('hidden');
       }
@@ -1326,7 +1344,7 @@
     function clearAllLogs() {
       if (confirm("Are you sure you want to clear all log records?")) {
         historyLogs = [];
-        localStorage.removeItem('tsc_logs_v12');
+        localStorage.removeItem('tsc_logs_v13');
         renderLogHistory();
       }
     }
