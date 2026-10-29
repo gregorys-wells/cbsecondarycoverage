@@ -226,7 +226,7 @@
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-100 gap-4 mb-4">
           <div>
             <h2 class="text-base font-bold text-slate-900">Absence & Coverage History Log</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Search and filter logs by specific teacher name, absence reason, or keyword.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Search and filter logs by specific teacher name, entry type, or keyword.</p>
           </div>
           <button onclick="clearAllLogs()" class="bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs font-bold px-4 py-2 rounded-xl transition-all">
             <i class="fa-solid fa-trash-can mr-1"></i> Clear Log History
@@ -243,12 +243,13 @@
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter by Entry Type</label>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter by Log Category</label>
             <select id="logTypeFilter" onchange="renderLogHistory()" class="w-full bg-white border border-slate-300 text-xs font-semibold rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-              <option value="">-- All Log Types --</option>
-              <option value="ABSENCE">Absences Only</option>
-              <option value="COVERAGE">Coverages Provided Only</option>
-              <option value="EDIT">Schedule Edits Only</option>
+              <option value="">-- All Categories --</option>
+              <option value="ABSENCE">Absences Recorded</option>
+              <option value="COVERAGE_PROVIDED">Coverages Provided (Sub Duty)</option>
+              <option value="COVERAGE_RECEIVED">Coverages Received (Class Covered)</option>
+              <option value="EDIT">Schedule Edits</option>
             </select>
           </div>
 
@@ -267,7 +268,7 @@
             <span id="summaryTeacherName" class="font-black text-sm">Teacher</span> Summary Statistics:
           </div>
           <div class="flex gap-3 font-bold flex-wrap">
-            <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-lg border border-rose-200"><i class="fa-solid fa-user-xmark mr-1"></i> <span id="summaryAbsenceCount">0</span> Absences</span>
+            <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-lg border border-rose-200"><i class="fa-solid fa-user-xmark mr-1"></i> <span id="summaryAbsenceCount">0</span> Absences Recorded</span>
             <span class="bg-amber-100 text-amber-900 px-2.5 py-1 rounded-lg border border-amber-200"><i class="fa-solid fa-handshake mr-1"></i> <span id="summaryCoveredCount">0</span> Coverages Received</span>
             <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200"><i class="fa-solid fa-user-check mr-1"></i> <span id="summaryCoverageCount">0</span> Coverages Provided</span>
           </div>
@@ -349,7 +350,7 @@
   </footer>
 
   <script>
-    let TEACHERS = JSON.parse(localStorage.getItem('tsc_teachers_v13')) || [
+    let TEACHERS = JSON.parse(localStorage.getItem('tsc_teachers_v14')) || [
       { name: "Mr. John", type: "secondary" },
       { name: "Ms. Philmi", type: "secondary" },
       { name: "Mr. Landon", type: "secondary" },
@@ -399,7 +400,7 @@
         "Mr. Fluke": { B1: "MS 2nd Language (G9-11)", P6: "Thai Language (G5)", P7: "Thai Language (G4)" },
         "Ms. Julia": { B1: "MS 2nd Language (G9-11)", P7: "Mandarin (G5)", P8: "Mandarin (G5)" },
         "Mr. Simone": { B2: "Modern World History I (G8)", B3: "Intro Human Geo / Psych (G10)" },
-        "Mr. Troy": { B3: "HS Language Arts I (G9)" },
+        "Mr. Troy": { B2: "HS Language Arts III (G11)", B3: "HS Language Arts I (G9)" },
         "Mr. Kris": { B2: "P.E. (G6/7)" },
         "Mr. Wentzel": { B2: "Biology / Env Sci (G9/10)", B4: "Math Fundamentals I (G6)" },
         "Mr. Xyries": { B2: "Chemistry / Physics (G9/10)", B4: "MS Algebra I (G8)" },
@@ -485,22 +486,22 @@
       }
     };
 
-    let SCHEDULES = JSON.parse(localStorage.getItem('tsc_master_schedules_v13')) || DEFAULT_SCHEDULES;
+    let SCHEDULES = JSON.parse(localStorage.getItem('tsc_master_schedules_v14')) || DEFAULT_SCHEDULES;
 
     let selectedDate = new Date().toISOString().split('T')[0];
     let selectedDayType = "Day A";
     let activeMainTab = "daily";
 
-    let absences = JSON.parse(localStorage.getItem('tsc_absences_v13') || '{}');
-    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v13') || '{}');
-    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v13') || '[]');
+    let absences = JSON.parse(localStorage.getItem('tsc_absences_v14') || '{}');
+    let coverages = JSON.parse(localStorage.getItem('tsc_coverages_v14') || '{}');
+    let historyLogs = JSON.parse(localStorage.getItem('tsc_logs_v14') || '[]');
 
     function saveTeachers() {
-      localStorage.setItem('tsc_teachers_v13', JSON.stringify(TEACHERS));
+      localStorage.setItem('tsc_teachers_v14', JSON.stringify(TEACHERS));
     }
 
     function saveMasterSchedules() {
-      localStorage.setItem('tsc_master_schedules_v13', JSON.stringify(SCHEDULES));
+      localStorage.setItem('tsc_master_schedules_v14', JSON.stringify(SCHEDULES));
     }
 
     function initPortal() {
@@ -598,7 +599,7 @@
 
       TEACHERS.push({ name, type });
       saveTeachers();
-      addLogEntry({ date: selectedDate, type: 'EDIT', text: `Added new staff member: ${name} (${type})` });
+      addLogEntry({ date: selectedDate, type: 'EDIT', teacher: name, text: `Added new staff member: ${name} (${type})` });
 
       nameInput.value = '';
       renderManageTeachersList();
@@ -608,7 +609,7 @@
       if (confirm(`Are you sure you want to remove ${name} from the school roster?`)) {
         TEACHERS = TEACHERS.filter(t => t.name !== name);
         saveTeachers();
-        addLogEntry({ date: selectedDate, type: 'EDIT', text: `Removed staff member: ${name}` });
+        addLogEntry({ date: selectedDate, type: 'EDIT', teacher: name, text: `Removed staff member: ${name}` });
         renderManageTeachersList();
       }
     }
@@ -769,7 +770,7 @@
 
       if (!absences[selectedDate]) absences[selectedDate] = {};
       absences[selectedDate][teacherName] = { type: reason, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-      localStorage.setItem('tsc_absences_v13', JSON.stringify(absences));
+      localStorage.setItem('tsc_absences_v14', JSON.stringify(absences));
 
       addLogEntry({
         date: selectedDate,
@@ -787,12 +788,12 @@
       if (absences[selectedDate] && absences[selectedDate][teacherName]) {
         delete absences[selectedDate][teacherName];
         if (Object.keys(absences[selectedDate]).length === 0) delete absences[selectedDate];
-        localStorage.setItem('tsc_absences_v13', JSON.stringify(absences));
+        localStorage.setItem('tsc_absences_v14', JSON.stringify(absences));
 
         addLogEntry({
           date: selectedDate,
           teacher: teacherName,
-          type: 'REMOVAL',
+          type: 'EDIT',
           text: `Removed absence record for ${teacherName} on ${selectedDate}`
         });
 
@@ -1223,18 +1224,29 @@
 
       if (coverTeacher) {
         coverages[selectedDate][key] = coverTeacher;
+        
+        // Log entry 1: For the teacher PROVIDING coverage
         addLogEntry({
           date: selectedDate,
           teacher: coverTeacher,
           absentTeacher: absentTeacher,
-          type: 'COVERAGE',
-          text: `Assigned ${coverTeacher} to cover for ${absentTeacher} (${slotKey}) on ${selectedDate}`
+          type: 'COVERAGE_PROVIDED',
+          text: `${coverTeacher} assigned to cover for ${absentTeacher} (${slotKey}) on ${selectedDate}`
+        });
+
+        // Log entry 2: For the absent teacher RECEIVING coverage
+        addLogEntry({
+          date: selectedDate,
+          teacher: absentTeacher,
+          coveringTeacher: coverTeacher,
+          type: 'COVERAGE_RECEIVED',
+          text: `${absentTeacher}'s class (${slotKey}) is covered by ${coverTeacher} on ${selectedDate}`
         });
       } else {
         delete coverages[selectedDate][key];
       }
 
-      localStorage.setItem('tsc_coverages_v13', JSON.stringify(coverages));
+      localStorage.setItem('tsc_coverages_v14', JSON.stringify(coverages));
       renderTeacherScheduleView();
       renderMasterMatrixTable();
     }
@@ -1249,11 +1261,11 @@
     }
 
     function addLogEntry(entry) {
-      entry.id = Date.now();
+      entry.id = Date.now() + Math.random();
       entry.time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       historyLogs.unshift(entry);
-      if (historyLogs.length > 200) historyLogs.pop();
-      localStorage.setItem('tsc_logs_v13', JSON.stringify(historyLogs));
+      if (historyLogs.length > 250) historyLogs.pop();
+      localStorage.setItem('tsc_logs_v14', JSON.stringify(historyLogs));
       renderLogHistory();
     }
 
@@ -1276,19 +1288,19 @@
         let totalCoveredRec = 0;
         let totalCovProvided = 0;
 
-        // Absences recorded for this teacher
+        // Count Absences Recorded
         Object.keys(absences).forEach(d => {
           if (absences[d][teacherFilter]) totalAbs++;
         });
 
-        // Coverages received (this teacher was absent and someone covered for them)
+        // Count Coverages Received (This teacher was absent and someone covered their class)
         Object.keys(coverages).forEach(d => {
           Object.keys(coverages[d]).forEach(k => {
             if (k.startsWith(teacherFilter + "_")) totalCoveredRec++;
           });
         });
 
-        // Coverages provided (this teacher covered someone else)
+        // Count Coverages Provided (This teacher covered for someone else)
         Object.keys(coverages).forEach(d => {
           Object.keys(coverages[d]).forEach(k => {
             if (coverages[d][k] === teacherFilter) totalCovProvided++;
@@ -1303,7 +1315,7 @@
       }
 
       let filtered = historyLogs.filter(l => {
-        if (teacherFilter && !l.text.includes(teacherFilter)) return false;
+        if (teacherFilter && l.teacher !== teacherFilter && (!l.text.includes(teacherFilter))) return false;
         if (typeFilter && l.type !== typeFilter) return false;
         if (searchInput && !l.text.toLowerCase().includes(searchInput) && !l.date.includes(searchInput)) return false;
         return true;
@@ -1319,9 +1331,27 @@
       quickList.innerHTML = '';
 
       filtered.forEach((item, idx) => {
-        const isAbsence = item.type === 'ABSENCE';
-        const isCoverage = item.type === 'COVERAGE';
-        const icon = isAbsence ? 'fa-user-xmark text-rose-500' : isCoverage ? 'fa-user-check text-emerald-500' : 'fa-pen-to-square text-indigo-500';
+        let icon = 'fa-pen-to-square text-indigo-500';
+        let badgeStyle = 'bg-indigo-100 text-indigo-800';
+        let badgeLabel = item.type;
+
+        if (item.type === 'ABSENCE') {
+          icon = 'fa-user-xmark text-rose-500';
+          badgeStyle = 'bg-rose-100 text-rose-800';
+          badgeLabel = 'ABSENCE RECORDED';
+        } else if (item.type === 'COVERAGE_PROVIDED') {
+          icon = 'fa-user-check text-emerald-500';
+          badgeStyle = 'bg-emerald-100 text-emerald-800';
+          badgeLabel = 'SUB DUTY (COVERED FOR)';
+        } else if (item.type === 'COVERAGE_RECEIVED') {
+          icon = 'fa-handshake text-amber-600';
+          badgeStyle = 'bg-amber-100 text-amber-900';
+          badgeLabel = 'CLASS COVERED';
+        } else if (item.type === 'EDIT') {
+          icon = 'fa-pen-to-square text-indigo-500';
+          badgeStyle = 'bg-indigo-100 text-indigo-800';
+          badgeLabel = 'SCHEDULE EDIT';
+        }
 
         const itemHtml = `
           <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs flex items-start justify-between gap-2">
@@ -1332,7 +1362,7 @@
                 <p class="text-[10px] text-slate-400 mt-0.5">${item.date} at ${item.time}</p>
               </div>
             </div>
-            <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${isAbsence ? 'bg-rose-100 text-rose-800' : isCoverage ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'}">${item.type}</span>
+            <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${badgeStyle}">${badgeLabel}</span>
           </div>
         `;
 
@@ -1344,7 +1374,7 @@
     function clearAllLogs() {
       if (confirm("Are you sure you want to clear all log records?")) {
         historyLogs = [];
-        localStorage.removeItem('tsc_logs_v13');
+        localStorage.removeItem('tsc_logs_v14');
         renderLogHistory();
       }
     }
